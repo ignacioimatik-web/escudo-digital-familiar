@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import {
   Shield,
   Wifi,
@@ -57,6 +57,18 @@ function AnimatedItem({ children, className }: { children: React.ReactNode; clas
     <motion.div variants={fadeUp} className={className}>
       {children}
     </motion.div>
+  )
+}
+
+function SlowVideo({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null)
+  useEffect(() => {
+    if (ref.current) ref.current.playbackRate = 0.5
+  }, [])
+  return (
+    <video ref={ref} autoPlay muted loop playsInline className="w-full block">
+      <source src={src} type="video/mp4" />
+    </video>
   )
 }
 
@@ -281,13 +293,8 @@ export default function HomePage() {
               </div>
             </div>
             <AnimatedItem>
-              <div className="mt-16 text-center rounded-2xl border border-border/60 bg-white p-8 max-w-2xl mx-auto">
-                <p className="text-sm text-slate-500 italic">
-                  Imagen del modelo de transición por edad disponible en
-                </p>
-                <p className="mt-2 text-xs text-slate-400 font-mono">
-                  public/images/proteccion-digital-menores-modelo-4k.jpg
-                </p>
+              <div className="mt-16 rounded-2xl overflow-hidden border border-border/60 max-w-2xl mx-auto">
+                <SlowVideo src="/video/intro_telemet.mp4" />
               </div>
             </AnimatedItem>
           </AnimatedSection>
