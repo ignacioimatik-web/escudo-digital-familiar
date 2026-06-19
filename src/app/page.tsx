@@ -335,7 +335,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-gradient-to-b from-brand-50/40 to-background">
+      <Section className="bg-gradient-to-b from-brand-50/40 to-background -mt-[100px]">
         <Container className="text-center">
           <AnimatedSection>
             <AnimatedItem>
