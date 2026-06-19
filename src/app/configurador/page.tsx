@@ -97,78 +97,76 @@ export default function ConfiguradorPage() {
             <p className="text-sm text-slate-500">{stepDescriptions[currentStep - 1]}</p>
           </div>
 
-          <div className="mt-[200px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.25 }}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.25 }}
+            >
+              {currentStep === 1 && (
+                <DeviceSelector selected={device} onSelect={setDevice} />
+              )}
+
+              {currentStep === 2 && (
+                <NetworkSelector selected={context} onSelect={setContext} />
+              )}
+
+              {currentStep === 3 && (
+                <LevelSelector selected={level} onSelect={setLevel} />
+              )}
+
+              {currentStep === 4 && recommendation && device && context && level && (
+                <RecommendationView
+                  device={device}
+                  context={context}
+                  level={level}
+                  recommendation={recommendation}
+                  onReset={handleReset}
+                />
+              )}
+
+              {currentStep === 4 && !recommendation && (
+                <div className="text-center py-10 rounded-2xl border border-slate-200 bg-white">
+                  <p className="text-slate-500 mb-2 text-sm">
+                    No tenemos una recomendación específica para esta combinación.
+                  </p>
+                  <p className="text-slate-600 text-sm">
+                    Consulta las guías individuales para configurar tu dispositivo.
+                  </p>
+                  <button
+                    onClick={handleReset}
+                    className="mt-5 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors inline-flex items-center gap-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Empezar de nuevo
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          {currentStep < TOTAL_STEPS && (
+            <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200">
+              <button
+                onClick={handleBack}
+                disabled={currentStep === 1}
+                className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {currentStep === 1 && (
-                  <DeviceSelector selected={device} onSelect={setDevice} />
-                )}
-
-                {currentStep === 2 && (
-                  <NetworkSelector selected={context} onSelect={setContext} />
-                )}
-
-                {currentStep === 3 && (
-                  <LevelSelector selected={level} onSelect={setLevel} />
-                )}
-
-                {currentStep === 4 && recommendation && device && context && level && (
-                  <RecommendationView
-                    device={device}
-                    context={context}
-                    level={level}
-                    recommendation={recommendation}
-                    onReset={handleReset}
-                  />
-                )}
-
-                {currentStep === 4 && !recommendation && (
-                  <div className="text-center py-10 rounded-2xl border border-slate-200 bg-white">
-                    <p className="text-slate-500 mb-2 text-sm">
-                      No tenemos una recomendación específica para esta combinación.
-                    </p>
-                    <p className="text-slate-600 text-sm">
-                      Consulta las guías individuales para configurar tu dispositivo.
-                    </p>
-                    <button
-                      onClick={handleReset}
-                      className="mt-5 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors inline-flex items-center gap-2"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      Empezar de nuevo
-                    </button>
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
-
-            {currentStep < TOTAL_STEPS && (
-              <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200">
-                <button
-                  onClick={handleBack}
-                  disabled={currentStep === 1}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Anterior
-                </button>
-                <button
-                  onClick={handleNext}
-                  disabled={!canGoNext()}
-                  className="px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  Siguiente
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
+                <ArrowLeft className="w-4 h-4" />
+                Anterior
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={!canGoNext()}
+                className="px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                Siguiente
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </Container>
       </Section>
     </>
