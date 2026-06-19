@@ -299,12 +299,11 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section>
+      <Section className="-mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
               <div className="text-center mb-16">
-                <Badge variant="default" className="mb-4">Para todos</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
                   Diseñado para tu comunidad
                 </h2>
