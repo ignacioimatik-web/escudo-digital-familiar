@@ -72,9 +72,9 @@ export default function ConfiguradorPage() {
 
   return (
     <>
-      <Section className="relative overflow-hidden py-10 md:py-14">
+      <Section className="relative overflow-hidden pb-10 md:pb-14">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50/40 via-background to-background" />
-        <Container size="md">
+        <Container size="md" className="pt-[200px]">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-3">
             Configurador
           </h1>
@@ -84,7 +84,7 @@ export default function ConfiguradorPage() {
         </Container>
       </Section>
 
-      <Section className="pt-0">
+      <Section className="-mt-[200px] pt-0">
         <Container size="md">
           <div className="mb-6">
             <Progress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
