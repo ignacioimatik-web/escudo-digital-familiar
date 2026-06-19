@@ -168,7 +168,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-slate-50/50">
+      <Section className="bg-gradient-to-b from-brand-100 to-white">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -197,7 +197,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="-mt-[100px]">
+      <Section className="bg-gradient-to-b from-white to-brand-100 -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -248,7 +248,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-slate-50/50 -mt-[100px]">
+      <Section className="bg-gradient-to-b from-brand-100 to-white -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -299,7 +299,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="-mt-[100px]">
+      <Section className="bg-gradient-to-b from-white to-brand-100 -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -335,7 +335,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-gradient-to-b from-brand-50/40 to-background -mt-[100px]">
+      <Section className="bg-gradient-to-b from-brand-100 to-white -mt-[100px]">
         <Container className="text-center">
           <AnimatedSection>
             <AnimatedItem>
