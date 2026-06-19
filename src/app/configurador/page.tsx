@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react"
 import { Container } from "@/components/ui/container"
 import { Section } from "@/components/ui/section"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/configurator/Progress"
 import { DeviceSelector } from "@/components/configurator/DeviceSelector"
 import { NetworkSelector } from "@/components/configurator/NetworkSelector"
@@ -73,41 +72,38 @@ export default function ConfiguradorPage() {
 
   return (
     <>
-      <Section className="relative overflow-hidden">
+      <Section className="relative overflow-hidden py-10 md:py-14">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50/40 via-background to-background" />
         <Container size="md">
-          <Badge variant="accent" className="mb-6">
-            Herramienta interactiva
-          </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-3">
             Configurador
           </h1>
-          <p className="text-lg text-slate-500 leading-relaxed max-w-2xl">
-            Configura la protección digital paso a paso según tu dispositivo, contexto y nivel de protección deseado.
+          <p className="text-base text-slate-500 leading-relaxed max-w-2xl">
+            Selecciona tu situación y obtén pasos personalizados para proteger el dispositivo.
           </p>
         </Container>
       </Section>
 
-      <Section>
+      <Section className="pt-0">
         <Container size="md">
-          <div className="mb-8">
+          <div className="mb-6">
             <Progress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+          <div className="mb-5">
+            <h2 className="text-xl font-bold text-slate-900 mb-1">
               {stepTitles[currentStep - 1]}
             </h2>
-            <p className="text-slate-500">{stepDescriptions[currentStep - 1]}</p>
+            <p className="text-sm text-slate-500">{stepDescriptions[currentStep - 1]}</p>
           </div>
 
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.25 }}
             >
               {currentStep === 1 && (
                 <DeviceSelector selected={device} onSelect={setDevice} />
@@ -132,16 +128,16 @@ export default function ConfiguradorPage() {
               )}
 
               {currentStep === 4 && !recommendation && (
-                <div className="text-center py-12">
-                  <p className="text-slate-500 mb-4">
+                <div className="text-center py-10 rounded-2xl border border-slate-200 bg-white">
+                  <p className="text-slate-500 mb-2 text-sm">
                     No tenemos una recomendación específica para esta combinación.
                   </p>
-                  <p className="text-slate-600">
+                  <p className="text-slate-600 text-sm">
                     Consulta las guías individuales para configurar tu dispositivo.
                   </p>
                   <button
                     onClick={handleReset}
-                    className="mt-6 px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors inline-flex items-center gap-2"
+                    className="mt-5 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors inline-flex items-center gap-2"
                   >
                     <RotateCcw className="w-4 h-4" />
                     Empezar de nuevo
@@ -152,11 +148,11 @@ export default function ConfiguradorPage() {
           </AnimatePresence>
 
           {currentStep < TOTAL_STEPS && (
-            <div className="flex justify-between items-center mt-12 pt-8 border-t border-slate-200">
+            <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200">
               <button
                 onClick={handleBack}
                 disabled={currentStep === 1}
-                className="px-6 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Anterior
@@ -164,7 +160,7 @@ export default function ConfiguradorPage() {
               <button
                 onClick={handleNext}
                 disabled={!canGoNext()}
-                className="px-6 py-3 rounded-xl bg-brand-500 text-white font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 Siguiente
                 <ArrowRight className="w-4 h-4" />

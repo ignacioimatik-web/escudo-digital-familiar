@@ -24,12 +24,12 @@ export function StepChecklist({ steps }: StepChecklistProps) {
   const progress = (completed.size / steps.length) * 100
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm font-medium text-slate-700">
+    <div className="space-y-2">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-medium text-slate-700">
           Progreso: {completed.size} de {steps.length}
         </span>
-        <span className="text-sm text-slate-500">{Math.round(progress)}%</span>
+        <span className="text-xs text-slate-500">{Math.round(progress)}%</span>
       </div>
       {steps.map((step, index) => {
         const isCompleted = completed.has(index)
@@ -37,20 +37,20 @@ export function StepChecklist({ steps }: StepChecklistProps) {
           <motion.button
             key={index}
             onClick={() => toggleStep(index)}
-            whileHover={{ scale: 1.01 }}
+            whileHover={{ scale: 1.005 }}
             whileTap={{ scale: 0.99 }}
-            className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+            className={`w-full flex items-start gap-2.5 p-3 rounded-lg border transition-all text-left ${
               isCompleted
-                ? "border-success-300 bg-success-50"
+                ? "border-success-200 bg-success-50/60"
                 : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
             {isCompleted ? (
-              <CheckCircle2 className="w-5 h-5 text-success-500 flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-success-500 flex-shrink-0 mt-0.5" />
             ) : (
-              <Circle className="w-5 h-5 text-slate-300 flex-shrink-0 mt-0.5" />
+              <Circle className="w-4 h-4 text-slate-300 flex-shrink-0 mt-0.5" />
             )}
-            <span className={`text-sm ${isCompleted ? "text-success-900 line-through" : "text-slate-700"}`}>
+            <span className={`text-xs leading-relaxed ${isCompleted ? "text-success-900 line-through" : "text-slate-700"}`}>
               {step}
             </span>
           </motion.button>

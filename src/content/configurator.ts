@@ -1,39 +1,95 @@
 import type { DeviceType, NetworkContext, ProtectionLevel, ConfiguratorStep } from "@/lib/types"
 
-export const deviceTypes: { id: DeviceType; label: string; icon: string }[] = [
-  { id: "android", label: "Android", icon: "Smartphone" },
-  { id: "iphone", label: "iPhone / iPad", icon: "Smartphone" },
-  { id: "windows", label: "Windows", icon: "Monitor" },
-  { id: "macos", label: "macOS", icon: "Monitor" },
-  { id: "router", label: "Router", icon: "Router" },
-  { id: "navegador", label: "Navegador", icon: "Globe" },
+export const deviceTypes: {
+  id: DeviceType
+  label: string
+  icon: string
+  descripcion: string
+}[] = [
+  {
+    id: "android",
+    label: "Android",
+    icon: "Smartphone",
+    descripcion:
+      "Google Family Link + DNS privado. Control parental nativo y filtrado de red.",
+  },
+  {
+    id: "iphone",
+    label: "iPhone / iPad",
+    icon: "Smartphone",
+    descripcion:
+      "Tiempo de Uso + En Familia + DNS personalizado. Configuración robusta pero sencilla.",
+  },
+  {
+    id: "windows",
+    label: "Windows",
+    icon: "Monitor",
+    descripcion:
+      "Microsoft Family Safety + DNS manual. Ideal para portátiles y sobremesas compartidos.",
+  },
+  {
+    id: "macos",
+    label: "macOS",
+    icon: "Monitor",
+    descripcion:
+      "En Familia + Tiempo de Uso + DNS manual. Protección integrada en el ecosistema Apple.",
+  },
+  {
+    id: "router",
+    label: "Router",
+    icon: "Router",
+    descripcion:
+      "Filtro DNS a nivel de red. Protege todos los dispositivos que se conectan en casa.",
+  },
+  {
+    id: "navegador",
+    label: "Navegador",
+    icon: "Globe",
+    descripcion:
+      "DNS-over-HTTPS en Chrome, Edge o Firefox. Protección rápida sin instalar nada.",
+  },
 ]
 
-export const networkContexts: { id: NetworkContext; label: string; descripcion: string }[] = [
+export const networkContexts: {
+  id: NetworkContext
+  label: string
+  descripcion: string
+  detalle: string
+}[] = [
   {
     id: "wifi-casa",
     label: "Wi-Fi de casa",
-    descripcion: "El dispositivo solo se conecta a la red Wi-Fi del hogar.",
+    descripcion: "Protege toda la red configurando el router.",
+    detalle:
+      "El dispositivo solo usa Wi-Fi del hogar. Configurar el router protege también a visitas y dispositivos sin control parental.",
   },
   {
     id: "datos-moviles",
     label: "Datos móviles",
-    descripcion: "El dispositivo se conecta principalmente con datos del operador.",
+    descripcion: "DNS privado o perfil móvil para filtrar fuera de casa.",
+    detalle:
+      "El menor usa datos del operador. Es imprescindible activar DNS privado (Android) o un perfil DNS (iOS).",
   },
   {
     id: "wifi-datos",
     label: "Wi-Fi y datos móviles",
-    descripcion: "El dispositivo alterna entre Wi-Fi y datos móviles.",
+    descripcion: "Doble protección: router + DNS en el dispositivo.",
+    detalle:
+      "El dispositivo alterna entre redes. Configura DNS en el router y también DNS privado en el dispositivo como respaldo.",
   },
   {
     id: "dispositivo-compartido",
     label: "Dispositivo compartido",
-    descripcion: "Varias personas usan el mismo dispositivo (ej: tablet familiar).",
+    descripcion: "Perfiles separados y restricciones por usuario.",
+    detalle:
+      "Varias personas usan el mismo dispositivo. Crea perfiles de usuario y bloquea cambios de configuración.",
   },
   {
     id: "dispositivo-personal",
     label: "Dispositivo personal",
-    descripcion: "El menor es el único usuario del dispositivo.",
+    descripcion: "Control parental completo sobre el dispositivo del menor.",
+    detalle:
+      "El menor es el único usuario. Puedes aplicar Family Link, Tiempo de Uso o Family Safety sin afectar a otros.",
   },
 ]
 
@@ -41,24 +97,31 @@ export const protectionLevels: {
   id: ProtectionLevel
   label: string
   descripcion: string
+  detalle: string
   color: string
 }[] = [
   {
     id: "basico",
     label: "Básico",
     descripcion: "Protección mínima. Ideal como primer paso o para adolescentes maduros.",
+    detalle:
+      "Filtro DNS + límites básicos de contenido. No bloquea apps ni controla tiempos de uso.",
     color: "success",
   },
   {
     id: "recomendado",
     label: "Recomendado",
     descripcion: "Equilibrio entre protección y autonomía. Adecuado para la mayoría de familias.",
+    detalle:
+      "DNS + control parental (Family Link, Tiempo de Uso o Family Safety) + límites de tiempo y compras.",
     color: "brand",
   },
   {
     id: "avanzado",
     label: "Avanzado",
     descripcion: "Máxima protección. Recomendado para menores de 12 años o situaciones de riesgo.",
+    detalle:
+      "Todas las capas anteriores + bloqueo de navegadores alternativos, aprobación de apps y restricciones máximas.",
     color: "accent",
   },
 ]
