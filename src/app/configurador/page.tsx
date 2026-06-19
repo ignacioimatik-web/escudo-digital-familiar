@@ -86,7 +86,7 @@ export default function ConfiguradorPage() {
 
       <Section className="-mt-[400px] pt-0">
         <Container size="md">
-          <div className="mb-6">
+          <div className="mb-6 mt-[200px]">
             <Progress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
           </div>
 
