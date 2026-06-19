@@ -168,12 +168,11 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-grid-cyan">
+      <Section className="bg-grid-cyan -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
               <div className="text-center mb-16">
-                <Badge variant="accent" className="mb-4">El problema</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
                   El entorno digital no es seguro para los menores
                 </h2>
