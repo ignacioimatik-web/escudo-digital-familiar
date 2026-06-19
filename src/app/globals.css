@@ -187,11 +187,15 @@
   }
 }
 
-.bg-grid {
+.bg-grid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background-image:
-    linear-gradient(to right, oklch(0.82 0.06 200 / 0.2) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.82 0.06 200 / 0.2) 1px, transparent 1px),
-    linear-gradient(to right, oklch(0.82 0.06 200 / 0.4) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.82 0.06 200 / 0.4) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.82 0.06 200 / 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.82 0.06 200 / 0.15) 1px, transparent 1px),
+    linear-gradient(to right, oklch(0.82 0.06 200 / 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.82 0.06 200 / 0.3) 1px, transparent 1px);
   background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
 }

@@ -168,7 +168,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-gradient-to-b from-cyan-100 to-white bg-grid">
+      <Section className="bg-gradient-to-b from-cyan-100 to-white relative bg-grid">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -197,7 +197,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-gradient-to-b from-white to-cyan-100 bg-grid -mt-[100px]">
+      <Section className="bg-gradient-to-b from-white to-cyan-100 relative bg-grid -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -248,7 +248,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-gradient-to-b from-cyan-100 to-white bg-grid -mt-[100px]">
+      <Section className="bg-gradient-to-b from-cyan-100 to-white relative bg-grid -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -299,7 +299,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-gradient-to-b from-white to-cyan-100 bg-grid -mt-[100px]">
+      <Section className="bg-gradient-to-b from-white to-cyan-100 relative bg-grid -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -335,7 +335,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-gradient-to-b from-cyan-100 to-white bg-grid -mt-[100px]">
+      <Section className="bg-gradient-to-b from-cyan-100 to-white relative bg-grid -mt-[100px]">
         <Container className="text-center">
           <AnimatedSection>
             <AnimatedItem>
