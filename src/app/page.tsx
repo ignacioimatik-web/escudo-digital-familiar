@@ -197,12 +197,11 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section>
+      <Section className="-mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
               <div className="text-center mb-16">
-                <Badge variant="cyan" className="mb-4">El método</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
                   Dos capas de protección complementarias
                 </h2>
