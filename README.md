@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Escudo Digital Familiar
 
-## Getting Started
+Plataforma web premium para presentar y aplicar un método de protección digital de menores basado en 2 capas: DNS de protección + control parental.
 
-First, run the development server:
+## Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Lenguaje:** TypeScript
+- **Estilos:** Tailwind CSS v4
+- **Componentes:** shadcn/ui
+- **Animaciones:** Framer Motion
+- **Iconos:** Lucide React
+- **Despliegue:** Vercel
+
+## Requisitos
+
+- Node.js 18+
+- npm 9+
+
+## Instalación
+
+```bash
+npm install
+```
+
+## Desarrollo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Estructura del proyecto
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/                    # Rutas de la aplicación (App Router)
+│   ├── layout.tsx          # Layout global con Navbar y Footer
+│   ├── page.tsx            # Landing page (/)
+│   ├── metodo/             # /metodo
+│   ├── presentacion/       # /presentacion
+│   ├── configurador/       # /configurador
+│   ├── guias/
+│   │   ├── android/        # /guias/android
+│   │   ├── ios/            # /guias/ios
+│   │   ├── windows/        # /guias/windows
+│   │   ├── macos/          # /guias/macos
+│   │   ├── router/         # /guias/router
+│   │   └── navegadores/    # /guias/navegadores
+│   ├── familias/           # /familias
+│   ├── colegios/           # /colegios
+│   ├── parroquias/         # /parroquias
+│   ├── faq/                # /faq
+│   ├── descargas/          # /descargas
+│   └── legal/              # /legal
+├── components/
+│   ├── ui/                 # Componentes base (Container, Section, PremiumCard, Badge)
+│   └── layout/             # Navbar y Footer
+├── content/                # Contenido local (guías, datos)
+├── lib/                    # Utilidades y helpers
+└── hooks/                  # Custom hooks
+public/
+└── images/                 # Recursos estáticos
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Despliegue en Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Opción 1: Desde GitHub
 
-## Deploy on Vercel
+1. Sube el repositorio a GitHub
+2. Ve a [vercel.com/new](https://vercel.com/new)
+3. Importa el repositorio
+4. Vercel detectará automáticamente Next.js y configurará el build
+5. Haz clic en **Deploy**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Opción 2: CLI
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm i -g vercel
+vercel
+```
+
+### Variables de entorno
+
+No se requieren variables de entorno. Todo el contenido es local.
+
+## Paleta de colores
+
+| Color | Uso |
+|-------|-----|
+| Azul profundo (brand) | Seguridad, confianza |
+| Cian suave (cyan) | Tecnología |
+| Naranja (accent) | Acompañamiento |
+| Verde (success) | Configuración correcta |
+| Gris pizarra (slate) | Textos |
+
+## Licencia
+
+Todos los derechos reservados.
