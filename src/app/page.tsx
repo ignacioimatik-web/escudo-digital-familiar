@@ -293,7 +293,7 @@ export default function HomePage() {
               </div>
             </div>
             <AnimatedItem>
-              <div className="mt-16 rounded-2xl overflow-hidden border border-border/60 max-w-2xl mx-auto">
+              <div className="mt-16 rounded-2xl overflow-hidden border border-border/60 max-w-4xl mx-auto">
                 <SlowVideo src="/video/intro_telemet.mp4" />
               </div>
             </AnimatedItem>
