@@ -248,12 +248,11 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="bg-slate-50/50">
+      <Section className="bg-slate-50/50 -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
               <div className="text-center mb-16">
-                <Badge variant="success" className="mb-4">Transición por edad</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
                   De los filtros al criterio
                 </h2>
