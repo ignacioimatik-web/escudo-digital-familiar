@@ -186,3 +186,12 @@
     @apply underline-offset-4 hover:underline;
   }
 }
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, oklch(0.82 0.06 200 / 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.82 0.06 200 / 0.2) 1px, transparent 1px),
+    linear-gradient(to right, oklch(0.82 0.06 200 / 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.82 0.06 200 / 0.4) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+}
