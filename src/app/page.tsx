@@ -197,9 +197,20 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section className="-mt-[100px]">
+      <Section>
         <Container>
           <AnimatedSection>
+            <AnimatedItem>
+              <div className="text-center mb-16">
+                <Badge variant="cyan" className="mb-4">El método</Badge>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
+                  Dos capas de protección complementarias
+                </h2>
+                <p className="mt-4 text-lg text-slate-500 max-w-2xl mx-auto">
+                  Un sistema sencillo que combina filtrado técnico con acompañamiento humano.
+                </p>
+              </div>
+            </AnimatedItem>
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {methodLayers.map((layer, i) => {
                 const Icon = i === 0 ? Wifi : Smartphone
