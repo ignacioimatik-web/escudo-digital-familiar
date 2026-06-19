@@ -105,24 +105,33 @@ const audienceIcons: Record<string, React.ElementType> = {
 export default function HomePage() {
   return (
     <>
-      <Section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50/60 via-background to-background" />
-        <Container className="text-center py-16 md:py-28">
+      <Section className="relative overflow-hidden min-h-[80vh] flex items-center">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/video/intro.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-background/90" />
+        <Container className="relative text-center py-16 md:py-28">
           <AnimatedSection>
             <AnimatedItem>
-              <Badge variant="default" className="mb-6">
+              <Badge variant="default" className="mb-6 bg-white/15 text-white border border-white/20">
                 Protección digital para menores
               </Badge>
             </AnimatedItem>
             <AnimatedItem>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
                 Un escudo digital
                 <br />
-                <span className="text-brand-600">para tu familia</span>
+                <span className="text-brand-300">para tu familia</span>
               </h1>
             </AnimatedItem>
             <AnimatedItem>
-              <p className="mt-6 text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
+              <p className="mt-6 text-lg md:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed">
                 Método en dos capas — DNS de protección y control parental — para crear un entorno digital seguro, sencillo y eficaz. Sin coste. Sin complicaciones.
               </p>
             </AnimatedItem>
