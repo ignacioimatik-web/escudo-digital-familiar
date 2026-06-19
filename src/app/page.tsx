@@ -4,8 +4,6 @@ import { motion, useInView } from "framer-motion"
 import { useEffect, useRef } from "react"
 import {
   Shield,
-  Wifi,
-  Smartphone,
   ArrowRight,
   AlertTriangle,
   Users,
@@ -22,7 +20,7 @@ import { Container } from "@/components/ui/container"
 import { Section } from "@/components/ui/section"
 import { PremiumCard } from "@/components/ui/premium-card"
 import { Badge } from "@/components/ui/badge"
-import { methodLayers, ageTransitions } from "@/content/method"
+import { ageTransitions } from "@/content/method"
 import { audiences } from "@/content/audiences"
 import Link from "next/link"
 
@@ -197,59 +195,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      <Section>
-        <Container>
-          <AnimatedSection>
-            <AnimatedItem>
-              <div className="text-center mb-16">
-                <Badge variant="cyan" className="mb-4">El método</Badge>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
-                  Dos capas de protección complementarias
-                </h2>
-                <p className="mt-4 text-lg text-slate-500 max-w-2xl mx-auto">
-                  Un sistema sencillo que combina filtrado técnico con acompañamiento humano.
-                </p>
-              </div>
-            </AnimatedItem>
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {methodLayers.map((layer, i) => {
-                const Icon = i === 0 ? Wifi : Smartphone
-                return (
-                  <AnimatedItem key={layer.id}>
-                    <PremiumCard className="h-full">
-                      <div className={`flex h-14 w-14 items-center justify-center rounded-xl mb-6 ${i === 0 ? "bg-brand-100" : "bg-cyan-100"}`}>
-                        <Icon className={`h-7 w-7 ${i === 0 ? "text-brand-600" : "text-cyan-500"}`} />
-                      </div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                        Capa {i + 1}
-                      </p>
-                      <h3 className="text-xl font-semibold text-slate-900 mb-2">{layer.titulo}</h3>
-                      <p className="text-sm text-slate-500 mb-6">{layer.subtitulo}</p>
-                      <p className="text-slate-600 leading-relaxed mb-6">{layer.descripcion}</p>
-                      <div className="space-y-2">
-                        {layer.queHace.slice(0, 3).map((item) => (
-                          <div key={item} className="flex items-start gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-success-500 mt-0.5 shrink-0" />
-                            <span className="text-sm text-slate-600">{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <Link
-                        href="/metodo"
-                        className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
-                      >
-                        Ver método completo <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
-                    </PremiumCard>
-                  </AnimatedItem>
-                )
-              })}
-            </div>
-          </AnimatedSection>
-        </Container>
-      </Section>
-
-      <Section className="bg-slate-50/50">
+      <Section className="bg-slate-50/50 -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
