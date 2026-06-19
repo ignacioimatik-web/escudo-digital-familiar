@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState, useEffect, useRef } from "react"
-import { Shield, Menu, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Container } from "@/components/ui/container"
 
@@ -48,8 +49,8 @@ export function Navbar() {
             className="flex items-center gap-2.5 group"
             aria-label="Escudo Digital Familiar - Inicio"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 shadow-md shadow-brand-600/20 transition-shadow group-hover:shadow-lg group-hover:shadow-brand-600/30">
-              <Shield className="h-5 w-5 text-white" strokeWidth={2.2} />
+            <div className="flex h-9 w-9 items-center justify-center">
+              <Image src="/images/logo.png" alt="Escudo Digital Familiar" width={36} height={36} className="object-contain" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-slate-900">
               Escudo Digital
