@@ -206,14 +206,6 @@ export function processInput(
   state: ConversationState,
   input: string
 ): AssistantResponse {
-  // Dedup: skip if we've already processed this exact input in this phase
-  const inputKey = state.phase + ":" + normalize(input)
-  if (state.processedInputs.has(inputKey)) {
-    // Don't reprocess - just resend current response based on phase
-    input = ""
-  }
-  state.processedInputs.add(inputKey)
-
   state.history.push({ role: "user", text: input })
 
   // ── INICIO ──
