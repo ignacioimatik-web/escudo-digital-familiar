@@ -150,7 +150,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 4,
         titulo: "Configurar DNS en el router",
         descripcion:
-          "Para proteger TODA la red de casa, configura también el DNS en el router. Consulta la guía de Router para instrucciones detalladas.",
+          "El router protege TODA la red WiFi de casa. Pasos:\n\n1. Abre el navegador y escribe **192.168.1.1** o **192.168.0.1**\n2. Inicia sesión (prueba: **admin/admin** si no lo has cambiado)\n3. Busca **DNS** en: Configuración de red > WAN > DNS\n4. Cambia a manual e introduce las IPs del proveedor\n5. Guarda los cambios y reinicia el router\n6. Reconecta tus dispositivos al WiFi\n\n➡ DNS4.EU: 91.239.100.101 y 91.239.100.102\n➡ CleanBrowsing: 185.228.168.168 y 185.228.169.168\n➡ Cloudflare Familias: 1.1.1.3 y 1.0.0.3\n➡ AdGuard Family: 94.140.14.15 y 94.140.15.16",
         notas: [
           "Esto protege a todos los dispositivos conectados al WiFi de casa",
           "Si configuras solo el DNS en el móvil, otros dispositivos no están protegidos",
@@ -166,7 +166,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 9,
         titulo: "Activar aprobación de compras",
         descripcion:
-          "En Family Link, activa **'Requerir aprobación para compras'**. Así ninguna compra en Play Store se realizará sin tu consentimiento.",
+          "En Family Link, ve a **Gestionar configuración > Controles de cuentas > Aprobación de compras y descargas**. Actívala. Así ninguna compra ni descarga de apps en Play Store se realizará sin que tú la autorices desde tu móvil.",
       },
     ],
     verificacion:
@@ -185,7 +185,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "Configurar DNS en el router",
         descripcion:
-          "Cambia los DNS del router a DNS4.EU (194.242.18.6 y 194.242.18.7) o CleanBrowsing Family (185.228.168.168 y 185.228.169.168). Esto protege TODA la red doméstica.",
+          "El router es la base de toda la protección. Sigue estos pasos:\n\n1. **Accede al router**: abre el navegador y ve a **192.168.1.1** (o 192.168.0.1)\n2. **Inicia sesión** con tu usuario y contraseña (por defecto: admin/admin)\n3. **Localiza los ajustes DNS**: suele estar en Red > WAN > DNS, o Internet > Configuración avanzada\n4. **Selecciona DNS manual** y desactiva DNS automático\n5. **Introduce las IPs**: primario y secundario del proveedor que elijas\n6. **Guarda los cambios** (el router puede reiniciarse)\n7. **Reconecta** los dispositivos al WiFi\n\n**Recomendación: DNS4.EU** → primario 91.239.100.101 / secundario 91.239.100.102\n**Alternativa CleanBrowsing** → primario 185.228.168.168 / secundario 185.228.169.168\n\nEsto protege TODOS los dispositivos de la casa de golpe.",
       },
       {
         id: "android-adv-dns",
@@ -291,9 +291,9 @@ export const knowledgeBase: DeviceConfig[] = [
     dnsRecomendado: [CLEAN_BROWSING, CLOUDFLARE_FAMILY],
     pasos: [
       { id: "android-mob-adv-1", numero: 1, titulo: "DNS privado con CleanBrowsing", descripcion: "Configura **family-filter-dns.cleanbrowsing.org** como DNS privado. CleanBrowsing bloquea proxies/anonymizers." },
-      { id: "android-mob-adv-2", numero: 2, titulo: "Family Link con restricciones máximas", descripcion: "Configura todas las restricciones de Family Link al máximo nivel." },
-      { id: "android-mob-adv-3", numero: 3, titulo: "Bloquear cambios de red", descripcion: "En Family Link, bloquea la capacidad de cambiar configuraciones de red." },
-      { id: "android-mob-adv-4", numero: 4, titulo: "App de respaldo DNS", descripcion: "Como capa extra, instala **AdGuard** (versión gratuita) y activa el filtrado DNS en la app. Esto añade bloqueo de anuncios y rastreadores." },
+      { id: "android-mob-adv-2", numero: 2, titulo: "Family Link con restricciones máximas", descripcion: "Abre Family Link, selecciona la cuenta del menor. Ve a Gestionar configuración > Filtros. Pon el límite de edad más bajo para apps. Activa: requerir aprobación para descargas y compras, supervisar actividad, y bloquear la instalación de apps no aprobadas." },
+      { id: "android-mob-adv-3", numero: 3, titulo: "Bloquear cambios de red", descripcion: "En Family Link: Gestionar configuración > Ajustes de Android > Bloquear cambios de configuración de red. Así el menor no podrá desactivar el DNS privado ni cambiar la red sin tu permiso." },
+      { id: "android-mob-adv-4", numero: 4, titulo: "App de respaldo DNS", descripcion: "Instala **AdGuard** (versión gratuita) desde Play Store. Activa 'Protección DNS' en la app y elige un filtro DNS. Esto añade bloqueo de anuncios y rastreadores como capa extra además del DNS privado." },
     ],
     verificacion: "Intenta usar un proxy/anonymizer desde el móvil — debe estar bloqueado por CleanBrowsing.",
     erroresFrecuentes: androidEdgeCases,
@@ -325,7 +325,7 @@ export const knowledgeBase: DeviceConfig[] = [
     tiempoEstimado: "25-35 minutos",
     dnsRecomendado: [CLEAN_BROWSING, DNS_FAMILIA_SURF],
     pasos: [
-      { id: "android-dual-r1", numero: 1, titulo: "Configurar DNS en el router", descripcion: "Protege toda la red WiFi de casa configurando el router con DNS4.EU o CleanBrowsing." },
+      { id: "android-dual-r1", numero: 1, titulo: "Configurar DNS en el router", descripcion: "Accede al router (192.168.1.1), inicia sesión, busca ajustes DNS en Red > WAN, cambia a manual e introduce: **DNS4.EU** 91.239.100.101 / 91.239.100.102 o **CleanBrowsing** 185.228.168.168 / 185.228.169.168. Guarda y reinicia." },
       ...androidPasosBase.map((p) => ({ ...p, numero: p.numero + 1 })),
       ...androidPasosFamilyLink.map((p, i) => ({ ...p, numero: i + 5 })),
     ],
@@ -339,11 +339,11 @@ export const knowledgeBase: DeviceConfig[] = [
     tiempoEstimado: "30-40 minutos",
     dnsRecomendado: [CLEAN_BROWSING, CLOUDFLARE_FAMILY],
     pasos: [
-      { id: "android-dual-a1", numero: 1, titulo: "Router con DNS4.EU", descripcion: "DNS en el router con DNS4.EU para proteger toda la red WiFi." },
-      { id: "android-dual-a2", numero: 2, titulo: "DNS privado con CleanBrowsing", descripcion: "En el móvil, configura CleanBrowsing Family como DNS privado." },
-      { id: "android-dual-a3", numero: 3, titulo: "Family Link máximo", descripcion: "Todas las restricciones activadas." },
-      { id: "android-dual-a4", numero: 4, titulo: "Bloqueo de proxies", descripcion: "CleanBrowsing bloquea proxies incluso con datos móviles." },
-      { id: "android-dual-a5", numero: 5, titulo: "DoH en navegador como respaldo", descripcion: "Configura DNS seguro (DoH) en Chrome como capa adicional." },
+      { id: "android-dual-a1", numero: 1, titulo: "Router con DNS4.EU", descripcion: "Accede al router (navegador → 192.168.1.1), inicia sesión, ve a Red > WAN > DNS, cambia a manual e introduce: primario **91.239.100.101** / secundario **91.239.100.102**. Guarda y reconecta dispositivos. Así toda la red WiFi queda protegida." },
+      { id: "android-dual-a2", numero: 2, titulo: "DNS privado con CleanBrowsing", descripcion: "En el móvil Android, ve a Ajustes > Red e Internet > DNS privado. Selecciona 'Nombre del host del proveedor' e introduce: **family-filter-dns.cleanbrowsing.org**. Esto protege también cuando el móvil no está en casa." },
+      { id: "android-dual-a3", numero: 3, titulo: "Family Link máximo", descripcion: "Abre Family Link, selecciona la cuenta del menor. Ve a Gestionar configuración > Filtros > Google Play y pon el límite de edad más restrictivo. Activa la supervisión de descargas, compras y la aprobación para instalar apps." },
+      { id: "android-dual-a4", numero: 4, titulo: "Bloqueo de proxies", descripcion: "Al usar CleanBrowsing como DNS privado, los proxies y VPN quedan bloqueados automáticamente. Verifica intentando usar un proxy desde el navegador del menor — debe fallar." },
+      { id: "android-dual-a5", numero: 5, titulo: "DoH en navegador como respaldo", descripcion: "En Chrome: Ajustes > Privacidad y seguridad > Usar DNS seguro > Elegir proveedor personalizado > **https://doh.cleanbrowsing.org/doh/family-filter/** . Esto añade una tercera capa de protección DNS." },
     ],
     verificacion: "Prueba bloqueo en WiFi, datos móviles y usando proxies. Todo debe estar bloqueado.",
     erroresFrecuentes: androidEdgeCases,
@@ -453,7 +453,7 @@ export const knowledgeBase: DeviceConfig[] = [
         id: "ios-rec-router",
         numero: 1,
         titulo: "Configurar DNS en el router",
-        descripcion: "Primero, configura el router con DNS4.EU o CleanBrowsing. Así toda la red WiFi de casa está protegida, incluso si el menor se conecta con otro dispositivo.",
+        descripcion: "Primero protege toda la red. Abre el navegador, ve a **192.168.1.1**, inicia sesión, busca Red > WAN > DNS, cambia a manual. Introduce: **DNS4.EU** 91.239.100.101 / 91.239.100.102 o **CleanBrowsing** 185.228.168.168 / 185.228.169.168. Guarda y reconecta. Así toda la WiFi de casa queda protegida.",
       },
       {
         id: "ios-rec-perfil",
@@ -531,9 +531,9 @@ export const knowledgeBase: DeviceConfig[] = [
     tiempoEstimado: "25-35 minutos",
     dnsRecomendado: [DNS_FAMILIA_SURF, CLEAN_BROWSING],
     pasos: [
-      { id: "ios-dual-router", numero: 1, titulo: "DNS en el router para WiFi de casa", descripcion: "Configura el router con DNS4.EU o CleanBrowsing." },
-      { id: "ios-dual-perfil", numero: 2, titulo: "Perfil DNS para datos móviles", descripcion: "Instala perfil DNS en el iPhone para proteger los datos móviles." },
-      { id: "ios-dual-familia", numero: 3, titulo: "En Familia + Tiempo de Uso", descripcion: "Configura En Familia y Tiempo de Uso completo." },
+      { id: "ios-dual-router", numero: 1, titulo: "DNS en el router para WiFi de casa", descripcion: "Navegador → 192.168.1.1, inicia sesión, Red > WAN > DNS, manual. Introduce DNS4.EU (91.239.100.101 / 91.239.100.102) o CleanBrowsing (185.228.168.168 / 185.228.169.168). Guarda. Toda la WiFi protegida." },
+      { id: "ios-dual-perfil", numero: 2, titulo: "Perfil DNS para datos móviles", descripcion: "Para proteger también con datos móviles: abre Safari y visita **dns4.eu/install** o instala la app **DNS Profile** desde la App Store. Descarga el perfil, ve a Ajustes > Perfil descargado > Instalar. Necesitas la contraseña del Apple ID." },
+      { id: "ios-dual-familia", numero: 3, titulo: "En Familia + Tiempo de Uso", descripcion: "Ajustes > [tu nombre] > En Familia > Añadir miembro. Crea un Apple ID para el menor. Luego en su dispositivo: Ajustes > Tiempo de Uso > Activar con código. Configura límites de apps, restricciones de contenido web (Limitar contenido para adultos) y bloqueo de compras." },
     ],
     verificacion: "Prueba bloqueo en WiFi, luego con datos móviles. Ambos deben funcionar.",
     erroresFrecuentes: [],
@@ -545,7 +545,7 @@ export const knowledgeBase: DeviceConfig[] = [
     tiempoEstimado: "20-30 minutos",
     dnsRecomendado: [DNS_FAMILIA_SURF, CLEAN_BROWSING],
     pasos: [
-      { id: "ios-shared-1", numero: 1, titulo: "DNS en el router (protege a todos)", descripcion: "Configura el router con DNS familiar. Esto protege al menor sin afectar configuraciones del iPhone del adulto." },
+      { id: "ios-shared-1", numero: 1, titulo: "DNS en el router (protege a todos)", descripcion: "Navegador → 192.168.1.1, inicia sesión, Red > WAN > DNS, manual. Introduce DNS4.EU (91.239.100.101 / 91.239.100.102) o CleanBrowsing (185.228.168.168 / 185.228.169.168). Guarda. El DNS filtra a nivel de toda la red, protegiendo al menor sin afectar configuraciones del iPhone del adulto." },
       { id: "ios-shared-2", numero: 2, titulo: "En Familia con cuenta del menor", descripcion: "En Familia > Añadir miembro. Crea un Apple ID para el menor y asígnale restricciones." },
       { id: "ios-shared-3", numero: 3, titulo: "Tiempo de Uso solo para el menor", descripcion: "Activa Tiempo de Uso para la cuenta del menor. El adulto no tendrá restricciones." },
     ],
@@ -561,9 +561,9 @@ export const knowledgeBase: DeviceConfig[] = [
     tiempoEstimado: "25-30 minutos",
     dnsRecomendado: [CLEAN_BROWSING, DNS_FAMILIA_SURF],
     pasos: [
-      { id: "ios-own-1", numero: 1, titulo: "Router con DNS familiar", descripcion: "El primer paso es proteger la red de casa." },
-      { id: "ios-own-2", numero: 2, titulo: "Perfil DNS en el dispositivo", descripcion: "Instala perfil DNS para proteger también fuera de casa." },
-      { id: "ios-own-3", numero: 3, titulo: "En Familia desde el dispositivo del adulto", descripcion: "Configura En Familia desde el móvil del adulto y vincula el dispositivo del menor." },
+      { id: "ios-own-1", numero: 1, titulo: "Router con DNS familiar", descripcion: "Abre navegador → 192.168.1.1, inicia sesión, busca Red > WAN > DNS, cambia a manual. Introduce DNS4.EU (91.239.100.101 / 91.239.100.102) o CleanBrowsing (185.228.168.168 / 185.228.169.168). Guarda. La WiFi de casa queda protegida." },
+      { id: "ios-own-2", numero: 2, titulo: "Perfil DNS en el dispositivo", descripcion: "Abre Safari, visita **dns4.eu/install** o instala la app **DNS Profile**. Descarga el perfil, ve a Ajustes > Perfil descargado > Instalar. Necesitas la contraseña del Apple ID. Esto protege también fuera de casa." },
+      { id: "ios-own-3", numero: 3, titulo: "En Familia desde el dispositivo del adulto", descripcion: "En tu iPhone: Ajustes > [tu nombre] > En Familia > Añadir miembro. Crea un Apple ID para el menor o usa el suyo. Activa Compartir en Familia y asígnale restricciones." },
       { id: "ios-own-4", numero: 4, titulo: "Tiempo de Uso con código", descripcion: "Establece todas las restricciones en el dispositivo del menor con un código secreto." },
     ],
     verificacion: "Todas las capas activas: DNS en router, perfil DNS, En Familia, Tiempo de Uso.",
@@ -823,7 +823,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "Opción A: DNS en el router (recomendado)",
         descripcion:
-          "Configura el router con DNS de protección. La Smart TV heredará automáticamente la protección. Todos los contenidos (YouTube, Netflix, navegador) estarán filtrados.",
+          "La opción más eficaz. Al configurar el DNS en el router, la Smart TV hereda la protección automáticamente. Haz esto:\n\n1. Abre el navegador y ve a **192.168.1.1**\n2. Inicia sesión (admin/admin si no lo has cambiado)\n3. Busca Configuración de red > WAN > DNS\n4. Cambia a manual e introduce las IPs del proveedor (DNS4.EU: 91.239.100.101 y 91.239.100.102)\n5. Guarda. La TV se reconectará sola.\n\nTodos los contenidos (YouTube, Netflix, navegador) quedarán filtrados.",
         notas: ["Esta es la solución más sencilla y efectiva", "Protege también cualquier otro dispositivo conectado al WiFi"],
       },
       {
@@ -870,7 +870,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "DNS en el router (método principal)",
         descripcion:
-          "La mejor protección para consolas es configurar el DNS en el router. La consola heredará la protección sin necesidad de configurarla individualmente.",
+          "La mejor protección para consolas es configurar el DNS en el router. Así la consola hereda la protección automáticamente. Pasos:\n\n1. Abre el navegador y ve a **192.168.1.1** (o 192.168.0.1)\n2. Inicia sesión (prueba admin/admin si no lo has cambiado)\n3. Busca Red > WAN > DNS y cambia a manual\n4. Introduce: primario **91.239.100.101** / secundario **91.239.100.102** (DNS4.EU)\n5. Guarda los cambios. La consola se reconectará sola con el nuevo DNS",
       },
       {
         id: "console-ps",
