@@ -154,6 +154,9 @@ function JarvisGlowButton({ label, desc, icon, onClick, glowColor, badgeLabel }:
 }
 
 function JarvisStepCard({ step, numero, total }: { step: ConfigStep; numero: number; total: number }) {
+  // Split description into individual instruction lines
+  const instrucciones = step.descripcion.split("\n").filter(Boolean)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
@@ -173,13 +176,34 @@ function JarvisStepCard({ step, numero, total }: { step: ConfigStep; numero: num
           </div>
           <span className="text-[10px] font-medium text-emerald-400/60 tracking-wide">PASO {numero}/{total}</span>
         </div>
-        <h4 className="text-sm font-bold text-white mb-2 tracking-wide">{step.titulo}</h4>
-        <div className="text-[13px] text-slate-300 leading-relaxed mb-3 whitespace-pre-line">{step.descripcion}</div>
+        <h4 className="text-sm font-bold text-white mb-3 tracking-wide">{step.titulo}</h4>
+        <div className="space-y-1.5 mb-3">
+          {instrucciones.map((linea, i) => {
+            // Detect if line starts with an emoji (visual instruction)
+            const tieneEmoji = /^[📍🔤🔑🔍✏️📝💾🔄📱🌐🔒📡🎯⚙️1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣💡👉✅❌⚠️👤🔐🎮💻📺🖥️📖📋🗂️🧩🛡️🚫🔞➕➖⬇️⬆️]/.test(linea.trim())
+            const esSubTitulo = linea.trim().startsWith("**") && linea.trim().endsWith("**")
+            
+            return (
+              <div
+                key={i}
+                className={`flex items-start gap-2 ${
+                  tieneEmoji ? "bg-emerald-500/5 rounded-lg px-3 py-2 -mx-1" : ""
+                }`}
+              >
+                <span className={`text-[13px] leading-relaxed ${
+                  esSubTitulo ? "text-white font-semibold text-sm" : "text-slate-200"
+                }`}>
+                  {linea}
+                </span>
+              </div>
+            )
+          })}
+        </div>
         {step.notas && step.notas.length > 0 && (
           <div className="mt-2 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-            <p className="text-[9px] font-medium tracking-wide text-emerald-400/60 mb-1.5">Consejo</p>
+            <p className="text-[9px] font-medium tracking-wide text-emerald-400/60 mb-1.5">💡 Consejo</p>
             {step.notas.map((n, i) => (
-              <p key={i} className="text-[12px] text-slate-400 mb-1 last:mb-0">💡 {n}</p>
+              <p key={i} className="text-[12px] text-slate-400 mb-1 last:mb-0">{n}</p>
             ))}
           </div>
         )}
