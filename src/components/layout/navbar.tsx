@@ -48,13 +48,13 @@ export function Navbar() {
           <Link
             href="/"
             className="flex items-center gap-2.5 group"
-            aria-label="Escudo Digital Familiar - Inicio"
+            aria-label="Sentinel - Inicio"
           >
             <div className="flex h-9 w-9 items-center justify-center">
-              <Image src="/images/logo.png" alt="Escudo Digital Familiar" width={36} height={36} className="object-contain" />
+              <Image src="/images/logo.png" alt="Sentinel" width={36} height={36} className="object-contain" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-slate-900">
-              Escudo Digital
+              Sentinel
             </span>
           </Link>
 

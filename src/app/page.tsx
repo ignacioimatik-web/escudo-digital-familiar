@@ -17,6 +17,11 @@ import {
   Smile,
   User,
   UserCheck,
+  EyeOff,
+  Dices,
+  ShieldAlert,
+  MessageCircle,
+  BrainCircuit,
 } from "lucide-react"
 import { Container } from "@/components/ui/container"
 import { Section } from "@/components/ui/section"
@@ -74,32 +79,32 @@ function SlowVideo({ src }: { src: string }) {
 
 const problems = [
   {
-    icon: AlertTriangle,
+    icon: Smartphone,
     titulo: "Exposición temprana",
     descripcion: "La edad media del primer contacto con un smartphone es 9 años. Con 7, el 40% ya tiene acceso a Internet sin supervisión.",
   },
   {
-    icon: AlertTriangle,
+    icon: EyeOff,
     titulo: "Pornografía",
     descripcion: "El 90% de los menores acceden a contenido pornográfico antes de los 14 años, normalmente de forma accidental.",
   },
   {
-    icon: AlertTriangle,
+    icon: Dices,
     titulo: "Apuestas online",
     descripcion: "Las plataformas de apuestas y gaming con loot boxes normalizan la conducta adictiva entre los menores.",
   },
   {
-    icon: AlertTriangle,
+    icon: ShieldAlert,
     titulo: "Violencia digital",
     descripcion: "Contenido violento, retos peligrosos y ciberbullo forman parte del ecosistema digital que consumen a diario.",
   },
   {
-    icon: AlertTriangle,
+    icon: MessageCircle,
     titulo: "Redes sociales",
     descripcion: "Algoritmos diseñados para captar atención que generan ansiedad, comparación y adicción en cerebros en desarrollo.",
   },
   {
-    icon: AlertTriangle,
+    icon: BrainCircuit,
     titulo: "Algoritmos opacos",
     descripcion: "Los motores de recomendación amplifican contenido extremo sin que las familias sean conscientes de su impacto.",
   },

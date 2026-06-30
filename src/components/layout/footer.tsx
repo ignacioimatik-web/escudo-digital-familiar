@@ -38,13 +38,13 @@ export function Footer() {
             <Link
               href="/"
               className="flex items-center gap-2.5 group"
-              aria-label="Escudo Digital Familiar - Inicio"
+              aria-label="Sentinel - Inicio"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600">
                 <Shield className="h-4 w-4 text-white" strokeWidth={2.2} />
               </div>
               <span className="text-base font-semibold tracking-tight text-slate-900">
-                Escudo Digital
+                Sentinel
               </span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-slate-500 max-w-xs">
@@ -127,7 +127,7 @@ export function Footer() {
 
         <div className="border-t border-border/40 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-slate-400">
-            &copy; {new Date().getFullYear()} Escudo Digital Familiar. Todos los derechos reservados.
+            &copy; {new Date().getFullYear()} Sentinel. Todos los derechos reservados.
           </p>
           <p className="text-xs text-slate-400">
             Hecho con dedicación para la protección de los menores.

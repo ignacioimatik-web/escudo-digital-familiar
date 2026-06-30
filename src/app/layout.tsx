@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Escudo Digital Familiar — Protección digital para menores",
-    template: "%s | Escudo Digital Familiar",
+    default: "Sentinel — Protección digital para menores",
+    template: "%s | Sentinel",
   },
   description:
     "Plataforma premium para proteger a los menores en el entorno digital. Método en dos capas: DNS de protección y control parental. Guías para familias, colegios y parroquias.",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_ES",
-    siteName: "Escudo Digital Familiar",
+    siteName: "Sentinel",
   },
 }
 
