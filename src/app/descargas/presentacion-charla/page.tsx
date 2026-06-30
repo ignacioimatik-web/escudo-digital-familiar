@@ -1,10 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import {
   Shield, Smartphone, AlertTriangle, Users, Heart,
-  Baby, Smile, User, UserCheck, Wifi, School,
+  Baby, Smile, User, UserCheck, Wifi,
   ArrowDown, ArrowUp, Play, ChevronRight
 } from "lucide-react"
 
@@ -178,13 +178,6 @@ const slides = [
   },
 ]
 
-const colorOverlays: Record<string, string> = {
-  brand: "from-brand-900/80 via-brand-800/50 to-brand-950/90",
-  cyan: "from-cyan-900/80 via-cyan-800/50 to-cyan-950/90",
-  accent: "from-accent-900/80 via-accent-800/50 to-accent-950/90",
-  success: "from-success-900/80 via-success-800/50 to-success-950/90",
-}
-
 const slideBgColors: Record<string, string> = {
   brand: "bg-gradient-to-br from-slate-900 via-brand-950 to-slate-900",
   cyan: "bg-gradient-to-br from-slate-900 via-cyan-950 to-slate-900",
@@ -192,22 +185,54 @@ const slideBgColors: Record<string, string> = {
   success: "bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900",
 }
 
+const glowColors: Record<string, string> = {
+  brand: "bg-brand-500/10",
+  cyan: "bg-cyan-500/10",
+  accent: "bg-accent-500/10",
+  success: "bg-emerald-500/10",
+}
+
 export default function PresentacionCharlaPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([])
 
+  // IntersectionObserver — detecta qué slide está visible al hacer scroll
+  useEffect(() => {
+    const observers: IntersectionObserver[] = []
+    slideRefs.current.forEach((ref, i) => {
+      if (!ref) return
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setCurrentSlide(i)
+            }
+          })
+        },
+        { threshold: 0.5 }
+      )
+      observer.observe(ref)
+      observers.push(observer)
+    })
+    return () => observers.forEach((o) => o.disconnect())
+  }, [])
+
+  // Teclado
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown" || e.key === " " || e.key === "ArrowRight") {
         e.preventDefault()
         setCurrentSlide((prev) => Math.min(prev + 1, slides.length - 1))
+        document.getElementById(`s-${Math.min(currentSlide + 1, slides.length - 1)}`)?.scrollIntoView({ behavior: "smooth" })
       } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
         e.preventDefault()
         setCurrentSlide((prev) => Math.max(prev - 1, 0))
+        document.getElementById(`s-${Math.max(currentSlide - 1, 0)}`)?.scrollIntoView({ behavior: "smooth" })
       }
     }
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  }, [currentSlide])
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index)
@@ -238,14 +263,14 @@ export default function PresentacionCharlaPage() {
         <button
           onClick={() => goToSlide(Math.max(currentSlide - 1, 0))}
           disabled={currentSlide === 0}
-          className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 disabled:opacity-30"
+          className="h-9 w-9 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white/70 hover:bg-white/20 disabled:opacity-30 transition-all"
         >
           <ArrowDown className="h-4 w-4 rotate-90" />
         </button>
         <button
           onClick={() => goToSlide(Math.min(currentSlide + 1, slides.length - 1))}
           disabled={currentSlide === slides.length - 1}
-          className="h-9 w-9 rounded-full bg-brand-600 flex items-center justify-center text-white hover:bg-brand-700 disabled:opacity-30"
+          className="h-9 w-9 rounded-full bg-brand-600 flex items-center justify-center text-white hover:bg-brand-700 disabled:opacity-30 transition-all"
         >
           <ArrowDown className="h-4 w-4 -rotate-90" />
         </button>
@@ -253,37 +278,36 @@ export default function PresentacionCharlaPage() {
 
       {/* Slides */}
       {slides.map((slide, index) => {
-        const overlay = colorOverlays[slide.color]
         const bg = slideBgColors[slide.color]
-        const isActive = currentSlide === index
+        const glow = glowColors[slide.color]
 
         return (
           <div
             key={slide.id}
             id={`s-${index}`}
-            className={`min-h-screen flex items-center justify-center relative overflow-hidden ${bg}`}
+            ref={(el) => { slideRefs.current[index] = el }}
+            className="min-h-screen flex items-center justify-center relative overflow-hidden snap-start"
           >
-            {/* Pattern */}
-            <div className="absolute inset-0 opacity-[0.03]" 
+            {/* Pattern dots */}
+            <div className={`absolute inset-0 opacity-[0.03] ${bg}`} 
               style={{
                 backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.8) 1px, transparent 1px)`,
                 backgroundSize: '50px 50px'
               }} 
             />
-            <div className={`absolute inset-0 bg-gradient-to-b ${overlay}`} />
+            <div className={`absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80`} />
 
             {/* Ambient glow */}
-            {slide.color === "brand" && <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-brand-500/10 blur-3xl" />}
-            {slide.color === "success" && <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl" />}
-            {slide.color === "accent" && <div className="absolute top-1/3 -right-40 w-80 h-80 rounded-full bg-accent-500/10 blur-3xl" />}
-            {slide.color === "cyan" && <div className="absolute -top-40 left-1/3 w-80 h-80 rounded-full bg-cyan-500/10 blur-3xl" />}
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full ${glow} blur-3xl`} />
 
             <div className="relative z-10 w-full max-w-5xl mx-auto px-6 md:px-12">
-              {/* ═══ TITLE SLIDE ═══ */}
+              {/* ═══ TITLE ═══ */}
               {slide.type === "title" && (
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.7 }}
                   className="text-center"
                 >
                   <div className="flex justify-center mb-8">
@@ -291,60 +315,73 @@ export default function PresentacionCharlaPage() {
                       <Shield className="h-10 w-10 text-brand-400" />
                     </div>
                   </div>
-                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6">
+                  <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6 drop-shadow-lg">
                     {slide.titulo}
                   </h1>
                   <p className="text-xl md:text-2xl text-slate-300 max-w-2xl mx-auto">{slide.subtitulo}</p>
                   <div className="mt-12 flex items-center justify-center gap-2 text-sm text-slate-500">
                     <Play className="h-4 w-4" />
-                    Usa las flechas del teclado o los botones para navegar
+                    Usa las flechas o el scroll para navegar
                   </div>
                 </motion.div>
               )}
 
-              {/* ═══ FACT SLIDE ═══ */}
+              {/* ═══ FACT ═══ */}
               {slide.type === "fact" && slide.icon && (
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.6 }}
                 >
                   <div className="flex items-center gap-3 mb-8">
                     <slide.icon className="h-8 w-8 text-accent-400" />
                     <span className="text-sm font-semibold uppercase tracking-widest text-accent-400">Realidad</span>
                   </div>
-                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-10 max-w-3xl">{slide.titulo}</h2>
-                  <div className="space-y-4 max-w-3xl">
+                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-10 max-w-3xl drop-shadow-lg">{slide.titulo}</h2>
+                  <div className="space-y-5 max-w-3xl">
                     {slide.bullets?.map((b, i) => (
-                      <div key={i} className="flex items-center gap-4 text-lg md:text-xl text-slate-200">
-                        <div className="h-2 w-2 rounded-full bg-accent-400 shrink-0" />
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: i * 0.12 }}
+                        className="flex items-center gap-4 text-lg md:text-xl text-slate-200"
+                      >
+                        <div className="h-2.5 w-2.5 rounded-full bg-accent-400 shrink-0 shadow-lg shadow-accent-500/30" />
                         <span>{b}</span>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </motion.div>
               )}
 
-              {/* ═══ CENTER SLIDE ═══ */}
+              {/* ═══ CENTER ═══ */}
               {slide.type === "center" && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={isActive ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.6 }}
                   className="text-center max-w-4xl mx-auto"
                 >
-                  <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-8 leading-tight">
+                  <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-8 leading-tight drop-shadow-lg">
                     {slide.titulo}
                   </h2>
-                  <p className="text-xl md:text-2xl text-slate-300 leading-relaxed">
+                  <p className="text-xl md:text-2xl text-slate-300 leading-relaxed drop-shadow">
                     {slide.texto}
                   </p>
                 </motion.div>
               )}
 
-              {/* ═══ HIGHLIGHT SLIDE ═══ */}
+              {/* ═══ HIGHLIGHT ═══ */}
               {slide.type === "highlight" && (
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.6 }}
                   className="text-center"
                 >
                   <div className="flex justify-center mb-6">
@@ -352,40 +389,56 @@ export default function PresentacionCharlaPage() {
                       <Shield className="h-8 w-8 text-success-400" />
                     </div>
                   </div>
-                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-3">{slide.titulo}</h2>
+                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">{slide.titulo}</h2>
                   <p className="text-lg text-slate-400 mb-10">{slide.desc}</p>
                   <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
                     {slide.subitems?.map((item, i) => {
                       const Icon = item.icon
                       return (
-                        <div key={i} className="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-8 text-left">
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.4, delay: i * 0.15 }}
+                          className="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-8 text-left hover:bg-white/10 transition-colors"
+                        >
                           <Icon className="h-8 w-8 text-white mb-4" />
                           <span className="text-xs font-semibold uppercase tracking-widest text-white/50 mb-1 block">{item.label}</span>
                           <h3 className="text-xl font-bold text-white mb-2">{item.tit}</h3>
                           <p className="text-sm text-slate-300">{item.desc}</p>
-                        </div>
+                        </motion.div>
                       )
                     })}
                   </div>
                 </motion.div>
               )}
 
-              {/* ═══ DETAIL SLIDE ═══ */}
+              {/* ═══ DETAIL ═══ */}
               {slide.type === "detail" && slide.icon && (
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.6 }}
                 >
                   <div className="flex items-center gap-4 mb-8">
                     <slide.icon className={`h-8 w-8 ${slide.color === "brand" ? "text-brand-400" : "text-cyan-400"}`} />
-                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white">{slide.titulo}</h2>
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-lg">{slide.titulo}</h2>
                   </div>
                   <div className="space-y-4 max-w-3xl mt-8">
                     {slide.bullets?.map((b, i) => (
-                      <div key={i} className="flex items-center gap-4 text-lg md:text-xl text-slate-200">
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -15 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.35, delay: i * 0.1 }}
+                        className="flex items-center gap-4 text-lg md:text-xl text-slate-200"
+                      >
                         <ChevronRight className={`h-5 w-5 shrink-0 ${slide.color === "brand" ? "text-brand-400" : "text-cyan-400"}`} />
                         <span>{b}</span>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 </motion.div>
@@ -394,15 +447,24 @@ export default function PresentacionCharlaPage() {
               {/* ═══ VISUAL GRID ═══ */}
               {slide.type === "visual-grid" && (
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0 }}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.6 }}
                 >
-                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-10 text-center">{slide.titulo}</h2>
+                  <h2 className="text-3xl md:text-5xl font-bold text-white mb-10 text-center drop-shadow-lg">{slide.titulo}</h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
                     {slide.items?.map((item, i) => {
                       const Icon = item.icon
                       return (
-                        <div key={i} className="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 text-center hover:bg-white/10 transition-colors">
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.4, delay: i * 0.1 }}
+                          className="rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-6 text-center hover:bg-white/15 transition-all duration-300 hover:-translate-y-1"
+                        >
                           <div className="flex justify-center mb-4">
                             <div className="h-16 w-16 rounded-2xl bg-success-500/20 border border-success-500/30 flex items-center justify-center">
                               <Icon className="h-8 w-8 text-success-400" />
@@ -410,18 +472,20 @@ export default function PresentacionCharlaPage() {
                           </div>
                           <p className="text-3xl font-bold text-white mb-1">{item.label}</p>
                           <p className="text-xs text-slate-400">{item.text}</p>
-                        </div>
+                        </motion.div>
                       )
                     })}
                   </div>
                 </motion.div>
               )}
 
-              {/* ═══ FINAL SLIDE ═══ */}
+              {/* ═══ FINAL ═══ */}
               {slide.type === "final" && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={isActive ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.7 }}
                   className="text-center max-w-4xl mx-auto"
                 >
                   <div className="flex justify-center mb-8">
@@ -429,9 +493,9 @@ export default function PresentacionCharlaPage() {
                       <Heart className="h-10 w-10 text-success-400" />
                     </div>
                   </div>
-                  <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4">{slide.titulo}</h2>
-                  <h3 className="text-3xl md:text-5xl font-bold text-success-400 mb-8">{slide.subtitulo}</h3>
-                  <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">{slide.desc}</p>
+                  <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4 drop-shadow-lg">{slide.titulo}</h2>
+                  <h3 className="text-3xl md:text-5xl font-bold text-success-400 mb-8 drop-shadow">{slide.subtitulo}</h3>
+                  <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed drop-shadow">{slide.desc}</p>
                   <div className="mt-12 text-sm text-slate-500">
                     escudodigitalfamiliar.org
                   </div>
