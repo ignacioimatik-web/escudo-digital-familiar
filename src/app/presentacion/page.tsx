@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 import {
   Shield,
   Wifi,
@@ -32,6 +33,7 @@ const slides = [
       "Apuestas, violencia, redes, algoritmos.",
     ],
     color: "accent",
+    img: "/images/presentacion/slide-1.jpg",
   },
   {
     id: 2,
@@ -43,6 +45,7 @@ const slides = [
       "Diseño adictivo para captar atención.",
     ],
     color: "accent",
+    img: "/images/presentacion/slide-2.jpg",
   },
   {
     id: 3,
@@ -54,6 +57,7 @@ const slides = [
       "Proteger es el primer paso de educar.",
     ],
     color: "brand",
+    img: "/images/presentacion/slide-3.jpg",
   },
   {
     id: 4,
@@ -65,6 +69,7 @@ const slides = [
       "Sin diálogo, la protección es frágil.",
     ],
     color: "brand",
+    img: "/images/presentacion/slide-4.jpg",
   },
   {
     id: 5,
@@ -76,6 +81,7 @@ const slides = [
       "Complementarias, no excluyentes.",
     ],
     color: "success",
+    img: "/images/presentacion/slide-5.jpg",
   },
   {
     id: 6,
@@ -87,6 +93,7 @@ const slides = [
       "No controla apps ni tiempo de uso.",
     ],
     color: "brand",
+    img: "/images/presentacion/slide-6.jpg",
   },
   {
     id: 7,
@@ -98,6 +105,7 @@ const slides = [
       "Filtros de contenido por edad.",
     ],
     color: "cyan",
+    img: "/images/presentacion/slide-7.jpg",
   },
   {
     id: 8,
@@ -110,6 +118,7 @@ const slides = [
       "15-17 años: Criterio propio. El adulto es referencia.",
     ],
     color: "success",
+    img: "/images/presentacion/slide-8.jpg",
   },
   {
     id: 9,
@@ -122,6 +131,7 @@ const slides = [
       "15-30 minutos. Sin coste.",
     ],
     color: "brand",
+    img: "/images/presentacion/slide-9.jpg",
   },
   {
     id: 10,
@@ -134,6 +144,7 @@ const slides = [
       "No revisar ni ajustar la configuración periódicamente.",
     ],
     color: "accent",
+    img: "/images/presentacion/slide-10.jpg",
   },
   {
     id: 11,
@@ -145,30 +156,29 @@ const slides = [
       "Es acompañar mientras crece el criterio.",
     ],
     color: "success",
+    img: "/images/presentacion/slide-11.jpg",
   },
 ]
 
-const colorClasses = {
-  brand: {
-    bg: "bg-brand-50",
-    text: "text-brand-600",
-    border: "border-brand-200",
-  },
-  cyan: {
-    bg: "bg-cyan-50",
-    text: "text-cyan-500",
-    border: "border-cyan-200",
-  },
-  accent: {
-    bg: "bg-accent-50",
-    text: "text-accent-500",
-    border: "border-accent-200",
-  },
-  success: {
-    bg: "bg-success-50",
-    text: "text-success-500",
-    border: "border-success-200",
-  },
+const colorOverlays = {
+  brand: "from-brand-900/70 via-brand-800/50 to-brand-950/80",
+  cyan: "from-cyan-900/70 via-cyan-800/50 to-cyan-950/80",
+  accent: "from-accent-900/70 via-accent-800/50 to-accent-950/80",
+  success: "from-success-900/70 via-success-800/50 to-success-950/80",
+}
+
+const iconBgColors = {
+  brand: "bg-white/15",
+  cyan: "bg-white/15",
+  accent: "bg-white/15",
+  success: "bg-white/15",
+}
+
+const iconTextColors = {
+  brand: "text-white",
+  cyan: "text-white",
+  accent: "text-white",
+  success: "text-white",
 }
 
 export default function PresentacionPage() {
@@ -204,8 +214,8 @@ export default function PresentacionPage() {
             onClick={() => goToSlide(index)}
             className={`h-2 w-2 rounded-full transition-all ${
               currentSlide === index
-                ? "bg-brand-600 w-3"
-                : "bg-slate-300 hover:bg-slate-400"
+                ? "bg-white w-3"
+                : "bg-white/40 hover:bg-white/70"
             }`}
             aria-label={`Ir al slide ${index + 1}`}
           />
@@ -216,7 +226,7 @@ export default function PresentacionPage() {
         <button
           onClick={() => goToSlide(Math.max(currentSlide - 1, 0))}
           disabled={currentSlide === 0}
-          className="h-10 w-10 rounded-full bg-white border border-border shadow-sm flex items-center justify-center text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-sm flex items-center justify-center text-white hover:bg-white/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           aria-label="Slide anterior"
         >
           <ArrowUp className="h-4 w-4" />
@@ -224,7 +234,7 @@ export default function PresentacionPage() {
         <button
           onClick={() => goToSlide(Math.min(currentSlide + 1, slides.length - 1))}
           disabled={currentSlide === slides.length - 1}
-          className="h-10 w-10 rounded-full bg-white border border-border shadow-sm flex items-center justify-center text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-sm flex items-center justify-center text-white hover:bg-white/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           aria-label="Slide siguiente"
         >
           <ArrowDown className="h-4 w-4" />
@@ -233,19 +243,40 @@ export default function PresentacionPage() {
 
       {slides.map((slide, index) => {
         const Icon = slide.icon
-        const colors = colorClasses[slide.color as keyof typeof colorClasses]
+        const overlayGradient = colorOverlays[slide.color as keyof typeof colorOverlays]
+        const iconBg = iconBgColors[slide.color as keyof typeof iconBgColors]
+        const iconColor = iconTextColors[slide.color as keyof typeof iconTextColors]
 
         return (
           <div
             key={slide.id}
             id={`slide-${index}`}
-            className="min-h-screen flex items-center justify-center relative"
+            className="min-h-screen flex items-center justify-center relative overflow-hidden"
           >
-            <div className="absolute top-4 left-4 text-xs text-slate-400 font-mono">
+            {/* Background image */}
+            <div className="absolute inset-0">
+              <Image
+                src={slide.img}
+                alt=""
+                fill
+                className="object-cover"
+                priority={index < 3}
+                sizes="100vw"
+              />
+            </div>
+
+            {/* Color overlay gradient */}
+            <div className={`absolute inset-0 bg-gradient-to-b ${overlayGradient}`} />
+
+            {/* Extra dark overlay for bottom to top depth */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+
+            {/* Slide number */}
+            <div className="absolute top-4 left-4 z-10 text-xs text-white/50 font-mono">
               {String(index + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
             </div>
 
-            <Container size="md">
+            <Container size="md" className="relative z-10">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -253,11 +284,11 @@ export default function PresentacionPage() {
                 viewport={{ once: true, margin: "-20%" }}
                 className="text-center"
               >
-                <div className={`inline-flex h-20 w-20 items-center justify-center rounded-2xl ${colors.bg} mb-8`}>
-                  <Icon className={`h-10 w-10 ${colors.text}`} />
+                <div className={`inline-flex h-20 w-20 items-center justify-center rounded-2xl ${iconBg} backdrop-blur-sm mb-8 border border-white/10`}>
+                  <Icon className={`h-10 w-10 ${iconColor}`} />
                 </div>
 
-                <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 mb-8 leading-tight">
+                <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-8 leading-tight drop-shadow-lg">
                   {slide.titulo}
                 </h2>
 
@@ -269,7 +300,7 @@ export default function PresentacionPage() {
                       whileInView={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: i * 0.1 }}
                       viewport={{ once: true }}
-                      className="text-lg md:text-xl text-slate-600 leading-relaxed"
+                      className="text-lg md:text-xl text-white/80 leading-relaxed drop-shadow"
                     >
                       {linea}
                     </motion.p>
@@ -285,10 +316,10 @@ export default function PresentacionPage() {
                       { icon: UserCheck, label: "15-17" },
                     ].map((item, i) => (
                       <div key={i} className="flex flex-col items-center gap-2">
-                        <div className={`h-12 w-12 rounded-xl ${colors.bg} flex items-center justify-center`}>
-                          <item.icon className={`h-6 w-6 ${colors.text}`} />
+                        <div className="h-12 w-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
+                          <item.icon className="h-6 w-6 text-white" />
                         </div>
-                        <span className="text-xs font-medium text-slate-500">{item.label} años</span>
+                        <span className="text-xs font-medium text-white/60">{item.label} años</span>
                       </div>
                     ))}
                   </div>
@@ -297,17 +328,21 @@ export default function PresentacionPage() {
                 {index === 4 && (
                   <div className="mt-12 flex items-center justify-center gap-8">
                     <div className="flex flex-col items-center gap-2">
-                      <div className="h-16 w-16 rounded-xl bg-brand-100 flex items-center justify-center">
-                        <Wifi className="h-8 w-8 text-brand-600" />
+                      <div className="h-16 w-16 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
+                        <Wifi className="h-8 w-8 text-white" />
                       </div>
-                      <Badge variant="default">Capa 1</Badge>
+                      <Badge variant="default" className="bg-white/15 text-white border-white/20">
+                        Capa 1
+                      </Badge>
                     </div>
-                    <div className="text-2xl text-slate-300">+</div>
+                    <div className="text-3xl text-white/40 drop-shadow">+</div>
                     <div className="flex flex-col items-center gap-2">
-                      <div className="h-16 w-16 rounded-xl bg-cyan-100 flex items-center justify-center">
-                        <Smartphone className="h-8 w-8 text-cyan-500" />
+                      <div className="h-16 w-16 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
+                        <Smartphone className="h-8 w-8 text-white" />
                       </div>
-                      <Badge variant="cyan">Capa 2</Badge>
+                      <Badge variant="default" className="bg-white/15 text-white border-white/20">
+                        Capa 2
+                      </Badge>
                     </div>
                   </div>
                 )}
