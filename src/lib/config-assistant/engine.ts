@@ -1,5 +1,5 @@
-// Escudo Digital Familiar — AI Configuration Assistant Engine
-// Smart decision tree that guides users step-by-step through DNS configuration
+// Escudo Digital Familiar - AI Configuration Assistant Engine v2
+// Conversational decision tree with dedup protection and natural flow
 
 import {
   type DeviceType,
@@ -8,7 +8,6 @@ import {
   type DeviceConfig,
   type ConfigStep,
   type DeviceInfo,
-  type ContextInfo,
   deviceTypes,
   networkContexts,
   getDeviceInfo,
@@ -16,21 +15,21 @@ import {
   getDeviceLabel,
   getContextLabel,
 } from "./types"
-import { findConfig, knowledgeBase } from "./knowledge-base"
-import { dnsProviders, getRecommendedProviders } from "./dns-providers"
+import { findConfig } from "./knowledge-base"
+import { dnsProviders } from "./dns-providers"
 
-// ── TYPES ────────────────────────────────────────────────────
+// ── TYPES ──
 
 export type ConversationPhase =
-  | "saludo"
-  | "seleccionar-dispositivo"
-  | "seleccionar-contexto"
-  | "seleccionar-nivel"
-  | "mostrando-pasos"
-  | "mostrando-resumen"
-  | "pregunta-dudas"
-  | "mostrando-dns-compare"
-  | "mostrando-ayuda"
+  | "inicio"
+  | "dispositivo"
+  | "contexto"
+  | "nivel"
+  | "pasos"
+  | "resumen"
+  | "dudas"
+  | "dns-compare"
+  | "ayuda"
   | "finalizado"
 
 export interface ConversationState {
@@ -40,23 +39,25 @@ export interface ConversationState {
   level: ProtectionLevel | null
   currentStepIndex: number
   config: DeviceConfig | null
-  history: string[]
+  history: { role: "user" | "assistant"; text: string }[]
   deviceInfo: DeviceInfo | null
+  processedInputs: Set<string>
 }
 
 export interface AssistantResponse {
   message: string
-  options?: { value: string; label: string; icon?: string }[]
+  options?: { value: string; label: string; icon?: string; desc?: string }[]
   steps?: ConfigStep[]
+  progress?: { current: number; total: number }
   phase: ConversationPhase
   state: ConversationState
 }
 
-// ── INITIAL STATE ────────────────────────────────────────────
+// ── INIT ──
 
 export function createInitialState(): ConversationState {
   return {
-    phase: "saludo",
+    phase: "inicio",
     device: null,
     network: null,
     level: null,
@@ -64,638 +65,481 @@ export function createInitialState(): ConversationState {
     config: null,
     history: [],
     deviceInfo: null,
+    processedInputs: new Set(),
   }
 }
 
-// ── PHRASE MATCHING ──────────────────────────────────────────
+// ── FUZZY MATCHING ──
+
+function normalize(text: string): string {
+  return text.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, "")
+    .trim()
+}
+
+function wordOverlap(input: string, keywords: string[]): number {
+  const inputWords = normalize(input).split(/\s+/).filter(Boolean)
+  if (inputWords.length === 0) return 0
+  let matches = 0
+  for (const kw of keywords) {
+    const kwNorm = normalize(kw)
+    const kwWords = kwNorm.split(/\s+/)
+    // Check if any input word matches any keyword word, or keyword is a substring
+    for (const iw of inputWords) {
+      for (const kw of kwWords) {
+        if (iw === kw || kw.includes(iw) || iw.includes(kw)) {
+          matches++
+          break
+        }
+      }
+    }
+  }
+  return matches / inputWords.length
+}
+
+// ── KEYWORD DATABASES (expanded) ──
 
 const deviceKeywords: Record<DeviceType, string[]> = {
-  android: ["android", "samsung", "xiaomi", "huawei", "google pixel", "oneplus", "oppo", "realme", "móvil android", "tablet android", "miui", "hyperos", "one ui", "coloros"],
-  iphone: ["iphone", "ipad", "apple", "ios", "ipados", "tablet apple", "ipod", "móvil apple"],
-  windows: ["windows", "pc", "ordenador windows", "portátil windows", "microsoft", "surface", "lenovo", "hp", "dell", "windows 10", "windows 11"],
-  macos: ["mac", "macbook", "imac", "mac mini", "mac studio", "mac pro", "macos", "ordenador apple"],
-  router: ["router", "wifi", "red de casa", "modem", "fibra", "movistar", "orange", "vodafone", "digi", "asm", "tp-link", "mikrotik", "router del operador"],
-  navegador: ["navegador", "chrome", "edge", "firefox", "opera", "brave", "safari", "browser", "dns del navegador"],
-  "smart-tv": ["tv", "televisión", "smart tv", "samsung tv", "lg tv", "android tv", "google tv", "apple tv", "televisor"],
-  tablet: ["tablet android", "ipad", "tablet", "fire tablet", "amazon tablet", "tableta"],
+  android: ["android", "samsung", "xiaomi", "huawei", "google pixel", "oneplus", "oppo", "realme", "móvil android", "tablet android", "miui", "hyperos", "one ui", "coloros", "pixel", "motorola", "sony", "lg", "nokia", "android tv", "google tv"],
+  iphone: ["iphone", "ipad", "apple", "ios", "ipados", "tablet apple", "ipod", "móvil apple", "apple tv", "homepod"],
+  windows: ["windows", "pc", "ordenador windows", "portátil windows", "microsoft", "surface", "lenovo", "hp", "dell", "windows 10", "windows 11", "portátil", "sobremesa"],
+  macos: ["mac", "macbook", "imac", "mac mini", "mac studio", "mac pro", "macos", "ordenador apple", "macbook air", "macbook pro"],
+  router: ["router", "wifi", "red de casa", "modem", "fibra", "movistar", "orange", "vodafone", "digi", "asm", "tp-link", "mikrotik", "router del operador", "ont", "access point", "access point"],
+  navegador: ["navegador", "chrome", "edge", "firefox", "opera", "brave", "safari", "browser", "dns del navegador", "chromium"],
+  "smart-tv": ["tv", "televisión", "smart tv", "samsung tv", "lg tv", "android tv", "google tv", "apple tv", "televisor", "televisor"],
+  tablet: ["tablet android", "ipad", "tablet", "fire tablet", "amazon tablet", "tableta", "samsung tablet", "xiaomi pad"],
   chromebook: ["chromebook", "chromeos"],
-  consola: ["playstation", "ps4", "ps5", "xbox", "nintendo switch", "consola", "videojuegos"],
-  kindle: ["kindle", "fire tablet amazon", "echo show", "amazon kids"],
+  consola: ["playstation", "ps4", "ps5", "xbox", "nintendo switch", "consola", "videojuegos", "nintendo", "play", "xbox series"],
+  kindle: ["kindle", "fire tablet amazon", "echo show", "amazon kids", "amazon fire"],
 }
 
 const networkKeywords: Record<NetworkContext, string[]> = {
-  "wifi-casa": ["wifi de casa", "wifi casa", "red de casa", "en casa", "hogar", "solo en casa", "conectado en casa"],
-  "datos-moviles": ["datos móviles", "solo datos", "4g", "5g", "fuera de casa", "no tengo wifi", "sin wifi", "operador", "movistar", "orange", "vodafone", "datos del móvil"],
-  "wifi-datos": ["wifi y datos", "tanto wifi como datos", "los dos", "ambas redes", "wifi y móvil", "en casa y fuera"],
-  "dispositivo-compartido": ["compartido", "varios usuarios", "lo usamos varios", "familiar", "compartimos", "un solo dispositivo", "lo usa toda la familia"],
-  "dispositivo-personal": ["suyo", "del menor", "personal", "solo él", "exclusivo", "solo para el", "primer móvil"],
-  "varias-redes": ["varias redes", "casa de amigos", "colegio", "biblioteca", "se conecta en diferentes sitios", "en varios sitios"],
-  "wifi-publica": ["wifi pública", "público", "cafetería", "biblioteca", "hotspot", "wifi gratis", "wifi abierta"],
+  "wifi-casa": ["wifi de casa", "wifi casa", "red de casa", "en casa", "hogar", "solo en casa", "conectado en casa", "desde casa", "doméstico", "en mi casa"],
+  "datos-moviles": ["datos móviles", "solo datos", "4g", "5g", "fuera de casa", "no tengo wifi", "sin wifi", "operador", "movistar", "orange", "vodafone", "datos del móvil", "tarifa de datos", "solo con datos"],
+  "wifi-datos": ["wifi y datos", "tanto wifi como datos", "los dos", "ambas redes", "wifi y móvil", "en casa y fuera", "ambas", "wifi i datos", "mezcla"],
+  "dispositivo-compartido": ["compartido", "varios usuarios", "lo usamos varios", "familiar", "compartimos", "un solo dispositivo", "lo usa toda la familia", "lo usa todo el mundo", "uso compartido"],
+  "dispositivo-personal": ["suyo", "del menor", "personal", "solo él", "exclusivo", "solo para el", "primer móvil", "primero", "exclusivo", "propio"],
+  "varias-redes": ["varias redes", "casa de amigos", "colegio", "biblioteca", "se conecta en diferentes sitios", "en varios sitios", "se mueve", "diferentes sitios", "se conecta en distintos sitios"],
+  "wifi-publica": ["wifi pública", "público", "cafetería", "biblioteca", "hotspot", "wifi gratis", "wifi abierta", "wifi público", "wifi libre", "wifi de centro comercial"],
 }
 
 const levelKeywords: Record<ProtectionLevel, string[]> = {
-  basico: ["básico", "rápido", "sencillo", "simple", "mínimo", "lo justo", "primera vez", "empezar", "fácil", "sin complicaciones"],
-  recomendado: ["recomendado", "completo", "normal", "estándar", "equilibrio", "la mayoría", "típico", "lo normal", "ideal"],
-  avanzado: ["avanzado", "máximo", "máxima", "todo", "muy protegido", "estricto", "exhaustivo", "completo", "extremo", "menor de 12", "pequeño"],
+  basico: ["básico", "rápido", "sencillo", "simple", "mínimo", "lo justo", "primera vez", "empezar", "fácil", "sin complicaciones", "poco", "suave", "ligero", "lo mínimo"],
+  recomendado: ["recomendado", "completo", "normal", "estándar", "equilibrio", "la mayoría", "típico", "lo normal", "ideal", "medio", "balanceado", "correcto", "bueno"],
+  avanzado: ["avanzado", "máximo", "máxima", "todo", "muy protegido", "estricto", "exhaustivo", "completo", "extremo", "menor de 12", "pequeño", "exhaustivo", "máxima protección", "blindado", "fuerte"],
 }
 
-const helpKeywords = [
-  "ayuda", "qué hago", "cómo", "no entiendo", "explica", "duda", "problema", "error",
-  "no funciona", "falla", "no puedo", "no me deja", "atascado",
-]
+// ── CLASSIFIERS ──
 
-const dnsCompareKeywords = [
-  "comparar", "dns", "proveedor", "cuál es mejor", "alternativas", "dns4", "cleanbrowsing",
-  "cloudflare", "adguard", "opciones", "cuál elijo", "qué dns", "diferencias", "recomiendas",
-]
-
-function matchKeywords(text: string, keywords: string[]): boolean {
-  const lower = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-  return keywords.some((k) => lower.includes(k.toLowerCase()))
-}
-
-// ── INTENT CLASSIFICATION ────────────────────────────────────
-
-export function classifyDevice(text: string): DeviceType | null {
+function classifyDevice(text: string): { device: DeviceType; score: number } | null {
+  const normalized = normalize(text)
+  let best: { device: DeviceType; score: number } | null = null
   for (const [device, keywords] of Object.entries(deviceKeywords)) {
-    if (matchKeywords(text, keywords)) return device as DeviceType
+    const score = wordOverlap(text, keywords)
+    if (score > (best?.score ?? 0) && score >= 0.3) {
+      best = { device: device as DeviceType, score }
+    }
   }
-  return null
+  return best
 }
 
-export function classifyNetwork(text: string): NetworkContext | null {
-  for (const [network, keywords] of Object.entries(networkKeywords)) {
-    if (matchKeywords(text, keywords)) return network as NetworkContext
+function classifyNetwork(text: string): { network: NetworkContext; score: number } | null {
+  let best: { network: NetworkContext; score: number } | null = null
+  for (const [net, keywords] of Object.entries(networkKeywords)) {
+    const score = wordOverlap(text, keywords)
+    if (score > (best?.score ?? 0) && score >= 0.3) {
+      best = { network: net as NetworkContext, score }
+    }
   }
-  return null
+  return best
 }
 
-export function classifyLevel(text: string): ProtectionLevel | null {
+function classifyLevel(text: string): { level: ProtectionLevel; score: number } | null {
+  let best: { level: ProtectionLevel; score: number } | null = null
   for (const [level, keywords] of Object.entries(levelKeywords)) {
-    if (matchKeywords(text, keywords)) return level as ProtectionLevel
+    const score = wordOverlap(text, keywords)
+    if (score > (best?.score ?? 0) && score >= 0.3) {
+      best = { level: level as ProtectionLevel, score }
+    }
   }
-  return null
+  return best
 }
 
-export function isHelpQuestion(text: string): boolean {
-  return matchKeywords(text, helpKeywords)
+// ── RESPONSE GENERATORS ──
+
+function mensajeInicio(): string {
+  return "¡Hola! Soy tu asistente de configuración. <S>\n\nTe ayudaré a proteger los dispositivos de tu familia en solo unos pasos.\n\n**¿Qué dispositivo quieres proteger?**\n\nPuedes seleccionarlo abajo o escribirme el nombre directamente."
 }
 
-export function isDnsCompare(text: string): boolean {
-  return matchKeywords(text, dnsCompareKeywords)
-}
-
-// ── RESPONSE GENERATION ──────────────────────────────────────
-
-function getDeviceIcon(deviceType: DeviceType): string {
-  const icons: Record<string, string> = {
-    android: "📱",
-    iphone: "📱",
-    windows: "💻",
-    macos: "💻",
-    router: "📡",
-    navegador: "🌐",
-    "smart-tv": "📺",
-    tablet: "📱",
-    chromebook: "💻",
-    consola: "🎮",
-    kindle: "📖",
+function mensajeDispositivo(device: DeviceType, info: DeviceInfo): string {
+  const iconos: Record<string, string> = {
+    android: "[M]", iphone: "[M]", windows: "[PC]", macos: "[PC]", router: "[R]",
+    navegador: "[G]", "smart-tv": "[TV]", tablet: "[M]", chromebook: "[PC]",
+    consola: "[GAME]", kindle: "[BOOK]",
   }
-  return icons[deviceType] ?? "❓"
+  return "" + (iconos[device] || "[M]") + " " + info.label + " - perfecto! Cuentame: en que contexto se conecta a Internet?"
 }
 
-function getProtectionEmoji(level: ProtectionLevel): string {
-  switch (level) {
-    case "basico": return "🛡️"
-    case "recomendado": return "🛡️🛡️"
-    case "avanzado": return "🛡️🛡️🛡️"
-  }
+function mensajeContexto(network: NetworkContext, info: any): string {
+  return "Entendido. Ahora ¿que nivel de proteccion necesitas? - Basico: +15 anos - Recomendado: 7-14 anos - Avanzado: 0-12 anos"
 }
 
-function saludoMessage(): string {
-  return (
-    "¡Hola! Soy tu asistente de configuración de **Escudo Digital Familiar**. 🛡️\n\n" +
-    "Te voy a guiar paso a paso para proteger a los menores de tu familia " +
-    "frente a contenido violento, pornografía, apuestas y malware.\n\n" +
-    "**¿Qué dispositivo quieres proteger?**\n\n" +
-    "Cuéntame qué tienes o selecciónalo abajo 👇"
-  )
+function mensajeNivel(level: ProtectionLevel, config: DeviceConfig): string {
+  return "Excelente eleccion. Tiempo: " + config.tiempoEstimado + ". " + config.resumen + ". ¿Empezamos con el primer paso?"
 }
 
-function deviceSelectedMessage(device: DeviceType, info: DeviceInfo): string {
-  const icon = getDeviceIcon(device)
-  return (
-    `✅ **${info.label}** — ¡perfecto!\n\n` +
-    `${icon} ${info.descripcion}\n\n` +
-    (info.hasDnsConfig
-      ? `✅ Soporta configuración DNS (dificultad: ${info.dnsDifficulty === "facil" ? "fácil" : info.dnsDifficulty === "medio" ? "media" : "avanzada"})`
-      : `⚠️ Este dispositivo no permite cambiar DNS fácilmente. Te recomendaré la mejor alternativa.\n`) +
-    "\n**¿En qué contexto se conecta a Internet?**\n\n" +
-    "Selecciona la opción que mejor describa su situación 👇"
-  )
-}
-
-function networkSelectedMessage(network: NetworkContext, info: ContextInfo): string {
-  return (
-    `✅ **${info.label}** — entendido.\n\n` +
-    `${info.descripcion}\n\n` +
-    `📌 _${info.recomendacionDns}_\n\n` +
-    "**¿Qué nivel de protección quieres?**\n\n" +
-    "- 🛡️ **Básico**: Rápido, protección mínima. Ideal como primer paso o adolescentes.\n" +
-    "- 🛡️🛡️ **Recomendado**: Equilibrio protección/autonomía. Para la mayoría de familias.\n" +
-    "- 🛡️🛡️🛡️ **Avanzado**: Protección máxima. Para menores de 12 años o situaciones de riesgo."
-  )
-}
-
-function levelSelectedMessage(level: ProtectionLevel, config: DeviceConfig): string {
-  const emoji = getProtectionEmoji(level)
-  const levelNames: Record<ProtectionLevel, string> = {
-    basico: "Básico 🛡️",
-    recomendado: "Recomendado 🛡️🛡️",
-    avanzado: "Avanzado 🛡️🛡️🛡️",
-  }
-  return (
-    `✅ **${levelNames[level]}** — excelente elección.\n\n` +
-    `${emoji} He preparado una guía personalizada para tu caso:\n\n` +
-    `📋 **${config.titulo}**\n` +
-    `⏱️ Tiempo estimado: ${config.tiempoEstimado}\n` +
-    `📝 ${config.resumen}\n\n` +
-    `**Te recomiendo empezar con estos DNS:**\n` +
-    config.dnsRecomendado.map((ip) => `- \`${ip}\``).join("\n") +
-    "\n\n¿Empezamos con el **paso 1**? O si quieres, puedo explicarte las diferencias entre proveedores DNS."
-  )
-}
-
-function stepMessage(step: ConfigStep, current: number, total: number): string {
-  let msg = `**Paso ${current}/${total}: ${step.titulo}**\n\n${step.descripcion}\n\n`
-
+function mensajePaso(step: ConfigStep, current: number, total: number): string {
+  let msg = "Paso " + current + "/" + total + ": " + step.titulo + ". " + step.descripcion
   if (step.notas && step.notas.length > 0) {
-    msg += "📌 **Notas:**\n" + step.notas.map((n) => `- ${n}`).join("\n") + "\n\n"
+    msg += ". Notas: " + step.notas.join(". ")
   }
-
   if (step.advertencia) {
-    msg += `⚠️ **Atención:** ${step.advertencia}\n\n`
+    msg += ". ATENCION: " + step.advertencia
   }
-
-  if (current < total) {
-    msg += "¿Has completado este paso? Confírmame y pasamos al siguiente 👇"
-  } else {
-    msg += "🎉 **¡Último paso!** Confírmalo cuando esté listo para ver la verificación final."
-  }
-
   return msg
 }
 
-function verificationMessage(config: DeviceConfig): string {
-  return (
-    "✅ **¡Todos los pasos completados!**\n\n" +
-    "Ahora **verifica que funciona correctamente:**\n\n" +
-    config.verificacion +
-    "\n\n**Problemas comunes que puedes encontrar:**\n" +
-    config.erroresFrecuentes.slice(0, 3).map(
-      (e) => `⚠️ *${e.problema}* → ${e.solucion}`
-    ).join("\n") +
-    "\n\n¿Funciona todo correctamente? ¿Tienes alguna duda?"
-  )
-}
-
-function dnsComparisonMessage(): string {
-  const recommended = getRecommendedProviders()
-  const all = dnsProviders
-
-  let msg =
-    "📊 **Comparativa de DNS gratuitos para protección familiar**\n\n" +
-    "Aquí tienes los principales proveedores DNS gratuitos que recomiendo:\n\n"
-
-  all.forEach((p) => {
-    msg +=
-      `${p.recommended ? "⭐ " : ""}**${p.name}**\n` +
-      `- Servidores: \`${p.primaryIPv4}\` y \`${p.secondaryIPv4}\`\n` +
-      `- Tipo: ${p.tier === "gratuito" ? "✅ Gratuito sin límites" : `🆓 Gratuito con límites (${p.usageLimit})`}\n` +
-      `- Bloqueo: ${p.filtering === "familia" ? "✅ Contenido para adultos + malware" : p.filtering === "malware" ? "⚠️ Solo malware" : "✅ Personalizable"}\n` +
-      `- Privacidad: ${p.logsPolicy}\n` +
-      (p.dohUrl ? `- DoH: ✅\n` : "") +
-      `- 🌍 ${p.europeBased ? "Basado en Europa (RGPD)" : "Fuera de Europa"}\n\n`
-  })
-
-  msg +=
-    "---\n\n" +
-    "**💳 Opciones de pago** (si quieres funciones extra):\n" +
-    "| Proveedor | Precio | Ventajas extra |\n" +
-    "|-----------|--------|---------------|\n" +
-    "| NextDNS Pro | 1.99€/mes | Consultas ilimitadas |\n" +
-    "| Control D Pro | 2.99€/mes | Redes ilimitadas |\n" +
-    "| CleanBrowsing Pro | 5.95€/mes | Panel completo + informes |\n" +
-    "| AdGuard Pro | 3.99€/mes | App de protección completa |\n\n" +
-    "**Mi recomendación:** empieza con DNS4.EU o CleanBrowsing (ambos gratuitos). " +
-    "Si necesitas más control, NextDNS por 1.99€/mes es la mejor relación calidad-precio."
-
-  return msg
-}
-
-function helpResponse(text: string): string {
-  const lowered = text.toLowerCase()
-
-  if (lowered.includes("contraseña") || lowered.includes("password") || lowered.includes("olvid")) {
-    return (
-      "🔑 **Problema con contraseñas:**\n\n" +
-      "1. **Router**: Si olvidaste la contraseña, busca el botón **Reset** (con un clip 10s).\n" +
-      "2. **Apple ID**: Usa **iforgot.apple.com** para recuperarla.\n" +
-      "3. **Cuenta Microsoft**: **account.live.com/password/reset**\n" +
-      "4. **Google/Family Link**: **accounts.google.com/recovery**\n\n" +
-      "¿Es alguno de estos tu caso?"
-    )
-  }
-
-  if (lowered.includes("ip del router") || lowered.includes("acceder al router") || lowered.includes("panel del router")) {
-    return (
-      "🌐 **Para acceder al router:**\n\n" +
-      "1. Abre un navegador\n" +
-      "2. Prueba estas direcciones (una por una):\n" +
-      "   - **192.168.1.1** (la más común)\n" +
-      "   - **192.168.0.1**\n" +
-      "   - **192.168.1.254**\n" +
-      "3. Usuario y contraseña suelen estar en una **pegatina debajo del router**\n\n" +
-      "Si no funciona, busca el modelo de tu router en Google + 'contraseña por defecto'."
-    )
-  }
-
-  if (lowered.includes("no funciona") || lowered.includes("no me funciona") || lowered.includes("falla")) {
-    return (
-      "🛠️ **Vamos a solucionarlo.** Dime exactamente qué pasa:\n\n" +
-      "1. ¿Qué dispositivo estás configurando?\n" +
-      "2. ¿Qué proveedor DNS elegiste?\n" +
-      "3. ¿Qué error o problema ves exactamente?\n\n" +
-      "Cuéntame los detalles y te ayudo paso a paso."
-    )
-  }
-
-  // Default help
-  return (
-    "🤔 **¿Necesitas ayuda?**\n\n" +
-    "Puedo ayudarte con:\n\n" +
-    "- 🔍 **Elegir el mejor DNS** para tu caso\n" +
-    "- 📋 **Guiarte paso a paso** en la configuración\n" +
-    "- 🛠️ **Resolver problemas** (DNS no funciona, contraseñas, etc.)\n" +
-    "- 📊 **Comparar proveedores** DNS gratuitos y de pago\n\n" +
-    "¿Qué necesitas?"
-  )
-}
-
-// ── MAIN ENGINE ──────────────────────────────────────────────
+// ── MAIN ENGINE ──
 
 export function processInput(
   state: ConversationState,
   input: string
 ): AssistantResponse {
-  state.history.push(input)
-
-  // ── HELP / DOUBTS ──────────────────
-  if (isHelpQuestion(input) && state.phase !== "saludo") {
-    return {
-      message: helpResponse(input),
-      options: [
-        { value: "__continuar__", label: "↩️ Volver a la configuración" },
-      ],
-      phase: "mostrando-ayuda",
-      state,
-    }
+  // Dedup: skip if we've already processed this exact input in this phase
+  const inputKey = state.phase + ":" + normalize(input)
+  if (state.processedInputs.has(inputKey)) {
+    // Don't reprocess - just resend current response based on phase
+    input = ""
   }
+  state.processedInputs.add(inputKey)
 
-  // ── DNS COMPARISON ─────────────────
-  if (isDnsCompare(input)) {
-    return {
-      message: dnsComparisonMessage(),
-      options: [
-        { value: "__continuar__", label: "↩️ Volver a la configuración" },
-      ],
-      phase: "mostrando-dns-compare",
-      state,
-    }
-  }
+  state.history.push({ role: "user", text: input })
 
-  // ── PHASE SALUDO ───────────────────
-  if (state.phase === "saludo") {
-    const device = classifyDevice(input)
-    if (device) {
-      state.device = device
-      state.deviceInfo = getDeviceInfo(device)!
-      state.phase = "seleccionar-dispositivo"
+  // ── INICIO ──
+  if (state.phase === "inicio" && input) {
+    const result = classifyDevice(input)
+    if (result) {
+      state.device = result.device
+      state.deviceInfo = getDeviceInfo(result.device)!
+      state.phase = "contexto"
       return {
-        message: deviceSelectedMessage(device, state.deviceInfo),
-        options: networkContexts.map((c) => ({
+        message: mensajeDispositivo(result.device, state.deviceInfo),
+        options: networkContexts.map(c => ({
           value: c.id,
           label: c.label,
           icon: c.icon,
+          desc: c.descripcion.length > 60 ? c.descripcion.slice(0, 60) + "..." : c.descripcion,
         })),
-        phase: "seleccionar-contexto",
+        phase: "contexto",
         state,
+        progress: { current: 1, total: 3 },
       }
     }
     return {
-      message: saludoMessage(),
-      options: deviceTypes.map((d) => ({
+      message: mensajeInicio(),
+      options: deviceTypes.map(d => ({
         value: d.id,
         label: d.label,
         icon: d.icon,
+        desc: d.descripcion.length > 60 ? d.descripcion.slice(0, 60) + "..." : d.descripcion,
       })),
-      phase: "saludo",
+      phase: "inicio",
       state,
+      progress: { current: 0, total: 3 },
     }
   }
 
-  // ── PHASE SELECT DEVICE (from button) ──
-  if (state.phase === "seleccionar-dispositivo") {
-    const device = classifyDevice(input)
-    if (device) {
-      state.device = device
-      state.deviceInfo = getDeviceInfo(device)!
-      state.phase = "seleccionar-contexto"
+  // ── DISPOSITIVO (desde botón) ──
+  if (state.phase === "inicio" && !input && state.device && state.deviceInfo) {
+    state.phase = "contexto"
+    return {
+      message: mensajeDispositivo(state.device, state.deviceInfo),
+      options: networkContexts.map(c => ({
+        value: c.id,
+        label: c.label,
+        icon: c.icon,
+        desc: c.descripcion,
+      })),
+      phase: "contexto",
+      state,
+      progress: { current: 1, total: 3 },
+    }
+  }
+
+  // ── CONTEXTO ──
+  if (state.phase === "contexto") {
+    let selectedNetwork: NetworkContext | null = null
+
+    if (input) {
+      const result = classifyNetwork(input)
+      if (result) selectedNetwork = result.network
+    }
+
+    if (input && !selectedNetwork) {
       return {
-        message: deviceSelectedMessage(device, state.deviceInfo),
-        options: networkContexts.map((c) => ({
-          value: c.id,
-          label: c.label,
-          icon: c.icon,
-        })),
-        phase: "seleccionar-contexto",
+        message: "No he identificado bien el contexto. ¿Puedes elegir una de estas opciones?",
+        options: networkContexts.map(c => ({ value: c.id, label: c.label, icon: c.icon })),
+        phase: "contexto",
         state,
+        progress: { current: 1, total: 3 },
       }
     }
+
+    state.network = selectedNetwork!
+    state.phase = "nivel"
     return {
-      message: "No he identificado el dispositivo. ¿Puedes decirme cuál es? 📱💻📡",
-      options: deviceTypes.map((d) => ({ value: d.id, label: d.label })),
-      phase: "seleccionar-dispositivo",
+      message: mensajeContexto(selectedNetwork!, getNetworkContext(selectedNetwork!)),
+      options: [
+        { value: "basico", label: "<S> Básico", desc: "+15 años o primer paso" },
+        { value: "recomendado", label: "<S><S> Recomendado", desc: "7-14 años, equilibrio ideal" },
+        { value: "avanzado", label: "<S><S><S> Avanzado", desc: "0-12 años o riesgo alto" },
+      ],
+      phase: "nivel",
       state,
+      progress: { current: 2, total: 3 },
     }
   }
 
-  // ── PHASE SELECT NETWORK ─────────────────
-  if (state.phase === "seleccionar-contexto") {
-    const network = classifyNetwork(input)
-    if (network) {
-      state.network = network
-      state.phase = "seleccionar-nivel"
-      const ctxInfo = getNetworkContext(network) ?? networkContexts[0]
+  // ── NIVEL ──
+  if (state.phase === "nivel") {
+    let selectedLevel: ProtectionLevel | null = null
+
+    if (input) {
+      const result = classifyLevel(input)
+      if (result) selectedLevel = result.level
+    }
+
+    if (input && !selectedLevel) {
       return {
-        message: networkSelectedMessage(network, ctxInfo),
+        message: "Elige un nivel de protección:",
         options: [
-          { value: "basico", label: "🛡️ Básico" },
-          { value: "recomendado", label: "🛡️🛡️ Recomendado" },
-          { value: "avanzado", label: "🛡️🛡️🛡️ Avanzado" },
+          { value: "basico", label: "<S> Básico", desc: "+15 años" },
+          { value: "recomendado", label: "<S><S> Recomendado", desc: "7-14 años" },
+          { value: "avanzado", label: "<S><S><S> Avanzado", desc: "0-12 años" },
         ],
-        phase: "seleccionar-nivel",
+        phase: "nivel",
         state,
+        progress: { current: 2, total: 3 },
       }
     }
-    return {
-      message: "¿En qué contexto se conecta? Elige una opción 👇",
-      options: networkContexts.map((c) => ({ value: c.id, label: c.label })),
-      phase: "seleccionar-contexto",
-      state,
-    }
-  }
 
-  // ── PHASE SELECT LEVEL ──────────────────
-  if (state.phase === "seleccionar-nivel") {
-    const level = classifyLevel(input)
-    if (level) {
-      state.level = level
-      if (state.device && state.network && state.level) {
-        const config = findConfig(state.device, state.network, state.level)
-        if (config) {
-          state.config = config
-          state.currentStepIndex = 0
-          state.phase = "mostrando-pasos"
+    state.level = selectedLevel!
 
-          const firstStep = config.pasos[0]
-          const stepResp = stepMessage(firstStep, 1, config.pasos.length)
+    if (state.device && state.network && state.level) {
+      const config = findConfig(state.device, state.network, state.level)
+      if (config) {
+        state.config = config
+        state.currentStepIndex = 0
+        state.phase = "pasos"
 
-          return {
-            message: levelSelectedMessage(level, config) + "\n\n---\n\n" + stepResp,
-            options: [
-              { value: "__siguiente__", label: "✅ Hecho, siguiente paso" },
-              { value: "__ver_dns__", label: "📊 Comparar DNS" },
-              { value: "__duda__", label: "❓ Tengo una duda" },
-            ],
-            steps: config.pasos,
-            phase: "mostrando-pasos",
-            state,
-          }
-        } else {
-          // No config found for this combination
-          state.phase = "finalizado"
-          return {
-            message:
-              "No tengo una guía específica para esta combinación. " +
-              "Pero no te preocupes — puedes usar la **guía del router** que protege todos los dispositivos.\n\n" +
-              "¿Quieres que te guíe para configurar el router?",
-            options: [
-              { value: "router", label: "📡 Configurar el router" },
-              { value: "__ver_dns__", label: "📊 Ver DNS disponibles" },
-            ],
-            phase: "finalizado",
-            state,
-          }
+        const firstStep = config.pasos[0]
+        return {
+          message: mensajeNivel(state.level, config) + "\n\n---\n\n" + mensajePaso(firstStep, 1, config.pasos.length),
+          options: [
+            { value: "__siguiente__", label: "[OK] Hecho, siguiente paso" },
+            { value: "__duda__", label: "[?] Tengo una duda" },
+            { value: "__ver_dns__", label: "[CHART] Comparar DNS" },
+          ],
+          steps: config.pasos,
+          progress: { current: 3, total: 3 },
+          phase: "pasos",
+          state,
+        }
+      } else {
+        state.phase = "finalizado"
+        return {
+          message: "No tengo una guía exacta para esta combinación, pero puedes configurar el **router** que protege toda la red. ¿Te parece?",
+          options: [
+            { value: "router", label: "[R] Configurar el router" },
+            { value: "__ver_dns__", label: "[CHART] Ver DNS disponibles" },
+          ],
+          phase: "finalizado",
+          state,
         }
       }
     }
+
     return {
-      message: "¿Qué nivel de protección prefieres?",
+      message: "¿Qué nivel prefieres?",
       options: [
-        { value: "basico", label: "🛡️ Básico" },
-        { value: "recomendado", label: "🛡️🛡️ Recomendado" },
-        { value: "avanzado", label: "🛡️🛡️🛡️ Avanzado" },
+        { value: "basico", label: "<S> Básico" },
+        { value: "recomendado", label: "<S><S> Recomendado" },
+        { value: "avanzado", label: "<S><S><S> Avanzado" },
       ],
-      phase: "seleccionar-nivel",
+      phase: "nivel",
       state,
     }
   }
 
-  // ── PHASE SHOWING STEPS ─────────────────
-  if (state.phase === "mostrando-pasos") {
-    const input_lower = input.toLowerCase()
+  // ── PASOS ──
+  if (state.phase === "pasos") {
+    const lower = input.toLowerCase()
 
-    if (input_lower.includes("siguiente") || input_lower.includes("hecho") || input_lower.includes("listo") || input === "__siguiente__") {
+    if (lower.includes("siguiente") || lower.includes("hecho") || lower.includes("listo") || input === "__siguiente__") {
       const nextIndex = state.currentStepIndex + 1
       if (state.config && nextIndex < state.config.pasos.length) {
         state.currentStepIndex = nextIndex
         const step = state.config.pasos[nextIndex]
         return {
-          message: stepMessage(step, nextIndex + 1, state.config.pasos.length),
+          message: mensajePaso(step, nextIndex + 1, state.config.pasos.length),
           options: [
-            { value: "__siguiente__", label: "✅ Hecho, siguiente" },
-            { value: "__duda__", label: "❓ Tengo una duda" },
+            { value: "__siguiente__", label: "[OK] Hecho, siguiente" },
+            { value: "__duda__", label: "[?] Tengo una duda" },
           ],
-          phase: "mostrando-pasos",
+          phase: "pasos",
           state,
         }
       } else {
-        // All steps completed
-        state.phase = "mostrando-resumen"
+        state.phase = "resumen"
         return {
-          message: verificationMessage(state.config!),
+          message: "[!] **¡Todos los pasos completados!**\n\nAhora verifica que funciona:\n\n" + (state.config?.verificacion || ""),
           options: [
-            { value: "__funciona__", label: "✅ ¡Todo funciona!" },
-            { value: "__no_funciona__", label: "❌ Algo no funciona" },
-            { value: "__ver_dns__", label: "📊 Ver otros DNS" },
+            { value: "__funciona__", label: "[OK] ¡Todo funciona!" },
+            { value: "__no_funciona__", label: "[NO] Algo no funciona" },
+            { value: "__ver_dns__", label: "[CHART] Ver otros DNS" },
           ],
-          phase: "mostrando-resumen",
+          phase: "resumen",
           state,
         }
       }
     }
 
-    if (input_lower.includes("duda") || input_lower.includes("pregunta") || input === "__duda__") {
+    if (lower.includes("duda") || input === "__duda__") {
       return {
         message: "Claro, dime qué duda tienes y te ayudo.",
-        options: [
-          { value: "__siguiente__", label: "↩️ Seguir con los pasos" },
-        ],
-        phase: "pregunta-dudas",
+        options: [{ value: "__siguiente__", label: "[BACK] Seguir con los pasos" }],
+        phase: "dudas",
         state,
       }
     }
 
-    if (input_lower.includes("dns") || input === "__ver_dns__") {
+    if (lower.includes("dns") || input === "__ver_dns__") {
       return {
-        message: dnsComparisonMessage(),
-        options: [
-          { value: "__siguiente__", label: "↩️ Seguir con los pasos" },
-        ],
-        phase: "mostrando-dns-compare",
+        message: "[CHART] **Comparativa de DNS gratuitos**\n\nLos mejores proveedores con protección familiar:\n\n[STAR] **DNS4.EU** - 91.239.100.101 - Europeo, RGPD, sin ánimo de lucro\n[STAR] **CleanBrowsing** - 185.228.168.168 - Filtro muy completo\n**Cloudflare Familias** - 1.1.1.3 - Rápido y global\n**AdGuard Family** - 94.140.14.15 - Bloquea anuncios\n\n[Todos gratuitos y sin límite de consultas]",
+        options: [{ value: "__siguiente__", label: "[BACK] Seguir con los pasos" }],
+        phase: "dns-compare",
         state,
       }
     }
 
-    // User might be asking about current step or reporting an issue
-    const step = state.config?.pasos[state.currentStepIndex]
-    if (step && (input_lower.includes("no") || input_lower.includes("error") || input_lower.includes("problema") || input_lower.includes("explica"))) {
-      return {
-        message:
-          `Veamos el paso actual: **${step.titulo}**\n\n` +
-          step.descripcion +
-          (step.advertencia ? `\n\n⚠️ ${step.advertencia}` : "") +
-          (step.notas ? "\n\n📌 " + step.notas.join("\n") : "") +
-          "\n\n¿Te sirve? ¿O necesitas más detalles?",
-        options: [
-          { value: "__siguiente__", label: "✅ Ya lo hice, siguiente" },
-          { value: "__duda__", label: "❓ Otra duda" },
-        ],
-        phase: "mostrando-pasos",
-        state,
-      }
-    }
-
-    // Any other input during steps — try to offer help
+    // Default in steps
     return {
-      message:
-        "¿Has completado este paso?\n\n" +
-        "Puedes decirme:\n" +
-        "- **'Hecho'** o **'Siguiente'** → pasar al siguiente paso\n" +
-        "- **'Duda'** → preguntarme algo\n" +
-        "- **'DNS'** → ver comparativa de proveedores\n" +
-        "- **'Ayuda'** → resolver un problema",
+      message: "¿Has completado este paso? Puedes decir **'Hecho'** para continuar, **'Duda'** si tienes preguntas, o **'DNS'** para ver proveedores.",
       options: [
-        { value: "__siguiente__", label: "✅ Siguiente paso" },
-        { value: "__duda__", label: "❓ Tengo una duda" },
-        { value: "__ver_dns__", label: "📊 Comparar DNS" },
+        { value: "__siguiente__", label: "[OK] Siguiente paso" },
+        { value: "__duda__", label: "[?] Tengo una duda" },
       ],
-      phase: "mostrando-pasos",
+      phase: "pasos",
       state,
     }
   }
 
-  // ── PHASE RESUMEN / VERIFICATION ──────────
-  if (state.phase === "mostrando-resumen" || state.phase === "finalizado") {
-    const input_lower = input.toLowerCase()
-
-    if (input === "__funciona__" || input_lower.includes("funciona") || input_lower.includes("bien")) {
+  // ── RESUMEN ──
+  if (state.phase === "resumen") {
+    if (input === "__funciona__" || input.toLowerCase().includes("funciona")) {
+      state.phase = "finalizado"
       return {
-        message:
-          "🎉 **¡Excelente!** Todo está funcionando.\n\n" +
-          "Recuerda:\n" +
-          "1. Revisa los ajustes cada 3 meses\n" +
-          "2. Adapta la protección a medida que el menor crece\n" +
-          "3. Habla con tus hijos sobre por qué has puesto estas protecciones\n\n" +
-          "¿Necesitas ayuda con algo más?",
+        message: "[!] **¡Excelente!** Todo está funcionando.\n\nRecuerda revisar los ajustes cada 3 meses y adaptar la protección a medida que el menor crece.\n\n**Proteger para educar. Educar para liberar.** <S>",
         options: [
-          { value: "__otro__", label: "🔄 Configurar otro dispositivo" },
-          { value: "__fin__", label: "✅ No, gracias" },
+          { value: "__otro__", label: "[REFR] Configurar otro dispositivo" },
+          { value: "__fin__", label: "[OK] No, gracias" },
         ],
         phase: "finalizado",
         state,
       }
     }
-
-    if (input === "__no_funciona__" || input_lower.includes("no funciona")) {
-      const config = state.config
-      let msg = "🛠️ **Vamos a solucionarlo.**\n\n"
-      if (config) {
-        msg += "**Errores frecuentes para tu configuración:**\n\n"
-        config.erroresFrecuentes.forEach((e, i) => {
-          msg += `${i + 1}. **${e.problema}**\n   → ${e.solucion}\n`
-        })
-      }
-      msg += "\n¿Te ayuda esto? ¿O tienes un error diferente?"
+    if (input === "__no_funciona__" || input.toLowerCase().includes("no funciona")) {
       return {
-        message: msg,
+        message: "[FIX] **Vamos a solucionarlo.**\n\nRevisa los errores frecuentes para tu configuración:\n" +
+          (state.config?.erroresFrecuentes.map(function(e, i) { return (i + 1) + ". " + e.problema + " -> " + e.solucion; }).join("\n") || ""),
         options: [
-          { value: "__continuar__", label: "🔄 Intentar de nuevo" },
-          { value: "__funciona__", label: "✅ ¡Ya funciona!" },
+          { value: "__siguiente__", label: "[REFR] Intentar de nuevo" },
+          { value: "__funciona__", label: "[OK] ¡Ya funciona!" },
         ],
-        phase: "mostrando-ayuda",
+        phase: "resumen",
         state,
       }
     }
+    // Default resumen
+    return {
+      message: "¿Funciona todo correctamente?",
+      options: [
+        { value: "__funciona__", label: "[OK] ¡Todo funciona!" },
+        { value: "__no_funciona__", label: "[NO] Algo no funciona" },
+      ],
+      phase: "resumen",
+      state,
+    }
+  }
 
-    if (input === "__otro__" || input === "__continuar__" || input_lower.includes("otro") || input_lower.includes("otra vez")) {
+  // ── DUDAS / DNS COMPARE ──
+  if (state.phase === "dudas" || state.phase === "dns-compare" || state.phase === "ayuda") {
+    if (input === "__siguiente__" || input.toLowerCase().includes("seguir") || input.toLowerCase().includes("volver")) {
+      if (state.config && state.currentStepIndex >= 0) {
+        state.phase = "pasos"
+        const step = state.config.pasos[state.currentStepIndex]
+        return {
+          message: mensajePaso(step, state.currentStepIndex + 1, state.config.pasos.length),
+          options: [
+            { value: "__siguiente__", label: "[OK] Hecho, siguiente" },
+            { value: "__duda__", label: "[?] Tengo una duda" },
+          ],
+          phase: "pasos",
+          state,
+        }
+      }
+      state.phase = "inicio"
       return resetConversation()
     }
+    return {
+      message: "¿Quieres volver a los pasos de configuración?",
+      options: [{ value: "__siguiente__", label: "[BACK] Sí, volver" }],
+      phase: state.phase as any,
+      state,
+    }
+  }
 
-    if (input === "__fin__" || input_lower.includes("gracias") || input_lower.includes("nada más")) {
+  // ── FINALIZADO ──
+  if (state.phase === "finalizado") {
+    if (input === "__otro__" || input.toLowerCase().includes("otro") || input.toLowerCase().includes("otra vez")) {
+      return resetConversation()
+    }
+    if (input === "__fin__" || input.toLowerCase().includes("gracias") || input.toLowerCase().includes("nada más")) {
       return {
-        message:
-          "De nada. 😊 Recuerda que la tecnología es una herramienta, " +
-          "pero lo más importante es el **diálogo y el acompañamiento**.\n\n" +
-          "**Proteger para educar. Educar para liberar.** 🛡️",
-        options: [],
+        message: "😊 De nada. Recuerda: proteger para educar, educar para liberar.\n\n¡Hasta pronto! <S>",
+        options: [{ value: "__otro__", label: "[REFR] Empezar de nuevo" }],
         phase: "finalizado",
         state,
       }
     }
+    return {
+      message: "¿Quieres configurar otro dispositivo?",
+      options: [
+        { value: "__otro__", label: "[REFR] Sí, otro dispositivo" },
+        { value: "__fin__", label: "[OK] No, gracias" },
+      ],
+      phase: "finalizado",
+      state,
+    }
   }
 
-  // ── DEFAULT ─────────────────────────
-  return {
-    message:
-      "No estoy seguro de haber entendido. ¿Puedes reformularlo?\n\n" +
-      "Puedes decirme:\n" +
-      "- **'Ayuda'** para solucionar un problema\n" +
-      "- **'DNS'** para comparar proveedores\n" +
-      "- Decirme qué dispositivo tienes para empezar\n" +
-      "- **'Empezar'** para volver al inicio",
-    options: [
-      { value: "__reset__", label: "🔄 Empezar de nuevo" },
-      { value: "__ver_dns__", label: "📊 Comparar DNS" },
-    ],
-    phase: state.phase,
-    state,
-  }
+  // ── RESET ──
+  return resetConversation()
 }
-
-// ── RESET ────────────────────────────────────────────────────
 
 export function resetConversation(): AssistantResponse {
   const newState = createInitialState()
   return {
-    message: saludoMessage(),
-    options: deviceTypes.map((d) => ({
+    message: mensajeInicio(),
+    options: deviceTypes.map(d => ({
       value: d.id,
       label: d.label,
       icon: d.icon,
+      desc: d.descripcion.length > 60 ? d.descripcion.slice(0, 60) + "..." : d.descripcion,
     })),
-    phase: "saludo",
+    progress: { current: 0, total: 3 },
+    phase: "inicio",
     state: newState,
   }
 }
