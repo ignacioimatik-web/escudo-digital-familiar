@@ -32,7 +32,6 @@ const slides = [
       "Pornografía antes de los 14.",
       "Apuestas, violencia, redes, algoritmos.",
     ],
-    color: "accent",
     img: "/images/presentacion/slide-1.jpg",
   },
   {
@@ -44,7 +43,6 @@ const slides = [
       "Notificaciones constantes.",
       "Diseño adictivo para captar atención.",
     ],
-    color: "accent",
     img: "/images/presentacion/slide-2.jpg",
   },
   {
@@ -56,7 +54,6 @@ const slides = [
       "La exposición temprana deja huella.",
       "Proteger es el primer paso de educar.",
     ],
-    color: "brand",
     img: "/images/presentacion/slide-3.jpg",
   },
   {
@@ -68,7 +65,6 @@ const slides = [
       "El objetivo final es formar criterio.",
       "Sin diálogo, la protección es frágil.",
     ],
-    color: "brand",
     img: "/images/presentacion/slide-4.jpg",
   },
   {
@@ -80,7 +76,6 @@ const slides = [
       "Capa 2: Control parental (apps, horarios, permisos).",
       "Complementarias, no excluyentes.",
     ],
-    color: "success",
     img: "/images/presentacion/slide-5.jpg",
   },
   {
@@ -92,7 +87,6 @@ const slides = [
       "Protege todos los dispositivos de la red.",
       "No controla apps ni tiempo de uso.",
     ],
-    color: "brand",
     img: "/images/presentacion/slide-6.jpg",
   },
   {
@@ -104,7 +98,6 @@ const slides = [
       "Restricción de apps y compras.",
       "Filtros de contenido por edad.",
     ],
-    color: "cyan",
     img: "/images/presentacion/slide-7.jpg",
   },
   {
@@ -117,7 +110,6 @@ const slides = [
       "12-14 años: Relajar filtros, fortalecer criterio.",
       "15-17 años: Criterio propio. El adulto es referencia.",
     ],
-    color: "success",
     img: "/images/presentacion/slide-8.jpg",
   },
   {
@@ -130,7 +122,6 @@ const slides = [
       "Family Link (Android) o Tiempo de Uso (iOS).",
       "15-30 minutos. Sin coste.",
     ],
-    color: "brand",
     img: "/images/presentacion/slide-9.jpg",
   },
   {
@@ -143,7 +134,6 @@ const slides = [
       "Confiar solo en los filtros sin dialogar.",
       "No revisar ni ajustar la configuración periódicamente.",
     ],
-    color: "accent",
     img: "/images/presentacion/slide-10.jpg",
   },
   {
@@ -155,31 +145,9 @@ const slides = [
       "No es construir muros.",
       "Es acompañar mientras crece el criterio.",
     ],
-    color: "success",
     img: "/images/presentacion/slide-11.jpg",
   },
 ]
-
-const colorOverlays = {
-  brand: "from-brand-900/70 via-brand-800/50 to-brand-950/80",
-  cyan: "from-cyan-900/70 via-cyan-800/50 to-cyan-950/80",
-  accent: "from-accent-900/70 via-accent-800/50 to-accent-950/80",
-  success: "from-success-900/70 via-success-800/50 to-success-950/80",
-}
-
-const iconBgColors = {
-  brand: "bg-white/15",
-  cyan: "bg-white/15",
-  accent: "bg-white/15",
-  success: "bg-white/15",
-}
-
-const iconTextColors = {
-  brand: "text-white",
-  cyan: "text-white",
-  accent: "text-white",
-  success: "text-white",
-}
 
 export default function PresentacionPage() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -243,9 +211,6 @@ export default function PresentacionPage() {
 
       {slides.map((slide, index) => {
         const Icon = slide.icon
-        const overlayGradient = colorOverlays[slide.color as keyof typeof colorOverlays]
-        const iconBg = iconBgColors[slide.color as keyof typeof iconBgColors]
-        const iconColor = iconTextColors[slide.color as keyof typeof iconTextColors]
 
         return (
           <div
@@ -265,11 +230,8 @@ export default function PresentacionPage() {
               />
             </div>
 
-            {/* Color overlay gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-b ${overlayGradient}`} />
-
-            {/* Extra dark overlay for bottom to top depth */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+            {/* Dark overlay for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
 
             {/* Slide number */}
             <div className="absolute top-4 left-4 z-10 text-xs text-white/50 font-mono">
@@ -284,8 +246,8 @@ export default function PresentacionPage() {
                 viewport={{ once: true, margin: "-20%" }}
                 className="text-center"
               >
-                <div className={`inline-flex h-20 w-20 items-center justify-center rounded-2xl ${iconBg} backdrop-blur-sm mb-8 border border-white/10`}>
-                  <Icon className={`h-10 w-10 ${iconColor}`} />
+                <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm mb-8 border border-white/10">
+                  <Icon className="h-10 w-10 text-white" />
                 </div>
 
                 <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-8 leading-tight drop-shadow-lg">
