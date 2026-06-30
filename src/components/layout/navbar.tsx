@@ -12,6 +12,7 @@ const navItems = [
   { href: "/metodo", label: "Método" },
   { href: "/guias", label: "Guías" },
   { href: "/configurador", label: "Configurador" },
+  { href: "/dns", label: "DNS" },
   { href: "/descargas", label: "Descargas" },
   { href: "/comunidades", label: "Comunidades" },
   { href: "/faq", label: "FAQ" },
