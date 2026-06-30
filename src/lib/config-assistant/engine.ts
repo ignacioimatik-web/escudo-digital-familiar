@@ -169,7 +169,7 @@ function classifyLevel(text: string): { level: ProtectionLevel; score: number } 
 // ── RESPONSE GENERATORS ──
 
 function mensajeInicio(): string {
-  return "¡Hola! Soy tu asistente de configuración. <S>\n\nTe ayudaré a proteger los dispositivos de tu familia en solo unos pasos.\n\n**¿Qué dispositivo quieres proteger?**\n\nPuedes seleccionarlo abajo o escribirme el nombre directamente."
+  return "¡Hola! Soy tu asistente de configuración. Te ayudaré a proteger los dispositivos de tu familia en solo unos pasos.\n\n**¿Qué dispositivo quieres proteger?**\n\nPuedes seleccionarlo abajo o escribirme el nombre directamente."
 }
 
 function mensajeDispositivo(device: DeviceType, info: DeviceInfo): string {
@@ -283,9 +283,9 @@ export function processInput(
     return {
       message: mensajeContexto(selectedNetwork!, getNetworkContext(selectedNetwork!)),
       options: [
-        { value: "basico", label: "<S> Básico", desc: "+15 años o primer paso" },
-        { value: "recomendado", label: "<S><S> Recomendado", desc: "7-14 años, equilibrio ideal" },
-        { value: "avanzado", label: "<S><S><S> Avanzado", desc: "0-12 años o riesgo alto" },
+        { value: "basico", label: "Básico", desc: "+15 años o primer paso" },
+        { value: "recomendado", label: "Recomendado", desc: "7-14 años, equilibrio ideal" },
+        { value: "avanzado", label: "Avanzado", desc: "0-12 años o riesgo alto" },
       ],
       phase: "nivel",
       state,
@@ -306,9 +306,9 @@ export function processInput(
       return {
         message: "Elige un nivel de protección:",
         options: [
-          { value: "basico", label: "<S> Básico", desc: "+15 años" },
-          { value: "recomendado", label: "<S><S> Recomendado", desc: "7-14 años" },
-          { value: "avanzado", label: "<S><S><S> Avanzado", desc: "0-12 años" },
+          { value: "basico", label: "Básico", desc: "+15 años" },
+          { value: "recomendado", label: "Recomendado", desc: "7-14 años" },
+          { value: "avanzado", label: "Avanzado", desc: "0-12 años" },
         ],
         phase: "nivel",
         state,
@@ -355,9 +355,9 @@ export function processInput(
     return {
       message: "¿Qué nivel prefieres?",
       options: [
-        { value: "basico", label: "<S> Básico" },
-        { value: "recomendado", label: "<S><S> Recomendado" },
-        { value: "avanzado", label: "<S><S><S> Avanzado" },
+        { value: "basico", label: "Básico" },
+        { value: "recomendado", label: "Recomendado" },
+        { value: "avanzado", label: "Avanzado" },
       ],
       phase: "nivel",
       state,
@@ -432,7 +432,7 @@ export function processInput(
     if (input === "__funciona__" || input.toLowerCase().includes("funciona")) {
       state.phase = "finalizado"
       return {
-        message: "[!] **¡Excelente!** Todo está funcionando.\n\nRecuerda revisar los ajustes cada 3 meses y adaptar la protección a medida que el menor crece.\n\n**Proteger para educar. Educar para liberar.** <S>",
+        message: "[!] **¡Excelente!** Todo está funcionando.\n\nRecuerda revisar los ajustes cada 3 meses y adaptar la protección a medida que el menor crece.\n\n**Proteger para educar. Educar para liberar.**",
         options: [
           { value: "__otro__", label: "[REFR] Configurar otro dispositivo" },
           { value: "__fin__", label: "[OK] No, gracias" },
@@ -499,7 +499,7 @@ export function processInput(
     }
     if (input === "__fin__" || input.toLowerCase().includes("gracias") || input.toLowerCase().includes("nada más")) {
       return {
-        message: "😊 De nada. Recuerda: proteger para educar, educar para liberar.\n\n¡Hasta pronto! <S>",
+        message: "😊 De nada. Recuerda: proteger para educar, educar para liberar.\n\n¡Hasta pronto!",
         options: [{ value: "__otro__", label: "[REFR] Empezar de nuevo" }],
         phase: "finalizado",
         state,
