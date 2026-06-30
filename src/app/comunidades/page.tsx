@@ -4,7 +4,7 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import {
-  Users, GraduationCap, Heart, Stethoscope, Shield,
+  Users, GraduationCap, Heart, Stethoscope, Shield, Cross,
   ArrowRight, CheckCircle2, Presentation, Sparkles,
   Baby, Smartphone, Smile, User, UserCheck,
   Monitor, Wifi, BookOpen, Star, Play
@@ -74,7 +74,7 @@ const communities = [
   },
   {
     id: "parroquias",
-    icon: Heart,
+    icon: Cross,
     label: "Parroquias",
     color: "accent",
     gradient: "from-amber-500 to-orange-600",
