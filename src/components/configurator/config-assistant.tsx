@@ -1,19 +1,19 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Shield, Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen,
-  Wifi, Send, Sparkles, CheckCircle2, ArrowRight, RotateCcw, ChevronRight,
-  MessageCircle, Zap, RefreshCw, Signal, Users, Network
+  Wifi, Send, Sparkles, CheckCircle2, ChevronRight,
+  MessageCircle, Zap, RefreshCw, Circle, Hexagon
 } from "lucide-react"
-import type { DeviceType, NetworkContext, ProtectionLevel, ConfigStep } from "@/lib/config-assistant/types"
+import type { DeviceType, NetworkContext, ConfigStep } from "@/lib/config-assistant/types"
 import { deviceTypes, networkContexts } from "@/lib/config-assistant/types"
 import { processInput, createInitialState, resetConversation } from "@/lib/config-assistant/engine"
 import type { ConversationState, AssistantResponse } from "@/lib/config-assistant/engine"
 
 const iconMap: Record<string, React.ElementType> = {
-  Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen, Wifi, Send, Shield, MessageCircle, Signal, Users, Network,
+  Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen, Wifi, Send, Shield, MessageCircle,
 }
 
 const deviceIconMap: Record<string, React.ElementType> = {
@@ -22,91 +22,180 @@ const deviceIconMap: Record<string, React.ElementType> = {
   chromebook: Monitor, consola: Gamepad2, kindle: BookOpen,
 }
 
-interface OptionCardProps {
-  value: string
-  label: string
-  icon?: string
-  desc?: string
-  onClick: (value: string) => void
-  color?: string
+const levelIcons: Record<string, React.ElementType> = {
+  basico: Shield,
+  recomendado: Shield,
+  avanzado: Shield,
 }
 
-function OptionCard({ value, label, icon, desc, onClick, color }: OptionCardProps) {
-  const IconComponent = icon ? iconMap[icon] : undefined
-  const cardColor = color || "brand"
-  const colorClasses: Record<string, string> = {
-    brand: "hover:border-brand-300 hover:bg-brand-50",
-    success: "hover:border-emerald-300 hover:bg-emerald-50",
-    accent: "hover:border-amber-300 hover:bg-amber-50",
-    cyan: "hover:border-cyan-300 hover:bg-cyan-50",
-  }
-  return (
-    <motion.button
-      whileHover={{ y: -2, scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => onClick(value)}
-      className={`flex items-start gap-3 px-4 py-3.5 rounded-xl border-2 border-slate-200 bg-white text-left transition-all shadow-sm ${colorClasses[color || "brand"]}`}
-    >
-      {IconComponent && (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50">
-          <IconComponent className="w-5 h-5 text-brand-600" />
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <span className="text-sm font-semibold text-slate-900 block truncate">{label}</span>
-        {desc && <span className="text-xs text-slate-500 mt-0.5 block leading-tight">{desc}</span>}
-      </div>
-      <ChevronRight className="w-4 h-4 text-slate-300 mt-2 shrink-0" />
-    </motion.button>
-  )
+const levelGlowColors: Record<string, string> = {
+  basico: "from-cyan-500/30 to-blue-600/30 border-cyan-500/30 shadow-cyan-500/10",
+  recomendado: "from-brand-500/30 to-purple-600/30 border-brand-500/30 shadow-brand-500/10",
+  avanzado: "from-rose-500/30 to-amber-600/30 border-rose-500/30 shadow-rose-500/10",
 }
 
-function ProgressBar({ current, total }: { current: number; total: number }) {
-  const pct = total > 0 ? (current / total) * 100 : 0
+const levelBadgeColors: Record<string, string> = {
+  basico: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+  recomendado: "bg-brand-500/20 text-brand-300 border-brand-500/30",
+  avanzado: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+}
+
+function JarvisHeader({ device, onReset }: { device: DeviceType | null; onReset: () => void }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+    <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 border-b border-cyan-500/20">
+      {/* Scan line effect */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          className="h-full rounded-full bg-gradient-to-r from-brand-500 to-cyan-500"
+          animate={{ y: ["-100%", "100%"] }}
+          transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+          className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"
         />
       </div>
-      <span className="text-[10px] font-semibold text-slate-400 tabular-nums shrink-0">
-        {current}/{total}
-      </span>
+      {/* Grid overlay */}
+      <div className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: `linear-gradient(rgba(6, 182, 212, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.3) 1px, transparent 1px)`,
+          backgroundSize: '24px 24px'
+        }}
+      />
+      <div className="relative z-10 flex items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/30">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
+            <motion.div
+              animate={{ opacity: [0.3, 0.8, 0.3] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="absolute -inset-0.5 rounded-xl bg-cyan-400/20 blur-sm -z-10"
+            />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-bold text-white tracking-wide">J.A.R.V.I.S.</p>
+              <span className="text-[8px] font-mono text-cyan-400/60 border border-cyan-500/20 px-1.5 py-0.5 rounded">v2.0</span>
+            </div>
+            <p className="text-[10px] text-cyan-300/60 font-mono">
+              {device
+                ? `> SISTEMA VINCULADO: ${deviceTypes.find(d => d.id === device)?.label?.toUpperCase()}`
+                : "> ESPERANDO INICIALIZACION..."}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onReset}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono text-cyan-400/60 border border-cyan-500/20 hover:text-cyan-300 hover:border-cyan-500/40 hover:bg-cyan-500/5 transition-all"
+        >
+          <RefreshCw className="w-3 h-3" />
+          REINICIAR
+        </button>
+      </div>
     </div>
   )
 }
 
-function StepCard({ step, numero, total }: { step: ConfigStep; numero: number; total: number }) {
+function JarvisProgress({ current, total, phase }: { current: number; total: number; phase: string }) {
+  const pct = total > 0 ? (current / total) * 100 : 0
+  const phaseLabels: Record<string, string> = {
+    inicio: "INICIALIZANDO",
+    contexto: "SELECCION CONTEXTO",
+    nivel: "SELECCION NIVEL",
+    pasos: "GUIANDO CONFIGURACION",
+    resumen: "VERIFICACION",
+    finalizado: "COMPLETADO",
+  }
+  return (
+    <div className="px-5 py-2.5 border-b border-cyan-500/10 bg-slate-900/50">
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-1 rounded-full bg-slate-800 overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-brand-500 to-cyan-400 shadow-sm shadow-cyan-500/30"
+          />
+        </div>
+        <span className="text-[9px] font-mono text-cyan-400/50 tabular-nums shrink-0">
+          {(current / total * 100).toFixed(0)}%
+        </span>
+        <span className="text-[8px] font-mono text-cyan-500/40 uppercase tracking-wider shrink-0 hidden sm:block">
+          {phaseLabels[phase] || phase}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function JarvisGlowButton({ label, desc, icon, onClick, glowColor, badgeLabel }: {
+  label: string; desc?: string; icon?: string; onClick: () => void; glowColor?: string; badgeLabel?: string
+}) {
+  const IconComponent = icon ? iconMap[icon] : undefined
+  const glow = glowColor || "from-cyan-500/20 to-blue-600/20 border-cyan-500/30"
+  return (
+    <motion.button
+      whileHover={{ y: -1, scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={onClick}
+      className={`group relative overflow-hidden w-full text-left px-4 py-3.5 rounded-xl bg-gradient-to-br ${glow} backdrop-blur-sm border transition-all duration-300`}
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="relative z-10 flex items-center gap-3">
+        {IconComponent && (
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/5 border border-white/10">
+            <IconComponent className="w-4.5 h-4.5 text-white/80" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-white tracking-wide">{label}</span>
+            {badgeLabel && (
+              <span className="text-[8px] font-mono px-1.5 py-0.5 rounded border bg-white/5 text-white/50 border-white/10">{badgeLabel}</span>
+            )}
+          </div>
+          {desc && <span className="text-[11px] text-white/40 mt-0.5 block leading-tight">{desc}</span>}
+        </div>
+        <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-white/50 transition-colors shrink-0" />
+      </div>
+    </motion.button>
+  )
+}
+
+function JarvisStepCard({ step, numero, total }: { step: ConfigStep; numero: number; total: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      className="rounded-xl border border-brand-200 bg-brand-50/50 p-5"
+      className="relative overflow-hidden rounded-xl border border-cyan-500/20 bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm p-5"
     >
-      <div className="flex items-center gap-2 mb-3">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-500 text-white text-[10px] font-bold">
-          {numero}
+      <div className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.8) 1px, transparent 1px)`,
+          backgroundSize: '20px 20px'
+        }}
+      />
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-bold font-mono">
+            {String(numero).padStart(2, '0')}
+          </div>
+          <span className="text-[10px] font-mono text-cyan-400/60 uppercase tracking-widest">PASO {numero}/{total}</span>
         </div>
-        <span className="text-xs font-semibold text-brand-700 uppercase tracking-wider">Paso {numero}/{total}</span>
+        <h4 className="text-sm font-bold text-white mb-2 tracking-wide">{step.titulo}</h4>
+        <div className="text-[13px] text-slate-300 leading-relaxed mb-3 whitespace-pre-line font-light">{step.descripcion}</div>
+        {step.notas && step.notas.length > 0 && (
+          <div className="mt-2 p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/10">
+            <p className="text-[9px] font-mono uppercase tracking-wider text-cyan-400/60 mb-1.5">// NOTAS</p>
+            {step.notas.map((n, i) => (
+              <p key={i} className="text-[12px] text-slate-400 mb-1 last:mb-0 font-light">$ {n}</p>
+            ))}
+          </div>
+        )}
+        {step.advertencia && (
+          <div className="mt-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20">
+            <p className="text-[12px] text-rose-300 font-light">! {step.advertencia}</p>
+          </div>
+        )}
       </div>
-      <h4 className="text-sm font-bold text-slate-900 mb-2">{step.titulo}</h4>
-      <div className="text-sm text-slate-600 leading-relaxed mb-3 whitespace-pre-line">{step.descripcion}</div>
-      {step.notas && step.notas.length > 0 && (
-        <div className="mt-2 p-3 rounded-lg bg-white/80 border border-brand-100">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-600 mb-1.5">📌 Notas</p>
-          {step.notas.map((n, i) => (
-            <p key={i} className="text-xs text-slate-600 mb-1 last:mb-0">• {n}</p>
-          ))}
-        </div>
-      )}
-      {step.advertencia && (
-        <div className="mt-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
-          <p className="text-xs text-amber-700">⚠️ {step.advertencia}</p>
-        </div>
-      )}
     </motion.div>
   )
 }
@@ -120,18 +209,22 @@ export function ConfigAssistant() {
   const [progress, setProgress] = useState({ current: 0, total: 3 })
   const [inputText, setInputText] = useState("")
   const [isFirstMessage, setIsFirstMessage] = useState(true)
+  const [isThinking, setIsThinking] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
-  }, [messages, options, steps])
+  }, [messages, options, steps, isThinking])
 
-  // Auto-start
   useEffect(() => {
     if (isFirstMessage) {
       setIsFirstMessage(false)
-      const response = processInput(createInitialState(), "")
-      applyResponse(response)
+      setIsThinking(true)
+      setTimeout(() => {
+        const response = processInput(createInitialState(), "")
+        applyResponse(response)
+        setIsThinking(false)
+      }, 600)
     }
   }, [isFirstMessage])
 
@@ -148,66 +241,48 @@ export function ConfigAssistant() {
       setSteps([])
       setCurrentStepIdx(-1)
     }
-    if (response.progress) {
-      setProgress(response.progress)
-    }
+    if (response.progress) setProgress(response.progress)
   }
 
   const handleOptionClick = (value: string) => {
-    // Add user selection as message
     const label = options.find(o => o.value === value)?.label || value
     setMessages(prev => [...prev, { text: label, isUser: true }])
-
-    // Handle reset
-    if (value === "__reset__") {
-      setMessages([])
-      setOptions([])
-      setSteps([])
-      setCurrentStepIdx(-1)
-      const response = resetConversation()
+    setOptions([])
+    setIsThinking(true)
+    setTimeout(() => {
+      if (value === "__reset__") {
+        setMessages([])
+        setOptions([])
+        setSteps([])
+        setCurrentStepIdx(-1)
+        const response = resetConversation()
+        applyResponse(response)
+        setIsThinking(false)
+        return
+      }
+      let response: AssistantResponse
+      if (["__siguiente__", "__duda__", "__funciona__", "__no_funciona__", "__ver_dns__", "__fin__", "__otro__"].includes(value)) {
+        response = processInput(state, value)
+      } else {
+        response = processInput(state, value)
+      }
       applyResponse(response)
-      return
-    }
-
-    // Handle device selection from keyboard
-    if (value === "__text_input__") {
-      const response = processInput(state, inputText)
-      applyResponse(response)
-      setInputText("")
-      return
-    }
-
-    // Process through engine
-    let response: AssistantResponse
-    if (value === "__siguiente__") {
-      response = processInput(state, "__siguiente__")
-    } else if (value === "__duda__") {
-      response = processInput(state, "__duda__")
-    } else if (value === "__funciona__") {
-      response = processInput(state, "__funciona__")
-    } else if (value === "__no_funciona__") {
-      response = processInput(state, "__no_funciona__")
-    } else if (value === "__ver_dns__") {
-      response = processInput(state, "__ver_dns__")
-    } else if (value === "__fin__") {
-      response = processInput(state, "__fin__")
-    } else if (value === "__otro__") {
-      response = processInput(state, "__otro__")
-    } else {
-      response = processInput(state, value)
-    }
-    applyResponse(response)
+      setIsThinking(false)
+    }, 400)
   }
 
   const handleTextSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const text = inputText.trim()
     if (!text) return
-
     setMessages(prev => [...prev, { text, isUser: true }])
     setInputText("")
-    const response = processInput(state, text)
-    applyResponse(response)
+    setIsThinking(true)
+    setTimeout(() => {
+      const response = processInput(state, text)
+      applyResponse(response)
+      setIsThinking(false)
+    }, 400)
   }
 
   const handleReset = () => {
@@ -220,68 +295,42 @@ export function ConfigAssistant() {
   }
 
   return (
-    <div className="flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-white rounded-t-2xl">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-cyan-500 shadow-sm">
-            <Zap className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-slate-900">Asistente inteligente</p>
-            <p className="text-[10px] text-slate-400">
-              {state.device
-                ? `🖥️ ${deviceTypes.find(d => d.id === state.device)?.label || ""}`
-                : "Selecciona un dispositivo para empezar"}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={handleReset}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-        >
-          <RefreshCw className="w-3 h-3" />
-          Nuevo
-        </button>
-      </div>
+    <div className="flex flex-col bg-slate-950 rounded-2xl overflow-hidden border border-cyan-500/20 shadow-2xl shadow-cyan-500/5">
+      <JarvisHeader device={state.device} onReset={handleReset} />
+      <JarvisProgress current={progress.current} total={progress.total} phase={state.phase} />
 
-      {/* Progress */}
-      <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/50">
-        <ProgressBar current={progress.current} total={progress.total} />
-      </div>
-
-      {/* Content area */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-4 max-h-[500px] md:max-h-[550px] scroll-smooth">
+      {/* Content */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-4 max-h-[500px] md:max-h-[550px] scroll-smooth"
+        style={{
+          backgroundImage: `radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.03) 0%, transparent 60%)`,
+        }}
+      >
         <AnimatePresence mode="popLayout">
           {messages.map((msg, i) => (
             msg.isUser ? (
-              // User selection pill
-              <motion.div
-                key={`msg-${i}`}
+              <motion.div key={`msg-${i}`}
                 initial={{ opacity: 0, x: 20, scale: 0.95 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 className="flex justify-end"
               >
-                <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white text-sm font-medium shadow-md shadow-brand-500/20">
-                  <CheckCircle2 className="w-4 h-4" />
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-600/80 to-blue-600/80 text-white text-sm font-medium shadow-lg shadow-cyan-500/10 border border-cyan-400/20 backdrop-blur-sm">
+                  <CheckCircle2 className="w-4 h-4 text-cyan-300" />
                   {msg.text}
                 </div>
               </motion.div>
             ) : (
-              // Assistant message card
-              <motion.div
-                key={`msg-${i}`}
+              <motion.div key={`msg-${i}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm p-4 shadow-lg"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-100">
-                    <MessageCircle className="h-4 w-4 text-brand-600" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                    <MessageCircle className="h-3.5 w-3.5 text-cyan-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-brand-700 mb-1">Asistente</p>
-                    <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line [&_strong]:text-slate-900 [&_strong]:font-semibold [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:bg-slate-100 [&_code]:text-xs [&_code]:font-mono [&_code]:text-brand-700">
+                    <p className="text-[10px] font-mono text-cyan-400/50 mb-1.5">JARVIS v2.0</p>
+                    <div className="text-sm text-slate-200 leading-relaxed whitespace-pre-line [&_strong]:text-white [&_strong]:font-semibold [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:bg-cyan-500/10 [&_code]:text-[11px] [&_code]:font-mono [&_code]:text-cyan-300">
                       {msg.text}
                     </div>
                   </div>
@@ -290,36 +339,43 @@ export function ConfigAssistant() {
             )
           ))}
 
-          {/* Steps display */}
-          {steps.length > 0 && currentStepIdx >= 0 && currentStepIdx < steps.length && (
-            <motion.div key="steps" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <StepCard step={steps[currentStepIdx]} numero={currentStepIdx + 1} total={steps.length} />
+          {/* Thinking indicator */}
+          {isThinking && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
+                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <span className="text-[10px] font-mono text-cyan-400/50 ml-1">PROCESANDO</span>
+              </div>
+            </motion.div>
+          )}
 
-              {/* Step progress dots */}
+          {/* Steps */}
+          {steps.length > 0 && currentStepIdx >= 0 && currentStepIdx < steps.length && !isThinking && (
+            <motion.div key="steps" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <JarvisStepCard step={steps[currentStepIdx]} numero={currentStepIdx + 1} total={steps.length} />
               <div className="flex items-center justify-center gap-1.5 mt-3">
                 {steps.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-1.5 rounded-full transition-all ${
-                      i <= currentStepIdx ? "w-6 bg-brand-500" : "w-1.5 bg-slate-200"
-                    }`}
-                  />
+                  <div key={i} className={`h-1 rounded-full transition-all duration-500 ${
+                    i <= currentStepIdx ? "w-6 bg-gradient-to-r from-cyan-500 to-brand-500 shadow-sm shadow-cyan-500/30" : "w-1.5 bg-slate-700"
+                  }`} />
                 ))}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Options grid */}
-        {options.length > 0 && (
+        {/* Options */}
+        {options.length > 0 && !isThinking && (
           <motion.div
             key={`options-${state.phase}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-2 pt-1"
           >
-            {state.phase === "inicio" || state.phase === "dispositivo" ? (
-              // Device grid - visual
+            {/* Device grid - holographic style */}
+            {(state.phase === "inicio" || state.phase === "dispositivo") && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {options.map((opt, i) => {
                   const Icon = opt.icon ? iconMap[opt.icon] : undefined
@@ -332,24 +388,65 @@ export function ConfigAssistant() {
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => handleOptionClick(opt.value)}
-                      className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-slate-200 bg-white hover:border-brand-300 hover:bg-brand-50 transition-all text-center"
+                      className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-700/50 bg-gradient-to-b from-slate-800/60 to-slate-900/60 backdrop-blur-sm hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all text-center group"
                     >
-                      {Icon && <Icon className="w-6 h-6 text-brand-500" />}
-                      <span className="text-[11px] font-semibold text-slate-700 leading-tight">{opt.label}</span>
-                      {opt.desc && <span className="text-[9px] text-slate-400 line-clamp-2">{opt.desc}</span>}
+                      {Icon && (
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/5 border border-cyan-500/10 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30 transition-all">
+                          <Icon className="w-5 h-5 text-cyan-400/70 group-hover:text-cyan-300" />
+                        </div>
+                      )}
+                      <span className="text-[11px] font-semibold text-slate-300 leading-tight group-hover:text-white transition-colors">{opt.label}</span>
+                      {opt.desc && <span className="text-[9px] text-slate-500 line-clamp-2">{opt.desc}</span>}
                     </motion.button>
                   )
                 })}
               </div>
-            ) : state.phase === "contexto" ? (
-              // Network context - list
+            )}
+
+            {/* Network context */}
+            {state.phase === "contexto" && (
               <div className="space-y-1.5">
                 {options.map((opt, i) => (
-                  <OptionCard key={i} value={opt.value} label={opt.label} icon={opt.icon} desc={opt.desc} onClick={handleOptionClick} color="brand" />
+                  <JarvisGlowButton key={i} label={opt.label} desc={opt.desc} icon={opt.icon} onClick={() => handleOptionClick(opt.value)} />
                 ))}
               </div>
-            ) : (
-              // Action buttons
+            )}
+
+            {/* Level selection - special shields */}
+            {state.phase === "nivel" && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {options.map((opt, i) => {
+                  const colors = ["from-cyan-500/20 to-blue-600/20 border-cyan-500/30", "from-brand-500/20 to-purple-600/20 border-brand-500/30", "from-rose-500/20 to-amber-600/20 border-rose-500/30"]
+                  const badges = ["+15 ANOS", "7-14 ANOS", "0-12 ANOS"]
+                  return (
+                    <motion.button
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.08 }}
+                      whileHover={{ y: -2, scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => handleOptionClick(opt.value)}
+                      className={`relative overflow-hidden p-4 rounded-xl bg-gradient-to-br ${colors[i]} backdrop-blur-sm border text-center group transition-all duration-300`}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      <div className="relative z-10 flex flex-col items-center gap-2">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white/10 bg-white/5 group-hover:border-white/20 transition-all">
+                          <Shield className={`w-5 h-5 ${i === 0 ? "text-cyan-300" : i === 1 ? "text-brand-300" : "text-rose-300"}`} />
+                        </div>
+                        <span className="text-sm font-bold text-white tracking-wide">{opt.label}</span>
+                        <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full border ${levelBadgeColors[opt.value] || "border-white/10 text-white/40"}`}>
+                          {badges[i]}
+                        </span>
+                      </div>
+                    </motion.button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            {state.phase !== "inicio" && state.phase !== "contexto" && state.phase !== "nivel" && state.phase !== "dispositivo" && (
               <div className="flex flex-wrap gap-2">
                 {options.map((opt, i) => (
                   <motion.button
@@ -360,9 +457,9 @@ export function ConfigAssistant() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => handleOptionClick(opt.value)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 transition-all shadow-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700/50 bg-gradient-to-b from-slate-800/60 to-slate-900/60 backdrop-blur-sm text-sm font-medium text-slate-300 hover:border-cyan-500/30 hover:text-cyan-300 transition-all shadow-sm"
                   >
-                    {opt.icon && <Shield className="w-4 h-4 text-brand-500" />}
+                    {opt.icon && <Shield className="w-4 h-4 text-cyan-400" />}
                     {opt.label}
                   </motion.button>
                 ))}
@@ -371,30 +468,34 @@ export function ConfigAssistant() {
           </motion.div>
         )}
 
-        {/* Empty state */}
-        {messages.length === 0 && options.length === 0 && (
+        {/* Empty / thinking states */}
+        {messages.length === 0 && options.length === 0 && !isThinking && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100 mb-4">
-              <Sparkles className="h-8 w-8 text-brand-600" />
+            <div className="relative mb-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/5 border border-cyan-500/10">
+                <Zap className="h-8 w-8 text-cyan-400/50" />
+              </div>
+              <motion.div animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute -inset-1 rounded-2xl bg-cyan-400/5 blur-sm" />
             </div>
-            <p className="text-sm text-slate-500">Preparando tu asistente...</p>
+            <p className="text-sm text-slate-500 font-mono">&gt; INICIALIZANDO SISTEMA...</p>
           </div>
         )}
       </div>
 
-      {/* Text input */}
-      <form onSubmit={handleTextSubmit} className="flex items-center gap-2 p-4 border-t border-slate-200 bg-white rounded-b-2xl">
+      {/* Input */}
+      <form onSubmit={handleTextSubmit} className="flex items-center gap-2 p-4 border-t border-cyan-500/10 bg-slate-900/80">
+        <span className="text-[10px] font-mono text-cyan-500/30 shrink-0 hidden sm:block">$</span>
         <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="Escribe tu respuesta aquí..."
-          className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100 transition-all"
+          placeholder="Escribe tu respuesta..."
+          className="flex-1 px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
         />
         <button
           type="submit"
           disabled={!inputText.trim()}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-brand-500 to-cyan-500 text-white hover:from-brand-600 hover:to-cyan-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+          className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-500 hover:to-blue-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/20"
         >
           <Send className="w-4 h-4" />
         </button>
