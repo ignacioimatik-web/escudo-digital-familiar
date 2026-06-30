@@ -234,12 +234,12 @@ export function ConfigAssistant() {
       setMessages(prev => [...prev, { text: response.message, isUser: false }])
     }
     setOptions(response.options ?? [])
+    // Always sync step index from engine state
+    setCurrentStepIdx(response.state.currentStepIndex)
     if (response.steps) {
       setSteps(response.steps)
-      setCurrentStepIdx(0)
     } else if (response.phase !== "pasos" && response.phase !== "resumen") {
       setSteps([])
-      setCurrentStepIdx(-1)
     }
     if (response.progress) setProgress(response.progress)
   }
