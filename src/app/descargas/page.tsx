@@ -27,7 +27,7 @@ const areas = [
       { href: "/descargas/guia-rapida", icon: FileText, label: "Guía rápida DNS + Control Parental", tipo: "3 páginas · A4", desc: "Pasos esenciales ilustrados para configurar la protección." },
       { href: "/descargas/checklist", icon: CheckSquare, label: "Checklist de protección", tipo: "1 página · A4", desc: "Verifica que tienes todo configurado correctamente." },
       { href: "/descargas/acuerdo-familiar", icon: FileSignature, label: "Acuerdo familiar digital", tipo: "1 página · A4", desc: "Plantilla para pactar el uso de tecnología con tus hijos." },
-      { href: "/descargas/presentacion-charla", icon: Presentation, label: "Presentación para charlas", tipo: "18 diapositivas", desc: "Lista para usar en charlas de colegios y parroquias.", premium: true },
+      { href: "/descargas/presentacion-familias", icon: Presentation, label: "Presentación para familias", tipo: "17 diapositivas", desc: "Charla especializada para madres y padres. Enfoque práctico y cercano.", premium: true },
     ],
   },
   {
@@ -43,7 +43,7 @@ const areas = [
     recursos: [
       { href: "/descargas/cartel-familias", icon: FileText, label: "Cartel para el centro", tipo: "1 página · A4", desc: "Póster para anunciar la protección digital en el centro." },
       { href: "/descargas/guia-rapida", icon: FileText, label: "Guía de configuración", tipo: "3 páginas · A4", desc: "Cómo configurar DNS en la red del colegio." },
-      { href: "/descargas/presentacion-charla", icon: Presentation, label: "Presentación para familias", tipo: "18 diapositivas", desc: "Charla para familias desde el colegio.", premium: true },
+      { href: "/descargas/presentacion-colegios", icon: Presentation, label: "Presentación para colegios", tipo: "17 diapositivas", desc: "Charla para equipos docentes y directivos. Enfoque escolar y legal.", premium: true },
     ],
   },
   {
@@ -58,7 +58,7 @@ const areas = [
     desc: "Recursos para crear entornos digitales seguros",
     recursos: [
       { href: "/descargas/cartel-familias", icon: FileText, label: "Cartel para la parroquia", tipo: "1 página · A4", desc: "Anuncia las charlas de protección digital." },
-      { href: "/descargas/presentacion-charla", icon: Presentation, label: "Presentación para catequistas", tipo: "18 diapositivas", desc: "Formación para catequistas y monitores.", premium: true },
+      { href: "/descargas/presentacion-parroquias", icon: Presentation, label: "Presentación para parroquias", tipo: "18 diapositivas", desc: "Charla para catequistas y comunidades. Enfoque pastoral y valores.", premium: true },
     ],
   },
   {
@@ -73,7 +73,7 @@ const areas = [
     desc: "Recursos para la consulta pediátrica",
     recursos: [
       { href: "/descargas/cartel-familias", icon: FileText, label: "Folleto para sala de espera", tipo: "1 página · A4", desc: "Información para familias sobre salud digital." },
-      { href: "/descargas/presentacion-charla", icon: Presentation, label: "Presentación para sanitarios", tipo: "18 diapositivas", desc: "Salud digital infantil para profesionales.", premium: true },
+      { href: "/descargas/presentacion-sanitarios", icon: Presentation, label: "Presentación para sanitarios", tipo: "17 diapositivas", desc: "Salud digital infantil para pediatras y profesionales. Enfoque clínico.", premium: true },
     ],
   },
 ]
