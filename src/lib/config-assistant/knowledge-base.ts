@@ -3385,18 +3385,17 @@ export function findConfig(
   network: NetworkContext,
   level: ProtectionLevel
 ): DeviceConfig | null {
-  // Exact match first
+  // 1. Exact match (device + network + level)
   const exact = knowledgeBase.find(
     (c) => c.device === device && c.network === network && c.level === level
   )
   if (exact) return exact
 
-  // Fallback: same device + network, cualquier nivel (priorizar el mismo nivel)
+  // 2. Fallback: same device + same network (closest level)
   const sameNetwork = knowledgeBase.filter(
     (c) => c.device === device && c.network === network
   )
   if (sameNetwork.length > 0) {
-    // Try closest level
     const levels: ProtectionLevel[] = ["recomendado", "basico", "avanzado"]
     for (const l of levels) {
       const found = sameNetwork.find((c) => c.level === l)
@@ -3404,17 +3403,16 @@ export function findConfig(
     }
   }
 
-  // Fallback: same device + same level, cualquier network
-  const sameDeviceLevel = knowledgeBase.filter(
-    (c) => c.device === device && c.level === level
+  // 3. Fallback: same device + safe fallback — only use router config (protects all)
+  const routerConfig = knowledgeBase.find(
+    (c) => c.device === "router" && c.network === "wifi-casa" && c.level === "recomendado"
   )
-  if (sameDeviceLevel.length > 0) return sameDeviceLevel[0]
+  if (routerConfig) return routerConfig
 
-  // Fallback: same device alone
-  const sameDevice = knowledgeBase.filter((c) => c.device === device)
-  if (sameDevice.length > 0) return sameDevice[0]
+  // 4. Last resort: any config with same network
+  const sameNetAny = knowledgeBase.filter((c) => c.network === network)
+  if (sameNetAny.length > 0) return sameNetAny[0]
 
-  // No config found
   return null
 }
 
