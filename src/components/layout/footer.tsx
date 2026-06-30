@@ -21,6 +21,7 @@ const footerLinks = {
     { href: "/familias", label: "Familias" },
     { href: "/colegios", label: "Colegios" },
     { href: "/parroquias", label: "Parroquias" },
+    { href: "/centros-sanitarios", label: "Centros sanitarios" },
   ],
   legal: [
     { href: "/legal", label: "Aviso legal" },

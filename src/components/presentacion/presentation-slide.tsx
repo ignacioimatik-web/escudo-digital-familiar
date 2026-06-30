@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { ArrowDown, ArrowUp, Play } from "lucide-react"
 
@@ -16,6 +17,7 @@ export interface SlideData {
   subitems?: { icon: React.ElementType; label: string; tit: string; desc: string }[]
   items?: { icon: React.ElementType; label: string; text: string }[]
   color?: "brand" | "accent" | "success" | "cyan"
+  img?: string
 }
 
 export interface PresentationTheme {
@@ -38,7 +40,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
 
   const accent = theme.accentColor
 
-  // IntersectionObserver
   useEffect(() => {
     const observers: IntersectionObserver[] = []
     slideRefs.current.forEach((ref, i) => {
@@ -57,7 +58,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
     return () => observers.forEach((o) => o.disconnect())
   }, [])
 
-  // Keyboard
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown" || e.key === " " || e.key === "ArrowRight") {
@@ -83,7 +83,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
 
   return (
     <div className="relative bg-black">
-      {/* Side nav */}
       <div className="fixed right-5 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-1.5">
         {slides.map((_, i) => (
           <button
@@ -97,7 +96,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
         ))}
       </div>
 
-      {/* Bottom nav */}
       <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
         <span className="text-xs text-white/40 font-mono">
           {String(currentSlide + 1).padStart(2, "0")}/{String(slides.length).padStart(2, "0")}
@@ -119,13 +117,12 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
         </button>
       </div>
 
-      {/* Slides */}
       {slides.map((slide, index) => {
         const gradientFrom = slide.color === "brand" ? "from-brand-950" : slide.color === "success" ? "from-emerald-950" : slide.color === "accent" ? "from-accent-950" : "from-cyan-950"
         const glowColor = slide.color === "brand" ? "bg-brand-500/10" : slide.color === "success" ? "bg-emerald-500/10" : slide.color === "accent" ? "bg-accent-500/10" : "bg-cyan-500/10"
         const accentColor = slide.color === "brand" ? "text-brand-400" : slide.color === "success" ? "text-emerald-400" : slide.color === "accent" ? "text-accent-400" : "text-cyan-400"
         const bulletColor = slide.color === "brand" ? "bg-brand-400" : slide.color === "success" ? "bg-emerald-400" : slide.color === "accent" ? "bg-accent-400" : "bg-cyan-400"
-        const chevronColor = slide.color === "brand" ? "text-brand-400" : slide.color === "success" ? "text-emerald-400" : slide.color === "accent" ? "text-accent-400" : "text-cyan-400"
+        const hasImage = !!slide.img
 
         return (
           <div
@@ -134,18 +131,45 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
             ref={(el) => { slideRefs.current[index] = el }}
             className={`min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-slate-900 ${gradientFrom} to-slate-900`}
           >
-            {/* Pattern */}
+            {/* Background image at very low opacity */}
+            {hasImage && (
+              <div className="absolute inset-0">
+                <Image
+                  src={slide.img!}
+                  alt=""
+                  fill
+                  className="object-cover opacity-[0.08]"
+                  priority={index < 3}
+                  sizes="100vw"
+                />
+              </div>
+            )}
+
+            {/* Pattern dots */}
             <div className="absolute inset-0 opacity-[0.03]" 
               style={{
                 backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.8) 1px, transparent 1px)`,
                 backgroundSize: '50px 50px'
               }} 
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
+
+            {/* Dark gradient overlay — keeps text readable */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/30 to-black/85" />
+
+            {/* Color-tinted gradient overlay */}
+            {slide.color && (
+              <div className={`absolute inset-0 bg-gradient-to-b ${
+                slide.color === "brand" ? "from-brand-900/30 via-transparent to-brand-950/40" :
+                slide.color === "success" ? "from-emerald-900/30 via-transparent to-emerald-950/40" :
+                slide.color === "accent" ? "from-amber-900/25 via-transparent to-amber-950/35" :
+                "from-cyan-900/30 via-transparent to-cyan-950/40"
+              }`} />
+            )}
+
+            {/* Ambient glow */}
             <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full ${glowColor} blur-3xl`} />
 
             <div className="relative z-10 w-full max-w-5xl mx-auto px-6 md:px-12">
-              {/* TITLE */}
               {slide.type === "title" && (
                 <motion.div
                   initial={{ opacity: 0, y: 40 }}
@@ -182,7 +206,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
                 </motion.div>
               )}
 
-              {/* FACT */}
               {slide.type === "fact" && (
                 <motion.div
                   initial={{ opacity: 0, y: 40 }}
@@ -213,7 +236,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
                 </motion.div>
               )}
 
-              {/* CENTER */}
               {slide.type === "center" && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.92 }}
@@ -233,7 +255,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
                 </motion.div>
               )}
 
-              {/* HIGHLIGHT */}
               {slide.type === "highlight" && (
                 <motion.div
                   initial={{ opacity: 0, y: 40 }}
@@ -273,7 +294,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
                 </motion.div>
               )}
 
-              {/* DETAIL */}
               {slide.type === "detail" && (
                 <motion.div
                   initial={{ opacity: 0, y: 40 }}
@@ -295,7 +315,7 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
                         transition={{ duration: 0.35, delay: i * 0.1 }}
                         className="flex items-center gap-4 text-lg md:text-xl text-slate-200"
                       >
-                        <svg className={`h-5 w-5 shrink-0 ${chevronColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className={`h-5 w-5 shrink-0 ${accentColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                         </svg>
                         <span>{b}</span>
@@ -305,7 +325,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
                 </motion.div>
               )}
 
-              {/* VISUAL GRID */}
               {slide.type === "visual-grid" && (
                 <motion.div
                   initial={{ opacity: 0, y: 40 }}
@@ -341,7 +360,6 @@ export function PresentationSlide({ slides, theme }: PresentationSlideProps) {
                 </motion.div>
               )}
 
-              {/* FINAL */}
               {slide.type === "final" && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}

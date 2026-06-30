@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   Shield, Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen,
   Wifi, Send, Sparkles, CheckCircle2, ArrowRight, RotateCcw, ChevronRight,
-  MessageCircle, Zap, RefreshCw
+  MessageCircle, Zap, RefreshCw, Signal, Users, Network
 } from "lucide-react"
 import type { DeviceType, NetworkContext, ProtectionLevel, ConfigStep } from "@/lib/config-assistant/types"
 import { deviceTypes, networkContexts } from "@/lib/config-assistant/types"
@@ -13,7 +13,7 @@ import { processInput, createInitialState, resetConversation } from "@/lib/confi
 import type { ConversationState, AssistantResponse } from "@/lib/config-assistant/engine"
 
 const iconMap: Record<string, React.ElementType> = {
-  Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen, Wifi, Send, Shield, MessageCircle,
+  Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen, Wifi, Send, Shield, MessageCircle, Signal, Users, Network,
 }
 
 const deviceIconMap: Record<string, React.ElementType> = {
