@@ -169,35 +169,35 @@ function classifyLevel(text: string): { level: ProtectionLevel; score: number } 
 // ── RESPONSE GENERATORS ──
 
 function mensajeInicio(): string {
- return "¡Hola! Soy tu asistente de configuración. Te ayudaré a proteger los dispositivos de tu familia en solo unos pasos.\n\n**¿Qué dispositivo quieres proteger?**\n\nPuedes seleccionarlo abajo o escribirme el nombre directamente."
+  return "¡Hola! Me alegra verte por aquí 😊 Voy a ayudarte a proteger los dispositivos de tu familia de una forma muy sencilla, paso a paso.\n\n**Lo primero: ¿qué dispositivo te gustaría proteger?**\n\nPuedes elegirlo abajo o escribirme el nombre directamente — lo que te resulte más cómodo."
 }
 
 function mensajeDispositivo(device: DeviceType, info: DeviceInfo): string {
- const iconos: Record<string, string> = {
- android: "(movil)", iphone: "(movil)", windows: "(PC)", macos: "(PC)", router: "(router)",
- navegador: "", "smart-tv": "", tablet: "(movil)", chromebook: "(PC)",
- consola: "", kindle: "",
- }
- return "" + (iconos[device] || "(movil)") + " " + info.label + " - perfecto! Cuentame: en que contexto se conecta a Internet?"
+  const iconos: Record<string, string> = {
+    android: "📱", iphone: "📱", windows: "💻", macos: "💻", router: "📡",
+    navegador: "🌐", "smart-tv": "📺", tablet: "📱", chromebook: "💻",
+    consola: "🎮", kindle: "📖",
+  }
+  return (iconos[device] || "📱") + " **" + info.label + "** — ¡perfecto! Ahora cuéntame: ¿cómo se conecta este dispositivo a Internet? Así puedo darte la mejor recomendación."
 }
 
 function mensajeContexto(network: NetworkContext, info: any): string {
- return "Entendido. Ahora ¿que nivel de proteccion necesitas? - Basico: +15 anos - Recomendado: 7-14 anos - Avanzado: 0-12 anos"
+  return "¡Genial! Ahora dime **¿qué nivel de protección necesitas?** Elige según la edad del menor:\n\n• **Básico** 🟢 → A partir de 15 años\n• **Recomendado** 🔵 → De 7 a 14 años\n• **Avanzado** 🔴 → Hasta 12 años"
 }
 
 function mensajeNivel(level: ProtectionLevel, config: DeviceConfig): string {
- return "Excelente eleccion. Tiempo: " + config.tiempoEstimado + ". " + config.resumen + ". ¿Empezamos con el primer paso?"
+  return "¡Estupendo! Has elegido el nivel adecuado. 🎉\n\n**Tiempo estimado:** " + config.tiempoEstimado + "\n**Resumen:** " + config.resumen + "\n\n¿Te parece bien si empezamos con el primer paso?"
 }
 
 function mensajePaso(step: ConfigStep, current: number, total: number): string {
- let msg = "Paso " + current + "/" + total + ": " + step.titulo + ". " + step.descripcion
- if (step.notas && step.notas.length > 0) {
- msg += ". Notas: " + step.notas.join(". ")
- }
- if (step.advertencia) {
- msg += ". ATENCION: " + step.advertencia
- }
- return msg
+  let msg = "**Paso " + current + "/" + total + ":** " + step.titulo + "\n\n" + step.descripcion
+  if (step.notas && step.notas.length > 0) {
+    msg += "\n\n💡 **Consejo:** " + step.notas.join("\n")
+  }
+  if (step.advertencia) {
+    msg += "\n\n⚠️ **Importante:** " + step.advertencia
+  }
+  return msg
 }
 
 // ── MAIN ENGINE ──
@@ -269,13 +269,13 @@ export function processInput(
  }
 
  if (input && !selectedNetwork) {
- return {
- message: "No he identificado bien el contexto. ¿Puedes elegir una de estas opciones?",
- options: networkContexts.map(c => ({ value: c.id, label: c.label, icon: c.icon })),
- phase: "contexto",
- state,
- progress: { current: 1, total: 3 },
- }
+   return {
+     message: "No me ha quedado del todo claro 😅 ¿puedes elegir una de estas opciones? Así me aseguro de darte la mejor recomendación.",
+     options: networkContexts.map(c => ({ value: c.id, label: c.label, icon: c.icon })),
+     phase: "contexto",
+     state,
+     progress: { current: 1, total: 3 },
+   }
  }
 
  state.network = selectedNetwork!
@@ -303,17 +303,17 @@ export function processInput(
  }
 
  if (input && !selectedLevel) {
- return {
- message: "Elige un nivel de protección:",
- options: [
- { value: "basico", label: "Básico", desc: "+15 años" },
- { value: "recomendado", label: "Recomendado", desc: "7-14 años" },
- { value: "avanzado", label: "Avanzado", desc: "0-12 años" },
- ],
- phase: "nivel",
- state,
- progress: { current: 2, total: 3 },
- }
+   return {
+     message: "No lo he entendido bien 😊 Elige un nivel de protección según la edad:",
+     options: [
+       { value: "basico", label: "Básico (+15 años)" },
+       { value: "recomendado", label: "Recomendado (7-14 años)" },
+       { value: "avanzado", label: "Avanzado (0-12 años)" },
+     ],
+     phase: "nivel",
+     state,
+     progress: { current: 2, total: 3 },
+   }
  }
 
  state.level = selectedLevel!
@@ -339,25 +339,25 @@ export function processInput(
  state,
  }
  } else {
- state.phase = "finalizado"
- return {
- message: "No tengo una guía exacta para esta combinación, pero puedes configurar el **router** que protege toda la red. ¿Te parece?",
- options: [
- { value: "router", label: "Configurar el router" },
- { value: "__ver_dns__", label: " Ver DNS disponibles" },
- ],
- phase: "finalizado",
- state,
- }
+   state.phase = "finalizado"
+   return {
+     message: "No tengo una guía exacta para esa combinación, pero te recomiendo configurar el **router** que protege toda la red de casa. ¿Te parece buena idea?",
+     options: [
+       { value: "router", label: "Configurar el router" },
+       { value: "__ver_dns__", label: "Ver DNS disponibles" },
+     ],
+     phase: "finalizado",
+     state,
+   }
  }
  }
 
  return {
- message: "¿Qué nivel prefieres?",
+ message: "¿Qué nivel de protección prefieres? Elige según la edad del menor:",
  options: [
- { value: "basico", label: "Básico" },
- { value: "recomendado", label: "Recomendado" },
- { value: "avanzado", label: "Avanzado" },
+   { value: "basico", label: "Básico (+15 años)" },
+   { value: "recomendado", label: "Recomendado (7-14 años)" },
+   { value: "avanzado", label: "Avanzado (0-12 años)" },
  ],
  phase: "nivel",
  state,
@@ -386,7 +386,7 @@ export function processInput(
  } else {
  state.phase = "resumen"
  return {
- message: "**¡Todos los pasos completados!**\n\nAhora verifica que funciona:\n\n" + (state.config?.verificacion || ""),
+ message: "**¡Todos los pasos completados!** 🎉\n\nAhora vamos a verificar que todo funciona correctamente:\n\n" + (state.config?.verificacion || ""),
  options: [
  { value: "__funciona__", label: "Todo funciona!" },
  { value: "__no_funciona__", label: "Algo no funciona" },
@@ -399,70 +399,70 @@ export function processInput(
  }
 
  if (lower.includes("duda") || input === "__duda__") {
- return {
- message: "Claro, dime qué duda tienes y te ayudo.",
- options: [{ value: "__siguiente__", label: "Seguir con los pasos" }],
- phase: "dudas",
- state,
- }
+   return {
+     message: "Claro, con gusto te ayudo 👐 Dime qué duda tienes y la resolveremos juntos.",
+     options: [{ value: "__siguiente__", label: "Seguir con los pasos" }],
+     phase: "dudas",
+     state,
+   }
  }
 
  if (lower.includes("dns") || input === "__ver_dns__") {
- return {
- message: " **Comparativa de DNS gratuitos**\n\nLos mejores proveedores con protección familiar:\n\n **DNS4.EU** - 91.239.100.101 - Europeo, RGPD, sin ánimo de lucro\n **CleanBrowsing** - 185.228.168.168 - Filtro muy completo\n**Cloudflare Familias** - 1.1.1.3 - Rápido y global\n**AdGuard Family** - 94.140.14.15 - Bloquea anuncios\n\n[Todos gratuitos y sin límite de consultas]",
- options: [{ value: "__siguiente__", label: "Seguir con los pasos" }],
- phase: "dns-compare",
- state,
- }
+   return {
+     message: "📡 **Comparativa de DNS gratuitos con protección familiar**\n\nTodos son gratuitos y sin límite de consultas:\n\n• **DNS4.EU** → `91.239.100.100` — Europeo, respeta RGPD, sin ánimo de lucro\n• **CleanBrowsing** → `185.228.168.168` — Filtro muy completo\n• **Cloudflare Familias** → `1.1.1.3` — Muy rápido, cobertura global\n• **AdGuard Family** → `94.140.14.15` — Bloquea anuncios además de contenido\n\n¿Te ayuda esto? Puedes seguir con los pasos cuando quieras.",
+     options: [{ value: "__siguiente__", label: "Seguir con los pasos" }],
+     phase: "dns-compare",
+     state,
+   }
  }
 
  // Default in steps
  return {
- message: "¿Has completado este paso? Puedes decir **'Hecho'** para continuar, **'Duda'** si tienes preguntas, o **'DNS'** para ver proveedores.",
- options: [
- { value: "__siguiente__", label: " Siguiente paso" },
- { value: "__duda__", label: " Tengo una duda" },
- ],
- phase: "pasos",
- state,
+   message: "😊 ¿Has completado este paso? Puedes decir **'Hecho'** para continuar, **'Duda'** si tienes preguntas, o **'DNS'** para ver proveedores disponibles.",
+   options: [
+     { value: "__siguiente__", label: "✅ Siguiente paso" },
+     { value: "__duda__", label: "❓ Tengo una duda" },
+   ],
+   phase: "pasos",
+   state,
  }
  }
 
  // ── RESUMEN ──
  if (state.phase === "resumen") {
  if (input === "__funciona__" || input.toLowerCase().includes("funciona")) {
- state.phase = "finalizado"
- return {
- message: "**¡Excelente!** Todo está funcionando.\n\nRecuerda revisar los ajustes cada 3 meses y adaptar la protección a medida que el menor crece.\n\n**Proteger para educar. Educar para liberar.**",
- options: [
- { value: "__otro__", label: " Configurar otro dispositivo" },
- { value: "__fin__", label: " No, gracias" },
- ],
- phase: "finalizado",
- state,
- }
+   state.phase = "finalizado"
+   return {
+     message: "**¡Me alegra muchísimo!** 🎉 Todo está funcionando correctamente.\n\nRecuerda revisar los ajustes cada 3 meses y adaptar la protección a medida que el menor crece. La protección digital es un proceso, no un destino.\n\n**Proteger para educar. Educar para liberar.** 💙",
+     options: [
+       { value: "__otro__", label: "🔄 Configurar otro dispositivo" },
+       { value: "__fin__", label: "No, gracias. ¡He terminado!" },
+     ],
+     phase: "finalizado",
+     state,
+   }
  }
  if (input === "__no_funciona__" || input.toLowerCase().includes("no funciona")) {
- return {
- message: "**Vamos a solucionarlo.**\n\nRevisa los errores frecuentes para tu configuración:\n" +
- (state.config?.erroresFrecuentes.map(function(e, i) { return (i + 1) + ". " + e.problema + " -> " + e.solucion; }).join("\n") || ""),
- options: [
- { value: "__siguiente__", label: "Intentar de nuevo" },
- { value: "__funciona__", label: "Ya funciona!" },
- ],
- phase: "resumen",
- state,
- }
+   return {
+     message: "**No te preocupes, vamos a solucionarlo juntos.** 🛠️\n\nRevisa estos errores frecuentes:\n\n" +
+     (state.config?.erroresFrecuentes.map(function(e, i) { return (i + 1) + ". **" + e.problema + "** → " + e.solucion; }).join("\n") || ""),
+     options: [
+       { value: "__siguiente__", label: "🔄 Intentar de nuevo" },
+       { value: "__funciona__", label: "✅ ¡Ya funciona!" },
+     ],
+     phase: "resumen",
+     state,
+   }
  }
  // Default resumen
  return {
- message: "¿Funciona todo correctamente?",
- options: [
- { value: "__funciona__", label: "Todo funciona!" },
- { value: "__no_funciona__", label: "Algo no funciona" },
- ],
- phase: "resumen",
- state,
+   message: "✅ **¿Funciona todo correctamente?** Dime cómo va.",
+   options: [
+     { value: "__funciona__", label: "✅ Todo funciona" },
+     { value: "__no_funciona__", label: "🔧 Algo no funciona" },
+   ],
+   phase: "resumen",
+   state,
  }
  }
 
@@ -484,12 +484,12 @@ export function processInput(
  }
  state.phase = "inicio"
  return resetConversation()
- }
  return {
- message: "¿Quieres volver a los pasos de configuración?",
- options: [{ value: "__siguiente__", label: "Sí, volver" }],
- phase: state.phase as any,
- state,
+   message: "¿Quieres volver a los pasos de configuración? Cuando quieras, aquí estoy.",
+   options: [{ value: "__siguiente__", label: "Sí, volver" }],
+   phase: state.phase as any,
+   state,
+ }
  }
  }
 
@@ -500,17 +500,17 @@ export function processInput(
  }
  if (input === "__fin__" || input.toLowerCase().includes("gracias") || input.toLowerCase().includes("nada más")) {
  return {
- message: "😊 De nada. Recuerda: proteger para educar, educar para liberar.\n\n¡Hasta pronto!",
- options: [{ value: "__otro__", label: " Empezar de nuevo" }],
- phase: "finalizado",
- state,
+   message: "😊 De nada. Ha sido un placer ayudarte. Recuerda: **proteger para educar, educar para liberar.**\n\n¡Hasta pronto! Cuídate mucho 💙",
+   options: [{ value: "__otro__", label: "🔄 Empezar de nuevo" }],
+   phase: "finalizado",
+   state,
  }
  }
  return {
- message: "¿Quieres configurar otro dispositivo?",
+ message: "¿Quieres configurar otro dispositivo? Puedo ayudarte con todos los que tengas en casa.",
  options: [
- { value: "__otro__", label: " Sí, otro dispositivo" },
- { value: "__fin__", label: " No, gracias" },
+   { value: "__otro__", label: "✅ Sí, otro dispositivo" },
+   { value: "__fin__", label: "No, gracias. ¡Terminamos!" },
  ],
  phase: "finalizado",
  state,

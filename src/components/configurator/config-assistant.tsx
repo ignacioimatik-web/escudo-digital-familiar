@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   Shield, Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen,
   Wifi, Send, Sparkles, CheckCircle2, ChevronRight,
-  MessageCircle, Zap, RefreshCw, Circle, Hexagon
+  MessageCircle, Zap, RefreshCw, Circle, Hexagon, HeartHandshake
 } from "lucide-react"
 import type { DeviceType, NetworkContext, ConfigStep } from "@/lib/config-assistant/types"
 import { deviceTypes, networkContexts } from "@/lib/config-assistant/types"
@@ -42,52 +42,45 @@ const levelBadgeColors: Record<string, string> = {
 
 function JarvisHeader({ device, onReset }: { device: DeviceType | null; onReset: () => void }) {
   return (
-    <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-r from-slate-900 via-brand-950 to-slate-900 border-b border-cyan-500/20">
-      {/* Scan line effect */}
+    <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-r from-emerald-700 via-teal-600 to-cyan-700 border-b border-teal-500/20">
+      {/* Subtle ambient glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          animate={{ y: ["-100%", "100%"] }}
-          transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-          className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"
+          animate={{ opacity: [0.1, 0.3, 0.1] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          className="absolute inset-0 bg-gradient-to-tr from-emerald-400/10 via-teal-400/5 to-cyan-400/10"
         />
       </div>
-      {/* Grid overlay */}
-      <div className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: `linear-gradient(rgba(6, 182, 212, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.3) 1px, transparent 1px)`,
-          backgroundSize: '24px 24px'
-        }}
-      />
       <div className="relative z-10 flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/30">
-              <Zap className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/30">
+              <HeartHandshake className="h-5 w-5 text-white" />
             </div>
             <motion.div
-              animate={{ opacity: [0.3, 0.8, 0.3] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="absolute -inset-0.5 rounded-xl bg-cyan-400/20 blur-sm -z-10"
+              animate={{ opacity: [0.4, 0.9, 0.4] }}
+              transition={{ repeat: Infinity, duration: 2.5 }}
+              className="absolute -inset-0.5 rounded-xl bg-emerald-400/20 blur-sm -z-10"
             />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-bold text-white tracking-wide">J.A.R.V.I.S.</p>
-              <span className="text-[8px] font-mono text-cyan-400/60 border border-cyan-500/20 px-1.5 py-0.5 rounded">v2.0</span>
+              <p className="text-sm font-bold text-white tracking-wide">Asistente Sentinel</p>
+              <span className="text-[8px] font-medium text-teal-200/70 bg-white/10 px-1.5 py-0.5 rounded">v2.0</span>
             </div>
-            <p className="text-[10px] text-cyan-300/60 font-mono">
+            <p className="text-[10px] text-teal-100/70">
               {device
-                ? `> SISTEMA VINCULADO: ${deviceTypes.find(d => d.id === device)?.label?.toUpperCase()}`
-                : "> ESPERANDO INICIALIZACION..."}
+                ? `Protegiendo ${deviceTypes.find(d => d.id === device)?.label?.toLowerCase() || "tu dispositivo"}`
+                : "Aquí para ayudarte con la protección digital"}
             </p>
           </div>
         </div>
         <button
           onClick={onReset}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono text-cyan-400/60 border border-cyan-500/20 hover:text-cyan-300 hover:border-cyan-500/40 hover:bg-cyan-500/5 transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-medium text-teal-200/70 bg-white/5 hover:bg-white/10 hover:text-white transition-all"
         >
           <RefreshCw className="w-3 h-3" />
-          REINICIAR
+          EMPEZAR DE NUEVO
         </button>
       </div>
     </div>
@@ -97,28 +90,28 @@ function JarvisHeader({ device, onReset }: { device: DeviceType | null; onReset:
 function JarvisProgress({ current, total, phase }: { current: number; total: number; phase: string }) {
   const pct = total > 0 ? (current / total) * 100 : 0
   const phaseLabels: Record<string, string> = {
-    inicio: "INICIALIZANDO",
-    contexto: "SELECCION CONTEXTO",
-    nivel: "SELECCION NIVEL",
-    pasos: "GUIANDO CONFIGURACION",
-    resumen: "VERIFICACION",
-    finalizado: "COMPLETADO",
+    inicio: "Empecemos",
+    contexto: "¿Dónde se conecta?",
+    nivel: "Nivel de protección",
+    pasos: "Pasos a seguir",
+    resumen: "Verificación final",
+    finalizado: "¡Completado!",
   }
   return (
-    <div className="px-5 py-2.5 border-b border-cyan-500/10 bg-slate-900/50">
+    <div className="px-5 py-2.5 border-b border-teal-500/10 bg-gradient-to-r from-emerald-900/30 to-teal-900/30">
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-1 rounded-full bg-slate-800 overflow-hidden">
+        <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-brand-500 to-cyan-400 shadow-sm shadow-cyan-500/30"
+            className="h-full rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 shadow-sm shadow-teal-500/30"
           />
         </div>
-        <span className="text-[9px] font-mono text-cyan-400/50 tabular-nums shrink-0">
-          {(current / total * 100).toFixed(0)}%
+        <span className="text-[10px] font-medium text-teal-300/70 tabular-nums shrink-0">
+          {pct.toFixed(0)}%
         </span>
-        <span className="text-[8px] font-mono text-cyan-500/40 uppercase tracking-wider shrink-0 hidden sm:block">
+        <span className="text-[9px] font-medium text-teal-400/60 tracking-wide shrink-0 hidden sm:block">
           {phaseLabels[phase] || phase}
         </span>
       </div>
@@ -165,34 +158,34 @@ function JarvisStepCard({ step, numero, total }: { step: ConfigStep; numero: num
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      className="relative overflow-hidden rounded-xl border border-cyan-500/20 bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm p-5"
+      className="relative overflow-hidden rounded-xl border border-emerald-700/20 bg-gradient-to-br from-emerald-950/60 to-teal-950/60 backdrop-blur-sm p-5"
     >
-      <div className="absolute inset-0 opacity-[0.03]"
+      <div className="absolute inset-0 opacity-[0.02]"
         style={{
-          backgroundImage: `radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.8) 1px, transparent 1px)`,
+          backgroundImage: `radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.8) 1px, transparent 1px)`,
           backgroundSize: '20px 20px'
         }}
       />
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-3">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-bold font-mono">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
             {String(numero).padStart(2, '0')}
           </div>
-          <span className="text-[10px] font-mono text-cyan-400/60 uppercase tracking-widest">PASO {numero}/{total}</span>
+          <span className="text-[10px] font-medium text-emerald-400/60 tracking-wide">PASO {numero}/{total}</span>
         </div>
         <h4 className="text-sm font-bold text-white mb-2 tracking-wide">{step.titulo}</h4>
-        <div className="text-[13px] text-slate-300 leading-relaxed mb-3 whitespace-pre-line font-light">{step.descripcion}</div>
+        <div className="text-[13px] text-slate-300 leading-relaxed mb-3 whitespace-pre-line">{step.descripcion}</div>
         {step.notas && step.notas.length > 0 && (
-          <div className="mt-2 p-3 rounded-lg bg-cyan-500/5 border border-cyan-500/10">
-            <p className="text-[9px] font-mono uppercase tracking-wider text-cyan-400/60 mb-1.5">// NOTAS</p>
+          <div className="mt-2 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+            <p className="text-[9px] font-medium tracking-wide text-emerald-400/60 mb-1.5">Consejo</p>
             {step.notas.map((n, i) => (
-              <p key={i} className="text-[12px] text-slate-400 mb-1 last:mb-0 font-light">$ {n}</p>
+              <p key={i} className="text-[12px] text-slate-400 mb-1 last:mb-0">💡 {n}</p>
             ))}
           </div>
         )}
         {step.advertencia && (
-          <div className="mt-2 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20">
-            <p className="text-[12px] text-rose-300 font-light">! {step.advertencia}</p>
+          <div className="mt-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <p className="text-[12px] text-amber-300">⚠️ {step.advertencia}</p>
           </div>
         )}
       </div>
@@ -295,14 +288,14 @@ export function ConfigAssistant() {
   }
 
   return (
-    <div className="flex flex-col bg-slate-950 rounded-2xl overflow-hidden border border-cyan-500/20 shadow-2xl shadow-cyan-500/5">
+    <div className="flex flex-col bg-slate-950 rounded-2xl overflow-hidden border border-teal-500/20 shadow-2xl shadow-teal-500/5">
       <JarvisHeader device={state.device} onReset={handleReset} />
       <JarvisProgress current={progress.current} total={progress.total} phase={state.phase} />
 
       {/* Content */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-4 max-h-[500px] md:max-h-[550px] scroll-smooth"
         style={{
-          backgroundImage: `radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.03) 0%, transparent 60%)`,
+          backgroundImage: `radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.03) 0%, transparent 60%)`,
         }}
       >
         <AnimatePresence mode="popLayout">
@@ -313,7 +306,7 @@ export function ConfigAssistant() {
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 className="flex justify-end"
               >
-                <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-600/80 to-blue-600/80 text-white text-sm font-medium shadow-lg shadow-cyan-500/10 border border-cyan-400/20 backdrop-blur-sm">
+                <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-medium shadow-lg shadow-emerald-500/10 border border-emerald-400/20 backdrop-blur-sm">
                   <CheckCircle2 className="w-4 h-4 text-cyan-300" />
                   {msg.text}
                 </div>
@@ -322,15 +315,15 @@ export function ConfigAssistant() {
               <motion.div key={`msg-${i}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-xl border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm p-4 shadow-lg"
+                className="rounded-xl border border-emerald-700/30 bg-gradient-to-br from-emerald-900/30 to-teal-900/20 backdrop-blur-sm p-4 shadow-lg"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                    <MessageCircle className="h-3.5 w-3.5 text-cyan-400" />
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <HeartHandshake className="h-3.5 w-3.5 text-emerald-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-mono text-cyan-400/50 mb-1.5">JARVIS v2.0</p>
-                    <div className="text-sm text-slate-200 leading-relaxed whitespace-pre-line [&_strong]:text-white [&_strong]:font-semibold [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:bg-cyan-500/10 [&_code]:text-[11px] [&_code]:font-mono [&_code]:text-cyan-300">
+                    <p className="text-[10px] font-medium text-emerald-400/60 mb-1.5">Asistente Sentinel</p>
+                    <div className="text-sm text-slate-200 leading-relaxed whitespace-pre-line [&_strong]:text-white [&_strong]:font-semibold [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:bg-emerald-500/10 [&_code]:text-[11px] [&_code]:font-medium [&_code]:text-emerald-300">
                       {msg.text}
                     </div>
                   </div>
@@ -342,11 +335,11 @@ export function ConfigAssistant() {
           {/* Thinking indicator */}
           {isThinking && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/30">
-                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                <span className="text-[10px] font-mono text-cyan-400/50 ml-1">PROCESANDO</span>
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-900/20 border border-emerald-700/20">
+                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-[10px] font-medium text-emerald-400/60 ml-1">Pensando...</span>
               </div>
             </motion.div>
           )}
@@ -388,11 +381,11 @@ export function ConfigAssistant() {
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => handleOptionClick(opt.value)}
-                      className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-700/50 bg-gradient-to-b from-slate-800/60 to-slate-900/60 backdrop-blur-sm hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all text-center group"
+                      className="flex flex-col items-center gap-2 p-3 rounded-xl border border-teal-700/30 bg-gradient-to-b from-emerald-900/40 to-teal-950/40 backdrop-blur-sm hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all text-center group"
                     >
                       {Icon && (
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/5 border border-cyan-500/10 group-hover:bg-cyan-500/10 group-hover:border-cyan-500/30 transition-all">
-                          <Icon className="w-5 h-5 text-cyan-400/70 group-hover:text-cyan-300" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/5 border border-emerald-500/10 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30 transition-all">
+                          <Icon className="w-5 h-5 text-emerald-400/70 group-hover:text-emerald-300" />
                         </div>
                       )}
                       <span className="text-[11px] font-semibold text-slate-300 leading-tight group-hover:text-white transition-colors">{opt.label}</span>
@@ -457,9 +450,9 @@ export function ConfigAssistant() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => handleOptionClick(opt.value)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700/50 bg-gradient-to-b from-slate-800/60 to-slate-900/60 backdrop-blur-sm text-sm font-medium text-slate-300 hover:border-cyan-500/30 hover:text-cyan-300 transition-all shadow-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-teal-700/30 bg-gradient-to-b from-emerald-900/40 to-teal-950/40 backdrop-blur-sm text-sm font-medium text-slate-300 hover:border-emerald-500/30 hover:text-emerald-300 transition-all shadow-sm"
                   >
-                    {opt.icon && <Shield className="w-4 h-4 text-cyan-400" />}
+                    {opt.icon && <Shield className="w-4 h-4 text-emerald-400" />}
                     {opt.label}
                   </motion.button>
                 ))}
@@ -472,30 +465,29 @@ export function ConfigAssistant() {
         {messages.length === 0 && options.length === 0 && !isThinking && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="relative mb-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/5 border border-cyan-500/10">
-                <Zap className="h-8 w-8 text-cyan-400/50" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                <HeartHandshake className="h-8 w-8 text-emerald-400/50" />
               </div>
-              <motion.div animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute -inset-1 rounded-2xl bg-cyan-400/5 blur-sm" />
+              <motion.div animate={{ opacity: [0.2, 0.5, 0.2] }} transition={{ repeat: Infinity, duration: 2 }} className="absolute -inset-1 rounded-2xl bg-emerald-400/5 blur-sm" />
             </div>
-            <p className="text-sm text-slate-500 font-mono">&gt; INICIALIZANDO SISTEMA...</p>
+            <p className="text-sm text-slate-500 font-medium">Preparando el asistente...</p>
           </div>
         )}
       </div>
 
       {/* Input */}
-      <form onSubmit={handleTextSubmit} className="flex items-center gap-2 p-4 border-t border-cyan-500/10 bg-slate-900/80">
-        <span className="text-[10px] font-mono text-cyan-500/30 shrink-0 hidden sm:block">$</span>
+      <form onSubmit={handleTextSubmit} className="flex items-center gap-2 p-4 border-t border-teal-500/10 bg-gradient-to-r from-emerald-950/80 to-teal-950/80">
         <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="Escribe tu respuesta..."
-          className="flex-1 px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/40 focus:ring-1 focus:ring-cyan-500/10 transition-all font-mono"
+          placeholder="Cuéntame sobre tu dispositivo..."
+          className="flex-1 px-4 py-2.5 rounded-lg bg-white/5 border border-teal-700/30 text-sm text-white placeholder:text-teal-400/30 focus:outline-none focus:border-teal-500/40 focus:ring-1 focus:ring-teal-500/10 transition-all"
         />
         <button
           type="submit"
           disabled={!inputText.trim()}
-          className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-500 hover:to-blue-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/20"
+          className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-400 hover:to-teal-400 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
         >
           <Send className="w-4 h-4" />
         </button>
