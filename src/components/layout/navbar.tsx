@@ -10,10 +10,9 @@ import { Container } from "@/components/ui/container"
 
 const navItems = [
   { href: "/metodo", label: "Método" },
-  { href: "/guias/android", label: "Guías" },
+  { href: "/guias", label: "Guías" },
   { href: "/configurador", label: "Configurador" },
-  { href: "/familias", label: "Familias" },
-  { href: "/colegios", label: "Colegios" },
+  { href: "/comunidades", label: "Comunidades" },
   { href: "/faq", label: "FAQ" },
 ]
 

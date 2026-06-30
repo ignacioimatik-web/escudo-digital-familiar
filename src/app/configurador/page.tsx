@@ -2,173 +2,160 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react"
+import { MessageCircle, ListChecks, ArrowRight, Sparkles } from "lucide-react"
 import { Container } from "@/components/ui/container"
 import { Section } from "@/components/ui/section"
-import { Progress } from "@/components/configurator/Progress"
-import { DeviceSelector } from "@/components/configurator/DeviceSelector"
-import { NetworkSelector } from "@/components/configurator/NetworkSelector"
-import { LevelSelector } from "@/components/configurator/LevelSelector"
-import { RecommendationView } from "@/components/configurator/RecommendationView"
-import { getRecommendedSteps } from "@/content/configurator"
-import type { DeviceType, NetworkContext, ProtectionLevel } from "@/lib/types"
-
-const TOTAL_STEPS = 4
-
-const stepTitles = [
-  "Selecciona tu dispositivo",
-  "¿Cuál es tu contexto de red?",
-  "Elige el nivel de protección",
-  "Tu recomendación personalizada",
-]
-
-const stepDescriptions = [
-  "Selecciona el dispositivo que quieres proteger",
-  "¿Cómo se conecta principalmente a Internet?",
-  "Según la edad y situación del menor",
-  "Pasos específicos para tu situación",
-]
+import { Badge } from "@/components/ui/badge"
+import { ConfigAssistant } from "@/components/configurator/config-assistant"
+import { ConfiguratorWizard } from "@/components/configurator/configurator-wizard"
+import { DnsComparator } from "@/components/configurator/dns-comparator"
 
 export default function ConfiguradorPage() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [device, setDevice] = useState<DeviceType | null>(null)
-  const [context, setContext] = useState<NetworkContext | null>(null)
-  const [level, setLevel] = useState<ProtectionLevel | null>(null)
-
-  const canGoNext = () => {
-    switch (currentStep) {
-      case 1:
-        return device !== null
-      case 2:
-        return context !== null
-      case 3:
-        return level !== null
-      default:
-        return false
-    }
-  }
-
-  const handleNext = () => {
-    if (canGoNext() && currentStep < TOTAL_STEPS) {
-      setCurrentStep(currentStep + 1)
-    }
-  }
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
-    }
-  }
-
-  const handleReset = () => {
-    setCurrentStep(1)
-    setDevice(null)
-    setContext(null)
-    setLevel(null)
-  }
-
-  const recommendation =
-    device && context && level ? getRecommendedSteps(device, context, level) : null
+  const [mode, setMode] = useState<"select" | "assistant" | "wizard" | "dns">("select")
 
   return (
     <>
-      <Section className="relative overflow-hidden pb-10 md:pb-14">
+      <Section className="relative overflow-hidden pb-8 md:pb-10">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50/40 via-background to-background" />
         <Container size="md">
+          <Badge variant="default" className="mb-6">Configurador</Badge>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-3">
-            Configurador
+            Protege tus dispositivos
           </h1>
           <p className="text-base text-slate-500 leading-relaxed max-w-2xl">
-            Selecciona tu situación y obtén pasos personalizados para proteger el dispositivo.
+            Te guiamos paso a paso para configurar la protección DNS en cualquier dispositivo.
           </p>
         </Container>
       </Section>
 
-      <Section className="-mt-[400px] pt-0">
-        <Container size="md">
-          <div className="mb-6 mt-[200px]">
-            <Progress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
-          </div>
-
-          <div className="mb-5">
-            <h2 className="text-xl font-bold text-slate-900 mb-1">
-              {stepTitles[currentStep - 1]}
-            </h2>
-            <p className="text-sm text-slate-500">{stepDescriptions[currentStep - 1]}</p>
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.25 }}
-            >
-              {currentStep === 1 && (
-                <DeviceSelector selected={device} onSelect={setDevice} />
-              )}
-
-              {currentStep === 2 && (
-                <NetworkSelector selected={context} onSelect={setContext} />
-              )}
-
-              {currentStep === 3 && (
-                <LevelSelector selected={level} onSelect={setLevel} />
-              )}
-
-              {currentStep === 4 && recommendation && device && context && level && (
-                <RecommendationView
-                  device={device}
-                  context={context}
-                  level={level}
-                  recommendation={recommendation}
-                  onReset={handleReset}
-                />
-              )}
-
-              {currentStep === 4 && !recommendation && (
-                <div className="text-center py-10 rounded-2xl border border-slate-200 bg-white">
-                  <p className="text-slate-500 mb-2 text-sm">
-                    No tenemos una recomendación específica para esta combinación.
-                  </p>
-                  <p className="text-slate-600 text-sm">
-                    Consulta las guías individuales para configurar tu dispositivo.
-                  </p>
-                  <button
-                    onClick={handleReset}
-                    className="mt-5 px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors inline-flex items-center gap-2"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    Empezar de nuevo
-                  </button>
+      {mode === "select" && (
+        <Section className="-mt-[300px] pt-0">
+          <Container size="md" className="mt-[200px]">
+            <div className="grid md:grid-cols-3 gap-4 mb-8">
+              <motion.button
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setMode("assistant")}
+                className="relative rounded-2xl border-2 border-brand-200 bg-white p-6 text-left hover:border-brand-400 hover:shadow-lg transition-all group"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 mb-4 group-hover:bg-brand-200 transition-colors">
+                  <MessageCircle className="h-6 w-6 text-brand-600" />
                 </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                  Asistente IA
+                  <Sparkles className="h-4 w-4 text-accent-500" />
+                </h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Guiado paso a paso. Te hago preguntas, me respondes y te doy las instrucciones exactas para tu caso.
+                </p>
+                <div className="mt-4 flex items-center gap-1 text-sm font-medium text-brand-600">
+                  Iniciar <ArrowRight className="h-3.5 w-3.5" />
+                </div>
+              </motion.button>
 
-          {currentStep < TOTAL_STEPS && (
-            <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200">
-              <button
-                onClick={handleBack}
-                disabled={currentStep === 1}
-                className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              <motion.button
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setMode("wizard")}
+                className="relative rounded-2xl border border-slate-200 bg-white p-6 text-left hover:border-slate-300 hover:shadow-md transition-all group"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Anterior
-              </button>
-              <button
-                onClick={handleNext}
-                disabled={!canGoNext()}
-                className="px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 mb-4 group-hover:bg-slate-200 transition-colors">
+                  <ListChecks className="h-6 w-6 text-slate-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  Rápido
+                </h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Selecciona dispositivo, contexto y nivel. Obtén los pasos directamente.
+                </p>
+                <div className="mt-4 flex items-center gap-1 text-sm font-medium text-brand-600">
+                  Ir <ArrowRight className="h-3.5 w-3.5" />
+                </div>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setMode("dns")}
+                className="relative rounded-2xl border border-slate-200 bg-white p-6 text-left hover:border-slate-300 hover:shadow-md transition-all group"
               >
-                Siguiente
-                <ArrowRight className="w-4 h-4" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-100 mb-4 group-hover:bg-cyan-200 transition-colors">
+                  <Sparkles className="h-6 w-6 text-cyan-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  Comparar DNS
+                </h3>
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Compara todos los proveedores DNS gratuitos y de pago para elegir el mejor.
+                </p>
+                <div className="mt-4 flex items-center gap-1 text-sm font-medium text-brand-600">
+                  Ver <ArrowRight className="h-3.5 w-3.5" />
+                </div>
+              </motion.button>
+            </div>
+
+            <div className="text-center">
+              <button
+                onClick={() => setMode("assistant")}
+                className="inline-flex h-12 items-center gap-2 rounded-xl bg-brand-600 px-8 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 transition-all hover:bg-brand-700 hover:shadow-xl"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Iniciar asistente inteligente
               </button>
             </div>
-          )}
-        </Container>
-      </Section>
+          </Container>
+        </Section>
+      )}
+
+      {mode === "assistant" && (
+        <Section className="-mt-[300px] pt-0">
+          <Container size="md" className="mt-[100px]">
+            <div className="mb-4">
+              <button
+                onClick={() => setMode("select")}
+                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1.5 transition-colors"
+              >
+                ← Volver al menú
+              </button>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <ConfigAssistant />
+            </div>
+          </Container>
+        </Section>
+      )}
+
+      {mode === "wizard" && (
+        <Section className="-mt-[300px] pt-0">
+          <Container size="md" className="mt-[100px]">
+            <div className="mb-4">
+              <button
+                onClick={() => setMode("select")}
+                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1.5 transition-colors"
+              >
+                ← Volver al menú
+              </button>
+            </div>
+            <ConfiguratorWizard />
+          </Container>
+        </Section>
+      )}
+
+      {mode === "dns" && (
+        <Section className="-mt-[300px] pt-0">
+          <Container size="md" className="mt-[100px]">
+            <div className="mb-4">
+              <button
+                onClick={() => setMode("select")}
+                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1.5 transition-colors"
+              >
+                ← Volver al menú
+              </button>
+            </div>
+            <DnsComparator />
+          </Container>
+        </Section>
+      )}
     </>
   )
 }
