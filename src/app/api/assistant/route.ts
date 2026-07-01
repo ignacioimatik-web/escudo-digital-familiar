@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 const ZEN_API_URL = "https://opencode.ai/zen/v1/chat/completions"
-const MODEL = "minimax-m2.7"
+const MODEL = "mimo-v2.5-free"
 
 export async function POST(request: NextRequest) {
   try {
