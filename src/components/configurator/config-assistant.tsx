@@ -253,7 +253,42 @@ export function ConfigAssistant() {
   const [inputText, setInputText] = useState("")
   const [isFirstMessage, setIsFirstMessage] = useState(true)
   const [isThinking, setIsThinking] = useState(false)
+  const aiEnabled = true // Use BigPickle for natural responses
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Call the AI API to enhance or generate responses
+  const callAI = async (userInput: string, engineResponse: AssistantResponse): Promise<string> => {
+    if (!aiEnabled) return engineResponse.message
+
+    try {
+      const conv = [
+        { role: "user", content: userInput || "(inicio de conversación)" },
+      ]
+      
+      const systemPrompt = `Eres el Asistente Sentinel, un experto en protección digital infantil. 
+Tu tono es cercano, amable y muy claro. Explicas cosas técnicas de forma sencilla.
+
+Contexto actual:
+- Dispositivo: ${state.device || "ninguno"}
+- Nivel: ${state.level || "ninguno"}
+- Fase: ${state.phase}
+- Opciones disponibles: ${(engineResponse.options || []).map(o => o.label).join(", ")}
+
+Responde de forma natural y amable. Si el usuario pregunta algo que no sabes, sé honesto.
+No uses jerga técnica sin explicarla. Mantén las respuestas concisas pero cálidas.`
+
+      const res = await fetch("/api/assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: conv, system: systemPrompt }),
+      })
+      const data = await res.json()
+      if (data.response) return data.response
+    } catch (e) {
+      console.warn("AI call failed, using engine response")
+    }
+    return engineResponse.message
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
@@ -271,10 +306,12 @@ export function ConfigAssistant() {
     }
   }, [isFirstMessage])
 
-  const applyResponse = (response: AssistantResponse) => {
+  const applyResponse = async (response: AssistantResponse, userInput?: string) => {
+    // Enhance message with AI
+    const enhancedMessage = response.message ? await callAI(userInput || "", response) : ""
     setState(response.state)
-    if (response.message) {
-      setMessages(prev => [...prev, { text: response.message, isUser: false }])
+    if (enhancedMessage) {
+      setMessages(prev => [...prev, { text: enhancedMessage, isUser: false }])
     }
     setOptions(response.options ?? [])
     // Always sync step index from engine state
@@ -287,54 +324,46 @@ export function ConfigAssistant() {
     if (response.progress) setProgress(response.progress)
   }
 
-  const handleOptionClick = (value: string) => {
+  const handleOptionClick = async (value: string) => {
     const label = options.find(o => o.value === value)?.label || value
     setMessages(prev => [...prev, { text: label, isUser: true }])
     setOptions([])
     setIsThinking(true)
-    setTimeout(() => {
-      if (value === "__reset__") {
-        setMessages([])
-        setOptions([])
-        setSteps([])
-        setCurrentStepIdx(-1)
-        const response = resetConversation()
-        applyResponse(response)
-        setIsThinking(false)
-        return
-      }
-      let response: AssistantResponse
-      if (["__siguiente__", "__duda__", "__funciona__", "__no_funciona__", "__ver_dns__", "__fin__", "__otro__"].includes(value)) {
-        response = processInput(state, value)
-      } else {
-        response = processInput(state, value)
-      }
-      applyResponse(response)
+    
+    if (value === "__reset__") {
+      setMessages([])
+      setOptions([])
+      setSteps([])
+      setCurrentStepIdx(-1)
+      const response = resetConversation()
+      await applyResponse(response, "")
       setIsThinking(false)
-    }, 400)
+      return
+    }
+    const response = processInput(state, value)
+    await applyResponse(response, label)
+    setIsThinking(false)
   }
 
-  const handleTextSubmit = (e: React.FormEvent) => {
+  const handleTextSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const text = inputText.trim()
     if (!text) return
     setMessages(prev => [...prev, { text, isUser: true }])
     setInputText("")
     setIsThinking(true)
-    setTimeout(() => {
-      const response = processInput(state, text)
-      applyResponse(response)
-      setIsThinking(false)
-    }, 400)
+    const response = processInput(state, text)
+    await applyResponse(response, text)
+    setIsThinking(false)
   }
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setMessages([])
     setOptions([])
     setSteps([])
     setCurrentStepIdx(-1)
     const response = resetConversation()
-    applyResponse(response)
+    await applyResponse(response, "")
   }
 
   return (
