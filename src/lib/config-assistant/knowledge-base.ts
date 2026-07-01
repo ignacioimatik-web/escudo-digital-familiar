@@ -410,37 +410,36 @@ export const knowledgeBase: DeviceConfig[] = [
   // ═══════════════════════════════════════
 
   cfg("iphone", "wifi-casa", "basico", {
-    titulo: "Protección básica en iPhone/iPad (WiFi en casa)",
-    resumen: "DNS personalizado en la red WiFi + restricciones básicas de contenido.",
+    titulo: "Protección básica en iPhone/iPad",
+    resumen: "Perfil DNS de protección + restricciones básicas en Tiempo de Uso.",
     tiempoEstimado: "10-15 minutos",
     dnsRecomendado: [CLEAN_BROWSING, CLOUDFLARE_FAMILY],
     pasos: [
       {
-        id: "ios-wifi-dns",
+        id: "ios-dns-perfil",
         numero: 1,
-        titulo: "Configurar DNS en la red WiFi",
+        titulo: "Instalar perfil DNS de protección",
         descripcion:
-          "Ve a **Ajustes > Wi-Fi**, pulsa el icono (i) junto a tu red. Baja a **Configurar DNS > Manual**. Elimina los DNS existentes y añade los del proveedor elegido.",
+          "En iOS/iPadOS el DNS se configura con un **perfil de configuración**. Así proteges todas las redes.\n\n📍 Abre **Safari**\n🔤 Ve a la web:\n   • **dns4.eu/install** → DNS4.EU Child Protection\n   • **cleanbrowsing.org** → CleanBrowsing Family\n\n⬇️ Pulsa **Descargar perfil**\n⚙️ Ajustes > **Perfil descargado** > **Instalar**"
         notas: [
-          `CleanBrowsing Family: ${CLEAN_BROWSING} y ${CLEAN_BROWSING2}`,
-          `Cloudflare Familias: ${CLOUDFLARE_FAMILY} y ${CLOUDFLARE_FAMILY2}`,
-          "Importante: esto SOLO funciona en esta red WiFi. Al cambiarte a otra red, pierdes la protección.",
+          "El perfil DNS protege en TODAS las redes: WiFi de casa, datos móviles, WiFi del colegio...",
+          "Si no ves Perfil descargado en Ajustes, abre Safari y prueba otra vez",
         ],
       },
       {
-        id: "ios-wifi-limits",
+        id: "ios-basico-tiempo",
         numero: 2,
-        titulo: "Restricciones básicas de contenido web",
+        titulo: "Restricciones de contenido en Tiempo de Uso",
         descripcion:
-          "Ve a **Ajustes > Tiempo de Uso > Restricciones de contenido y privacidad**. Actívalas y en **Restricciones de contenido > Contenido web** selecciona **'Limitar contenido para adultos'**.",
-        advertencia: "Tiempo de Uso requiere un código de 4 dígitos que el menor NO debe conocer.",
+          "⚙️ **Ajustes > Tiempo de Uso**\n🔢 Pon un código de 4 números (que el menor NO sepa)\n🌐 **Restricciones de contenido > Contenido web > Limitar contenido para adultos**\n🛑 Activa **bloquear compras en iTunes y App Store**",
+        advertencia: "Sin el código, el menor puede desactivar todas las restricciones. No se lo digas.",
       },
     ],
     verificacion:
-      "Conectado al WiFi de casa, visita un sitio para adultos — debe mostrar 'Sitio web bloqueado'.",
+      "Conectado a cualquier red, visita un sitio para adultos. Debe mostrar Sitio web bloqueado.",
     erroresFrecuentes: [
-      { problema: "El DNS solo funciona en esta WiFi", solucion: "Al cambiarte de red, el DNS vuelve al automático. Para protección en todas partes, instala un perfil DNS o configura el router." },
-      { problema: "El menor conoce el código de Tiempo de Uso", solucion: "Cambia el código inmediatamente. Sin él, el menor puede desactivar todas las restricciones." },
+      { problema: "No aparece Perfil descargado en Ajustes", solucion: "Asegúrate de usar Safari, no Chrome. Si sigue sin aparecer, reinicia el iPhone y vuelve a descargar." },
+      { problema: "El menor conoce el código de Tiempo de Uso", solucion: "Cámbialo inmediatamente en Ajustes > Tiempo de Uso > Cambiar código." },
     ],
   }),
 
