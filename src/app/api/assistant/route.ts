@@ -1,12 +1,15 @@
 // API route for Sentinel AI Assistant
-// Uses Hermes CLI to call BigPickle via opencode-zen provider
-// Hermes handles auth internally - no API key needed in env
-
+// TWO modes:
+//   1. Local: uses hermes CLI (finds binary by absolute path)
+//   2. Vercel: calls ZEN API directly via HTTPS (needs OPENCODE_ZEN_API_KEY env var)
 import { NextRequest, NextResponse } from "next/server"
 import { execSync } from "child_process"
 import { existsSync } from "fs"
 
-// Find hermes binary in known locations
+const ZEN_API_URL = "https://opencode.ai/zen/v1/chat/completions"
+const MODEL = "big-pickle"
+
+// Find hermes binary for local mode
 function findHermes(): string | null {
   const candidates = [
     "/Users/jistev/.hermes/hermes-agent/venv/bin/hermes",
@@ -17,7 +20,6 @@ function findHermes(): string | null {
   for (const p of candidates) {
     if (existsSync(p)) return p
   }
-  // Try PATH
   try {
     const which = execSync("which hermes 2>/dev/null", { encoding: "utf-8", timeout: 5 }).trim()
     if (which) return which
@@ -25,42 +27,81 @@ function findHermes(): string | null {
   return null
 }
 
-const HERMES = findHermes()
+// Mode 1: call via hermes CLI (local development)
+function callViaHermes(messages: any[], system: string): string | null {
+  const hermes = findHermes()
+  if (!hermes) return null
+
+  let prompt = ""
+  if (system) prompt += `[Sistema: ${system}]\n\n`
+  for (const msg of messages || []) {
+    if (msg.role === "user") prompt += `[Usuario: ${msg.content}]\n`
+    else if (msg.role === "assistant") prompt += `[Asistente: ${msg.content}]\n`
+  }
+  prompt += "\n[Asistente:"
+
+  try {
+    const result = execSync(
+      `${hermes} -z ${JSON.stringify(prompt)} -m "opencode-zen/big-pickle" --provider opencode-zen 2>/dev/null`,
+      { timeout: 30000, encoding: "utf-8", maxBuffer: 10 * 1024 * 1024 }
+    )
+    return result.trim()
+  } catch {
+    return null
+  }
+}
+
+// Mode 2: call ZEN API directly via HTTPS (Vercel production)
+async function callDirectAPI(messages: any[], system: string): Promise<string | null> {
+  const apiKey = process.env.OPENCODE_ZEN_API_KEY || process.env.OPENCODE_GO_API_KEY || ""
+  if (!apiKey) return null
+
+  const apiMessages = [
+    { role: "system", content: system || "Eres un asistente amable." },
+    ...(messages || []),
+  ]
+
+  try {
+    const res = await fetch(ZEN_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: apiMessages,
+        max_tokens: 512,
+        temperature: 0.7,
+        stream: false,
+      }),
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data?.choices?.[0]?.message?.content?.trim() || null
+  } catch {
+    return null
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
     const { messages, system } = await request.json()
 
-    if (!HERMES) {
-      return NextResponse.json({ response: "", fallback: true }, { status: 200 })
+    // Try local mode first (hermes CLI)
+    let response = callViaHermes(messages, system)
+
+    // If local failed, try direct API (Vercel with env var)
+    if (!response) {
+      response = await callDirectAPI(messages, system)
     }
 
-    // Build the prompt for Hermes CLI
-    // System instruction first, then conversation history
-    let prompt = ""
-    if (system) {
-      prompt += `[Sistema: ${system}]\n\n`
+    if (response) {
+      return NextResponse.json({ response })
     }
-    for (const msg of messages || []) {
-      if (msg.role === "user") {
-        prompt += `[Usuario: ${msg.content}]\n`
-      } else if (msg.role === "assistant") {
-        prompt += `[Asistente: ${msg.content}]\n`
-      }
-    }
-    prompt += "\n[Asistente:"
 
-    const result = execSync(
-      `${HERMES} -z ${JSON.stringify(prompt)} -m "opencode-zen/big-pickle" --provider opencode-zen 2>/dev/null`,
-      {
-        timeout: 30000,
-        encoding: "utf-8",
-        maxBuffer: 10 * 1024 * 1024,
-      }
-    )
-
-    const response = result.trim()
-    return NextResponse.json({ response })
+    // Both failed — signal fallback to hardcoded engine responses
+    return NextResponse.json({ response: "", fallback: true }, { status: 200 })
   } catch (error: any) {
     console.error("Assistant API error:", error?.message?.slice(0, 200))
     return NextResponse.json({ response: "", fallback: true }, { status: 200 })
