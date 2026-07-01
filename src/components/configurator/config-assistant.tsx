@@ -93,34 +93,80 @@ function AiChat() {
 }
 
 // ── Step Card ──
+const stepThemes = [
+  { gradient: "from-brand-500/5 via-brand-400/5 to-transparent", accent: "bg-brand-500" },
+  { gradient: "from-cyan-500/5 via-cyan-400/5 to-transparent", accent: "bg-cyan-500" },
+  { gradient: "from-violet-500/5 via-violet-400/5 to-transparent", accent: "bg-violet-500" },
+  { gradient: "from-emerald-500/5 via-emerald-400/5 to-transparent", accent: "bg-emerald-500" },
+  { gradient: "from-amber-500/5 via-amber-400/5 to-transparent", accent: "bg-amber-500" },
+  { gradient: "from-rose-500/5 via-rose-400/5 to-transparent", accent: "bg-rose-500" },
+  { gradient: "from-sky-500/5 via-sky-400/5 to-transparent", accent: "bg-sky-500" },
+  { gradient: "from-teal-500/5 via-teal-400/5 to-transparent", accent: "bg-teal-500" },
+  { gradient: "from-indigo-500/5 via-indigo-400/5 to-transparent", accent: "bg-indigo-500" },
+]
+
 function StepCard({ step, i, total }: { step: ConfigStep; i: number; total: number }) {
+  const theme = stepThemes[i % stepThemes.length]
+  const isDnsStep = step.titulo.toLowerCase().includes("dns")
+  const isParentalStep = step.titulo.toLowerCase().includes("familia") || step.titulo.toLowerCase().includes("tiempo") || step.titulo.toLowerCase().includes("control")
+  const isRouterStep = step.titulo.toLowerCase().includes("router") || step.titulo.toLowerCase().includes("wifi")
+
+  // Decorative icon per step
+  let decorIcon = "🛡️"
+  if (isDnsStep) decorIcon = "🌐"
+  else if (isParentalStep) decorIcon = "👨‍👩‍👧‍👦"
+  else if (isRouterStep) decorIcon = "📶"
+
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 text-xs font-bold">{i + 1}</div>
-        <div>
-          <p className="text-[9px] font-semibold text-slate-400 uppercase">paso {i + 1} de {total}</p>
-          <h3 className="text-sm font-bold text-slate-900">{step.titulo}</h3>
-        </div>
-      </div>
-      <div className="space-y-2">
-        {step.descripcion.split("\n").filter(Boolean).map((line, j) => (
-          <div key={j} className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-success-500 mt-0.5 shrink-0" />
-            <span className="text-[13px] text-slate-700 leading-relaxed">{line}</span>
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      {/* Gradient background */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient} opacity-80`} />
+      {/* Decorative pattern */}
+      <div className="absolute inset-0 opacity-[0.03]"
+        style={{ backgroundImage: `radial-gradient(circle at 30% 40%, currentColor 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
+      {/* Side accent bar */}
+      <div className={`absolute left-0 top-0 bottom-0 w-1 ${theme.accent} opacity-30`} />
+      
+      {/* Content */}
+      <div className="relative z-10 p-4 pl-5">
+        <div className="flex items-center gap-3 mb-3">
+          <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${theme.accent} bg-opacity-10 border border-slate-200/60`}>
+            <span className="text-xs font-bold text-slate-500">{i + 1}</span>
           </div>
-        ))}
+          <div className="flex-1">
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">paso {i + 1} de {total}</p>
+            <h3 className="text-sm font-bold text-slate-900 leading-tight">{step.titulo}</h3>
+          </div>
+          <div className="text-lg opacity-30">{decorIcon}</div>
+        </div>
+
+        <div className="space-y-2">
+          {step.descripcion.split("\n").filter(Boolean).map((line, j) => {
+            const trimmed = line.trim()
+            const isHeader = trimmed.startsWith("**") && trimmed.endsWith("**")
+            if (isHeader) {
+              return <p key={j} className="text-xs font-bold text-slate-800 mt-1">{trimmed.replace(/\*\*/g, "")}</p>
+            }
+            return (
+              <div key={j} className="flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 text-success-500 mt-0.5 shrink-0" />
+                <span className="text-[13px] text-slate-700 leading-relaxed">{trimmed}</span>
+              </div>
+            )
+          })}
+        </div>
+
+        {step.notas && step.notas.length > 0 && (
+          <div className="mt-3 p-2.5 rounded-lg bg-amber-50/80 border border-amber-200/60 backdrop-blur-sm">
+            {step.notas.map((n, j) => <p key={j} className="text-[11px] text-amber-700 mb-1 last:mb-0">💡 {n}</p>)}
+          </div>
+        )}
+        {step.advertencia && (
+          <div className="mt-2 p-2.5 rounded-lg bg-red-50/80 border border-red-200/60 backdrop-blur-sm">
+            <p className="text-[11px] text-red-700">⚠️ {step.advertencia}</p>
+          </div>
+        )}
       </div>
-      {step.notas && step.notas.length > 0 && (
-        <div className="mt-3 p-2.5 rounded-lg bg-amber-50 border border-amber-100">
-          {step.notas.map((n, j) => <p key={j} className="text-[11px] text-amber-700 mb-1 last:mb-0">💡 {n}</p>)}
-        </div>
-      )}
-      {step.advertencia && (
-        <div className="mt-2 p-2.5 rounded-lg bg-red-50 border border-red-100">
-          <p className="text-[11px] text-red-700">⚠️ {step.advertencia}</p>
-        </div>
-      )}
     </div>
   )
 }
