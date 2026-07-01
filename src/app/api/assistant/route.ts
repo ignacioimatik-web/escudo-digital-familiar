@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 const ZEN_API_URL = "https://opencode.ai/zen/v1/chat/completions"
-const MODEL = "mimo-v2.5-free"
+const MODEL = "north-mini-code-free"
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model: MODEL,
         messages: apiMessages,
-        max_tokens: 2048,
+        max_tokens: 4096,
         temperature: 0.7,
         stream: false,
       }),
