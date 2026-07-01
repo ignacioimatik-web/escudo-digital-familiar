@@ -66,7 +66,7 @@ export default function ConfiguradorPage() {
                   Rápido
                 </h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Selecciona dispositivo, contexto y nivel. Obtén los pasos directamente.
+                  Selecciona dispositivo y nivel. Obtén los pasos al instante.
                 </p>
                 <div className="mt-4 flex items-center gap-1 text-sm font-medium text-brand-600">
                   Ir <ArrowRight className="h-3.5 w-3.5" />

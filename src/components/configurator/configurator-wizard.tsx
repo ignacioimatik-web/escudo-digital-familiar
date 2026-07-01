@@ -2,45 +2,39 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ArrowRight, RotateCcw, CheckCircle2, Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen, Wifi, Signal, Users, Network } from "lucide-react"
+import { ArrowLeft, ArrowRight, RotateCcw, CheckCircle2, Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen } from "lucide-react"
 import { Container } from "@/components/ui/container"
-import { deviceTypes, networkContexts } from "@/lib/config-assistant/types"
-import type { DeviceType, NetworkContext, ProtectionLevel, ConfigStep } from "@/lib/config-assistant/types"
+import { deviceTypes } from "@/lib/config-assistant/types"
+import type { DeviceType, ProtectionLevel, ConfigStep } from "@/lib/config-assistant/types"
 import { findConfig } from "@/lib/config-assistant/knowledge-base"
-import { DeviceConfig } from "@/lib/config-assistant/types"
+import type { DeviceConfig } from "@/lib/config-assistant/types"
 
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 3
 
 const deviceIconMap: Record<string, React.ElementType> = {
   Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen,
 }
 
-const networkIconMap: Record<string, React.ElementType> = {
-  Wifi, Signal, Users, Smartphone, Network,
-}
-
 export function ConfiguratorWizard() {
   const [step, setStep] = useState(1)
   const [device, setDevice] = useState<DeviceType | null>(null)
-  const [network, setNetwork] = useState<NetworkContext | null>(null)
   const [level, setLevel] = useState<ProtectionLevel | null>(null)
   const [currentConfig, setCurrentConfig] = useState<DeviceConfig | null>(null)
   const [currentStepIdx, setCurrentStepIdx] = useState(0)
 
-  const config = device && network && level ? findConfig(device, network, level) : null
+  const config = device && level ? findConfig(device, "wifi-casa", level) : null
 
   const canGoNext = () => {
     switch (step) {
       case 1: return device !== null
-      case 2: return network !== null
-      case 3: return level !== null
-      case 4: return true
+      case 2: return level !== null
+      case 3: return true
       default: return false
     }
   }
 
   const handleNext = () => {
-    if (step === 3 && config) {
+    if (step === 2 && config) {
       setCurrentConfig(config)
       setCurrentStepIdx(0)
     }
@@ -54,7 +48,6 @@ export function ConfiguratorWizard() {
   const handleReset = () => {
     setStep(1)
     setDevice(null)
-    setNetwork(null)
     setLevel(null)
     setCurrentConfig(null)
     setCurrentStepIdx(0)
@@ -121,44 +114,11 @@ export function ConfiguratorWizard() {
             </div>
           )}
 
-          {/* Step 2: Network */}
+          {/* Step 2: Level */}
           {step === 2 && (
             <div>
-              <h2 className="text-xl font-bold text-slate-900 mb-1">¿En qué contexto se conecta?</h2>
-              <p className="text-sm text-slate-500 mb-6">¿Cómo usa Internet el menor?</p>
-              <div className="space-y-2">
-                {networkContexts.map((c) => {
-                  const Icon = networkIconMap[c.icon as keyof typeof networkIconMap] || Smartphone
-                  const isSelected = network === c.id
-                  return (
-                    <button
-                      key={c.id}
-                      onClick={() => setNetwork(c.id)}
-                      className={`w-full flex items-start gap-4 p-4 rounded-xl border-2 transition-all text-left ${
-                        isSelected
-                          ? "border-brand-500 bg-brand-50 shadow-sm"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
-                    >
-                      <Icon className={`w-5 h-5 mt-0.5 ${isSelected ? "text-brand-600" : "text-slate-400"}`} />
-                      <div className="flex-1">
-                        <p className={`text-sm font-semibold ${isSelected ? "text-brand-700" : "text-slate-700"}`}>
-                          {c.label}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5">{c.descripcion}</p>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Level */}
-          {step === 3 && (
-            <div>
               <h2 className="text-xl font-bold text-slate-900 mb-1">¿Qué nivel de protección necesitas?</h2>
-              <p className="text-sm text-slate-500 mb-6">Según la edad y situación del menor</p>
+              <p className="text-sm text-slate-500 mb-6">Según la edad del menor</p>
               <div className="space-y-3">
                 {[
                   { id: "basico" as ProtectionLevel, label: "🛡️ Básico", desc: "Protección mínima. Ideal como primer paso o para adolescentes maduros.", recom: "+15 años" },
@@ -194,8 +154,8 @@ export function ConfiguratorWizard() {
             </div>
           )}
 
-          {/* Step 4: Results */}
-          {step === 4 && config && (
+          {/* Step 3: Results */}
+          {step === 3 && config && (
             <div>
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Tu guía personalizada</h2>
@@ -210,9 +170,6 @@ export function ConfiguratorWizard() {
                 <span className="px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-700 text-xs font-medium">
                   📋 {config.pasos.length} pasos
                 </span>
-                <span className="px-2.5 py-1 rounded-full bg-success-100 text-success-700 text-xs font-medium">
-                  {config.dnsRecomendado.map(ip => `DNS: ${ip}`).join(" | ")}
-                </span>
               </div>
 
               {/* Steps */}
@@ -225,7 +182,7 @@ export function ConfiguratorWizard() {
                       </div>
                       <div>
                         <h3 className="text-sm font-semibold text-slate-900 mb-1">{paso.titulo}</h3>
-                        <p className="text-sm text-slate-600 leading-relaxed">{paso.descripcion}</p>
+                        <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{paso.descripcion}</p>
                         {paso.notas && paso.notas.length > 0 && (
                           <div className="mt-2 space-y-0.5">
                             {paso.notas.map((nota, i) => (
@@ -279,11 +236,11 @@ export function ConfiguratorWizard() {
           )}
 
           {/* No config found */}
-          {step === 4 && !config && (
+          {step === 3 && !config && (
             <div className="text-center py-10 rounded-2xl border border-slate-200 bg-white">
-              <p className="text-slate-500 mb-2">No tenemos una guía para esta combinación.</p>
+              <p className="text-slate-500 mb-2">No tenemos una guía para esa combinación.</p>
               <button
-                onClick={() => { setDevice("router"); setNetwork("wifi-casa"); setLevel("recomendado") }}
+                onClick={() => { setDevice("router"); setLevel("recomendado") }}
                 className="mt-3 text-sm text-brand-600 hover:text-brand-700 font-medium"
               >
                 Prueba con la guía del router (protege toda la red)
@@ -309,7 +266,7 @@ export function ConfiguratorWizard() {
             disabled={!canGoNext()}
             className="px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {step === 3 ? "Ver guía" : "Siguiente"}
+            {step === 2 ? "Ver guía" : "Siguiente"}
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
