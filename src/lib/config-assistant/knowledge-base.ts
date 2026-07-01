@@ -64,7 +64,7 @@ const androidPasosBase: DeviceConfig["pasos"] = [
     descripcion:
       "📍 Abre **Ajustes** en el móvil\n📶 Entra en **Red e Internet** o **Conexiones**\n🔍 Busca **DNS privado** (suele estar abajo del todo)\n\n✏️ En Samsung: Ajustes > Conexiones > Más ajustes > DNS privado\n✏️ En Xiaomi: Ajustes > Conexión y compartir > DNS privado\n✏️ En Google Pixel: Ajustes > Red e Internet > DNS privado",
     notas: [
-      "Si no ves \"DNS privado\", tu móvil es muy antiguo (Android 8 o anterior). No te preocupes, puedes configurar el DNS en el router en su lugar.",
+      "Si no ves "DNS privado", tu móvil es muy antiguo (Android 8 o anterior). No te preocupes, puedes configurar el DNS en el router en su lugar.",
     ],
   },
   {
@@ -72,7 +72,7 @@ const androidPasosBase: DeviceConfig["pasos"] = [
     numero: 2,
     titulo: "Activar DNS privado",
     descripcion:
-      "🔘 Pulsa en la opción **\"Nombre del host del proveedor de DNS privado\"**\n✏️ En el recuadro que aparece, escribe exactamente:\n\n📝 **child.joindns4.eu** (protección infantil)\n\n✅ Pulsa **Guardar** o **Aceptar**\n\n💡 Otros perfiles DNS4.EU según edad:\n   • **protective.joindns4.eu** → +15 años, solo malware\n   • **child-noads.joindns4.eu** → 0-12 años, infantil + sin anuncios\n\n💡 Alternativas si DNS4.EU no funciona:\n   • **family-filter-dns.cleanbrowsing.org** (CleanBrowsing)\n   • **cloudflare-dns.com** (Cloudflare Familias)",
+      "🔘 Pulsa en la opción **"Nombre del host del proveedor de DNS privado"**\n✏️ En el recuadro que aparece, escribe exactamente:\n\n📝 **child.joindns4.eu** (protección infantil)\n\n✅ Pulsa **Guardar** o **Aceptar**\n\n💡 Otros perfiles DNS4.EU según edad:\n   • **protective.joindns4.eu** → +15 años, solo malware\n   • **child-noads.joindns4.eu** → 0-12 años, infantil + sin anuncios\n\n💡 Alternativas si DNS4.EU no funciona:\n   • **family-filter-dns.cleanbrowsing.org** (CleanBrowsing)\n   • **cloudflare-dns.com** (Cloudflare Familias)",
     notas: [
       "Escribe el nombre exactamente como aparece, sin espacios ni http://",
     ],
@@ -169,7 +169,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 9,
         titulo: "🌟 Extra: proteger también el WiFi de casa (opcional)",
         descripcion:
-          "Si quieres proteger TODOS los dispositivos de casa (no solo el móvil), configura el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia a **manual**\n📝 En DNS principal escribe:\n   1️⃣ **91.239.100.101**\n📝 En DNS secundario escribe:\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**",
+          "Si quieres proteger TODOS los dispositivos de casa (no solo el móvil), configura el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **"DNS"** en los ajustes\n✏️ Cambia a **manual**\n📝 En DNS principal escribe:\n   1️⃣ **91.239.100.101**\n📝 En DNS secundario escribe:\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**",
         notas: [
           "Esto es OPCIONAL. El móvil ya está protegido desde el paso 1",
           "El router protege también a la tablet, la tele, el ordenador...",
@@ -215,7 +215,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 7,
         titulo: "🌟 Extra: DNS en el router para doble capa (opcional)",
         descripcion:
-          "Si además quieres proteger todos los dispositivos de casa, añade el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"**\n✏️ Cambia a **manual**\n📝 1️⃣ **91.239.100.101** 2️⃣ **91.239.100.102**\n💾 **Guardar**",
+          "Si además quieres proteger todos los dispositivos de casa, añade el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **"DNS"**\n✏️ Cambia a **manual**\n📝 1️⃣ **91.239.100.101** 2️⃣ **91.239.100.102**\n💾 **Guardar**",
         notas: ["Opcional: el móvil ya está protegido con los pasos anteriores"],
       },
     ],
@@ -444,23 +444,28 @@ export const knowledgeBase: DeviceConfig[] = [
   }),
 
   cfg("iphone", "wifi-casa", "recomendado", {
-    titulo: "Protección recomendada en iPhone/iPad (WiFi en casa)",
-    resumen: "DNS en router + perfil DNS + En Familia + Tiempo de Uso completo.",
-    tiempoEstimado: "25-35 minutos",
-    dnsRecomendado: [CLEAN_BROWSING, DNS_FAMILIA_SURF],
+    titulo: "Protección recomendada en iPhone/iPad",
+    resumen: "Perfil DNS + En Familia + Tiempo de Uso completo.",
+    tiempoEstimado: "20-30 minutos",
+    dnsRecomendado: [DNS4_CHILD, CLEAN_BROWSING],
     pasos: [
       {
-        id: "ios-rec-dns",
+        id: "ios-rec-perfil",
         numero: 1,
-        titulo: "Configurar DNS en la red WiFi del iPhone",
-        descripcion: "📱 Abre **Ajustes** en el iPhone\n📶 Pulsa **Wi-Fi**\nℹ️ Toca el icono (i) junto a tu red\n⬇️ Baja hasta **Configurar DNS**\n✏️ Cambia de **Automático** a **Manual**\n❌ Elimina los DNS que aparezcan\n➕ Añade:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**",
+        titulo: "Instalar perfil DNS de protección",
+        descripcion:
+          "En iOS el DNS se configura con un **perfil de configuración**. Así proteges WiFi y datos móviles.\\n\\n📍 Abre **Safari**\\n🔤 Ve a la web del proveedor:\\n   • **dns4.eu/install** → DNS4.EU Child Protection (recomendado)\\n   • **cleanbrowsing.org** → CleanBrowsing Family\\n\\n⬇️ Pulsa **Descargar perfil**\\n⚙️ Ajustes > **Perfil descargado** > **Instalar**",
+        notas: [
+          "El perfil DNS protege en TODAS las redes. No necesitas configurar nada más.",
+          "Si no ves \\"Perfil descargado\\" en Ajustes, abre Safari y prueba otra vez.",
+        ],
       },
       {
         id: "ios-rec-tiempo",
         numero: 2,
         titulo: "Configurar Tiempo de Uso",
         descripcion:
-          "📱 En el iPhone del menor:\n⚙️ **Ajustes > Tiempo de Uso**\n🔢 Pon un código de 4 números (que el menor NO sepa)\n🌐 **Restricciones de contenido > Contenido web > Limitar contenido para adultos**\n🛑 Activa **bloquear compras**\n⏱️ Pon **límites de apps** (ej: 1-2h para juegos y redes)",
+          "📱 En el iPhone del menor:\\n⚙️ **Ajustes > Tiempo de Uso**\\n🔢 Pon un código de 4 números (que el menor NO sepa)\\n🌐 **Restricciones de contenido > Contenido web > Limitar contenido para adultos**\\n🛑 Activa **bloquear compras**\\n⏱️ Pon **límites de apps** (ej: 1-2h para juegos y redes)",
         notas: [
           "Límites de apps: 1-2h diarias para redes sociales y juegos",
           "Sin el código, el menor no puede desactivar nada",
@@ -470,31 +475,17 @@ export const knowledgeBase: DeviceConfig[] = [
         id: "ios-rec-familia",
         numero: 3,
         titulo: "Configurar En Familia",
-        descripcion: "👤 En **tu** iPhone (el del adulto):\n⚙️ Ajustes > **tu nombre** > **En Familia**\n➕ **Añadir miembro**\n👶 Crea un Apple ID para el menor",
-      },
-      {
-        id: "ios-rec-router-bonus",
-        numero: 4,
-        titulo: "🌟 Extra: proteger todo el WiFi (opcional)",
-        descripcion:
-          "Si quieres proteger también los demás dispositivos de casa, cambia el DNS del router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"**\n✏️ Cambia a **manual**\n📝 1️⃣ **91.239.100.101** 2️⃣ **91.239.100.102**\n💾 **Guardar**",
-      },
-      {
-        id: "ios-rec-perfil-bonus",
-        numero: 5,
-        titulo: "🌟 Extra: proteger también con datos móviles (opcional)",
-        descripcion:
-          "📱 Abre Safari en el iPhone\n🌐 Ve a: **dns4.eu/install**\n⬇️ Descarga el perfil\n⚙️ Ajustes > Perfil descargado > **Instalar**\n🔐 Te pedirá la contraseña de Apple",
-        notas: ["Sin este paso, el DNS solo funciona en WiFi. Con datos móviles, no hay filtro."],
-        advertencia: "Necesitas saber la contraseña del Apple ID del adulto.",
+        descripcion: "👤 En **tu** iPhone (el del adulto):\\n⚙️ Ajustes > **tu nombre** > **En Familia**\\n➕ **Añadir miembro**\\n👶 Crea un Apple ID para el menor si no tiene uno",
       },
     ],
     verificacion:
-      "Verifica desde el dispositivo del menor: contenido bloqueado, límites de tiempo activos, compras bloqueadas.",
+      "Conectado a cualquier red, visita un sitio para adultos. Debe mostrar 'Sitio web bloqueado'. Verifica también con datos móviles.",
     erroresFrecuentes: [
-      { problema: "No puedo instalar perfil DNS", solucion: "Asegúrate de tener la contraseña del Apple ID del adulto. Los perfiles requieren autenticación." },
-      { problema: "El menor desactiva Tiempo de Uso", solucion: "Protege el código. Si el menor lo sabe, puede desactivar todo. Usa un código difícil y no lo compartas." },
+      { problema: "No aparece 'Perfil descargado' en Ajustes", solucion: "Asegúrate de usar Safari. Si sigue sin aparecer, reinicia el iPhone y vuelve a descargar el perfil." },
+      { problema: "El menor conoce el código de Tiempo de Uso", solucion: "Cámbialo inmediatamente en Ajustes > Tiempo de Uso > Cambiar código." },
+      { problema: "El menor tiene su propio Apple ID", solucion: "Si el menor ya tiene Apple ID, añádelo a En Familia desde Ajustes > En Familia > Añadir miembro > Invitar a otra persona." },
     ],
+  }),
   }),
 
   // iPhone × all other critical contexts
@@ -830,7 +821,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "Opción A: DNS en el router (recomendado)",
         descripcion:
-          "Es la opción más fácil. Al cambiar el DNS del router, la TV se protege sola:\n\n📍 Abre Chrome o Safari\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia a **manual**\n📝 Escribe:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**\n✅ La TV ya filtra YouTube, Netflix y navegador",
+          "Es la opción más fácil. Al cambiar el DNS del router, la TV se protege sola:\n\n📍 Abre Chrome o Safari\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **"DNS"** en los ajustes\n✏️ Cambia a **manual**\n📝 Escribe:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**\n✅ La TV ya filtra YouTube, Netflix y navegador",
         notas: ["Esta es la solución más sencilla y efectiva", "Protege también cualquier otro dispositivo conectado al WiFi"],
       },
       {
@@ -877,7 +868,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "DNS en el router (método principal)",
         descripcion:
-          "Al cambiar el DNS del router, la consola se protege sola. Haz esto:\n\n📍 Abre Chrome o Safari en tu móvil u ordenador\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia de **automático** a **manual**\n📝 Escribe estos números:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**\n🔄 La consola se reconectará sola con protección",
+          "Al cambiar el DNS del router, la consola se protege sola. Haz esto:\n\n📍 Abre Chrome o Safari en tu móvil u ordenador\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **"DNS"** en los ajustes\n✏️ Cambia de **automático** a **manual**\n📝 Escribe estos números:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**\n🔄 La consola se reconectará sola con protección",
       },
       {
         id: "console-ps",
