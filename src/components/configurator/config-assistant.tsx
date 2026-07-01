@@ -2,129 +2,18 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { HeartHandshake, CheckCircle2, Send, Shield, Sparkles, RefreshCw, ArrowRight } from "lucide-react"
-import { processInput, createInitialState } from "@/lib/config-assistant/engine"
-import { deviceTypes } from "@/lib/config-assistant/types"
+import { Shield, Sparkles, Send, CheckCircle2, ArrowRight, Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen } from "lucide-react"
 import { findConfig } from "@/lib/config-assistant/knowledge-base"
-import type { AssistantResponse, ConversationState } from "@/lib/config-assistant/engine"
-import type { ConfigStep, DeviceType, ProtectionLevel } from "@/lib/config-assistant/types"
+import { deviceTypes } from "@/lib/config-assistant/types"
+import type { DeviceType, ConfigStep } from "@/lib/config-assistant/types"
+import type { DeviceConfig } from "@/lib/config-assistant/types"
 
-// ── Sub-components ──
-
-function JarvisHeader({ device, onReset }: { device: string | null; onReset: () => void }) {
-  return (
-    <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-r from-brand-700 to-brand-500">
-      <div className="absolute inset-0 opacity-[0.04]"
-        style={{ backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.6) 1px, transparent 1px)`, backgroundSize: '30px 30px' }} />
-      <div className="relative z-10 flex items-center justify-between px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 shadow-sm">
-            <Shield className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white tracking-tight">Asistente Sentinel</h2>
-              <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full bg-white/15 text-white/70 border border-white/20">v2.0</span>
-            </div>
-            <p className="text-[11px] text-white/70">{device ? `Protegiendo ${device}` : "Aquí para ayudarte"}</p>
-          </div>
-        </div>
-        <button onClick={onReset}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-[10px] font-medium text-white/60 hover:bg-white/20 hover:text-white/80 transition-all"
-        >
-          <RefreshCw className="w-3 h-3" /> Nuevo
-        </button>
-      </div>
-    </div>
-  )
+const iconMap: Record<string, React.ElementType> = {
+  Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen,
 }
 
-function JarvisProgress({ current, total, phase }: { current: number; total: number; phase: string }) {
-  const pct = total > 0 ? (current / total) * 100 : 0
-  const phaseLabels: Record<string, string> = { inicio: "elige dispositivo", nivel: "elige nivel", pasos: "siguiendo pasos", resumen: "verificar", finalizado: "completado", "": "esperando" }
-  return (
-    <div className="px-5 py-2.5 border-b border-slate-100 bg-white/80">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[9px] font-semibold text-brand-500/70 uppercase tracking-wider">{phaseLabels[phase] || phase}</span>
-        <span className="text-[9px] font-mono text-slate-400">{String(current).padStart(2, '0')}/{String(total).padStart(2, '0')}</span>
-      </div>
-      <div className="h-1.5 rounded-full bg-brand-100 overflow-hidden">
-        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.5, ease: "easeOut" }}
-          className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-400 shadow-sm shadow-brand-500/20" />
-      </div>
-    </div>
-  )
-}
-
-function JarvisStepCard({ step, numero, total }: { step: ConfigStep; numero: number; total: number }) {
-  const instrucciones = step.descripcion ? step.descripcion.split("\n").filter(Boolean) : []
-  const ipPattern = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g
-  const dnsIps: string[] = []
-  instrucciones.forEach(line => {
-    const trimmed = line.trim()
-    if (trimmed.match(/^[1-9]️⃣/)) {
-      const ips = trimmed.match(ipPattern)
-      if (ips) dnsIps.push(...ips)
-    }
-  })
-  const hasDnsInfo = dnsIps.length > 0
-  const filteredLines = instrucciones.filter(line => !line.trim().match(/^[1-9]️⃣/))
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-    >
-      <div className="flex items-center gap-3 mb-4">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 text-[11px] font-bold">{String(numero).padStart(2, '0')}</div>
-        <div>
-          <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">paso {numero}/{total}</p>
-          <h3 className="text-sm font-bold text-slate-900">{step.titulo}</h3>
-        </div>
-      </div>
-
-      {hasDnsInfo && (
-        <div className="mb-4 p-3 rounded-xl bg-brand-50 border border-brand-200 shadow-sm">
-          <p className="text-[9px] font-semibold uppercase tracking-wider text-brand-600 mb-2">🌐 Servidores DNS</p>
-          <div className="flex flex-wrap gap-2">
-            {dnsIps.map((ip) => (
-              <code key={ip} className="text-[12px] font-mono text-brand-700 bg-brand-100 border border-brand-200 px-2.5 py-1 rounded-md">{ip}</code>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {filteredLines.length > 0 && (
-        <div className="space-y-2 mb-3">
-          {filteredLines.map((line, i) => {
-            const trimmed = line.trim()
-            return (
-              <div key={i} className="flex items-start gap-2.5">
-                <CheckCircle2 className="h-4 w-4 text-success-500 mt-0.5 shrink-0" />
-                <span className="text-[13px] text-slate-700 leading-relaxed">{trimmed}</span>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {step.notas && step.notas.length > 0 && (
-        <div className="mt-2 p-3 rounded-lg bg-amber-50 border border-amber-100">
-          <p className="text-[9px] font-medium text-amber-600/70 mb-1.5">💡 Nota</p>
-          {step.notas.map((n, i) => <p key={i} className="text-[12px] text-amber-800 mb-1 last:mb-0">{n}</p>)}
-        </div>
-      )}
-      {step.advertencia && (
-        <div className="mt-2 p-3 rounded-lg bg-red-50 border border-red-100">
-          <p className="text-[12px] text-red-700">⚠️ {step.advertencia}</p>
-        </div>
-      )}
-    </motion.div>
-  )
-}
-
-// ── AI Chat Component ──
-
-function AiChat({ state }: { state: ConversationState }) {
+// ── AI Chat ──
+function AiChat() {
   const [aiMessages, setAiMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
@@ -138,47 +27,24 @@ function AiChat({ state }: { state: ConversationState }) {
     const text = input.trim()
     if (!text || loading) return
     setInput("")
-    setAiMessages(prev => [...prev, { role: "user" as const, content: text }])
+    setAiMessages(prev => [...prev, { role: "user", content: text }])
     setLoading(true)
-
     try {
-      const deviceLabel = state.device
-        ? deviceTypes.find(d => d.id === state.device)?.label || state.device
-        : "ninguno"
-      const levelLabel = state.level || "ninguno"
-
-      const system = `Eres el Asistente Sentinel, experto en protección digital infantil.
-Respondes en español de España, con tono cercano y muy claro.
-Respuestas cortas, máximo 4-5 líneas. Usas emojis de vez en cuando.
-
-Contexto del usuario:
-- Dispositivo: ${deviceLabel}
-- Nivel: ${levelLabel}`
-
       const res = await fetch("/api/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [{ role: "user", content: text }], system }),
+        body: JSON.stringify({
+          messages: [{ role: "user", content: text }],
+          system: "Eres el Asistente Sentinel, experto en protección digital infantil. Respondes en español, claro y breve.",
+        }),
       })
       const data = await res.json()
-      console.log("[Sentinel AI] API response:", JSON.stringify(data))
-      const response = data.response
-      if (!response) {
-        console.error("[Sentinel AI] Empty response from API:", data)
-        setAiMessages(prev => [...prev, { role: "assistant", content: "Lo siento, no he podido procesar tu pregunta. ¿Puedes reformularla?" }])
-        setLoading(false)
-        return
-      }
+      const response = data.response || "Lo siento, no he podido procesar tu pregunta."
       setAiMessages(prev => [...prev, { role: "assistant", content: response }])
-    } catch (e) {
-      console.error("[Sentinel AI] Fetch error:", e)
-      setAiMessages(prev => [...prev, { role: "assistant", content: "Lo siento, hubo un error. Inténtalo de nuevo." }])
+    } catch {
+      setAiMessages(prev => [...prev, { role: "assistant", content: "Error de conexión. Inténtalo de nuevo." }])
     }
     setLoading(false)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
   return (
@@ -187,7 +53,7 @@ Contexto del usuario:
         <Sparkles className="w-4 h-4 text-brand-500" />
         <span className="text-xs font-semibold text-slate-700">Chat IA — Pregúntame lo que quieras</span>
       </div>
-      <div ref={chatRef} className="h-56 overflow-y-auto px-4 py-3 space-y-3">
+      <div ref={chatRef} className="h-48 overflow-y-auto px-4 py-3 space-y-3">
         {aiMessages.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <Sparkles className="w-8 h-8 text-slate-300 mb-2" />
@@ -197,9 +63,7 @@ Contexto del usuario:
         {aiMessages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[85%] rounded-xl px-3.5 py-2 text-sm leading-relaxed ${
-              msg.role === "user"
-                ? "bg-brand-600 text-white rounded-br-sm"
-                : "bg-slate-100 text-slate-700 rounded-bl-sm"
+              msg.role === "user" ? "bg-brand-600 text-white rounded-br-sm" : "bg-slate-100 text-slate-700 rounded-bl-sm"
             }`}>
               {msg.content}
             </div>
@@ -216,14 +80,11 @@ Contexto del usuario:
         )}
       </div>
       <div className="flex items-center gap-2 p-3 border-t border-slate-100">
-        <input
-          type="text" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown}
-          placeholder="Escribe tu pregunta..."
-          className="flex-1 px-3.5 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-brand-300 focus:ring-1 focus:ring-brand-200 transition-all"
-        />
+        <input type="text" value={input} onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
+          placeholder="Escribe tu pregunta..." className="flex-1 px-3.5 py-2 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-brand-300 focus:ring-1 focus:ring-brand-200 transition-all" />
         <button onClick={handleSend} disabled={!input.trim() || loading}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-        >
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white hover:bg-brand-700 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
           <Send className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -231,295 +92,157 @@ Contexto del usuario:
   )
 }
 
-// ── Main ConfigAssistant ──
+// ── Step Card ──
+function StepCard({ step, i, total }: { step: ConfigStep; i: number; total: number }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 text-xs font-bold">{i + 1}</div>
+        <div>
+          <p className="text-[9px] font-semibold text-slate-400 uppercase">paso {i + 1} de {total}</p>
+          <h3 className="text-sm font-bold text-slate-900">{step.titulo}</h3>
+        </div>
+      </div>
+      <div className="space-y-2">
+        {step.descripcion.split("\n").filter(Boolean).map((line, j) => (
+          <div key={j} className="flex items-start gap-2">
+            <CheckCircle2 className="h-4 w-4 text-success-500 mt-0.5 shrink-0" />
+            <span className="text-[13px] text-slate-700 leading-relaxed">{line}</span>
+          </div>
+        ))}
+      </div>
+      {step.notas && step.notas.length > 0 && (
+        <div className="mt-3 p-2.5 rounded-lg bg-amber-50 border border-amber-100">
+          {step.notas.map((n, j) => <p key={j} className="text-[11px] text-amber-700 mb-1 last:mb-0">💡 {n}</p>)}
+        </div>
+      )}
+      {step.advertencia && (
+        <div className="mt-2 p-2.5 rounded-lg bg-red-50 border border-red-100">
+          <p className="text-[11px] text-red-700">⚠️ {step.advertencia}</p>
+        </div>
+      )}
+    </div>
+  )
+}
 
+// ── Main Assistant ──
 export function ConfigAssistant() {
-  const [state, setState] = useState<ConversationState>(createInitialState)
-  const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([])
-  const [options, setOptions] = useState<{ value: string; label: string; icon?: string; desc?: string }[]>([])
-  const [steps, setSteps] = useState<ConfigStep[]>([])
-  const [currentStepIdx, setCurrentStepIdx] = useState(-1)
-  const [progress, setProgress] = useState({ current: 0, total: 3 })
-  const [isFirstMessage, setIsFirstMessage] = useState(true)
-  const [isThinking, setIsThinking] = useState(false)
-  const [debugInfo, setDebugInfo] = useState("")
-  const stateRef = useRef(state)
-  stateRef.current = state
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const [step, setStep] = useState<"bienvenida" | "seleccion" | "pasos">("bienvenida")
+  const [device, setDevice] = useState<DeviceType | null>(null)
+  const [config, setConfig] = useState<DeviceConfig | null>(null)
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
-  }, [messages, options, steps, isThinking])
-
-  useEffect(() => {
-    if (isFirstMessage) {
-      setIsFirstMessage(false)
-      setIsThinking(true)
-      setTimeout(() => {
-        const freshState = createInitialState()
-        const response = processInput(freshState, "")
-        applyResponseFromState(freshState, response)
-        setIsThinking(false)
-      }, 300)
+  const handleDeviceSelect = (id: string) => {
+    const d = id as DeviceType
+    const c = findConfig(d, "wifi-casa", "recomendado")
+    if (c) {
+      setDevice(d)
+      setConfig(c)
+      setStep("pasos")
     }
-  }, [isFirstMessage])
-
-  const applyResponseFromState = (currentState: ConversationState, response: AssistantResponse) => {
-    setState(currentState)
-    if (response.message) setMessages(prev => [...prev, { text: response.message, isUser: false }])
-    setOptions(response.options ?? [])
-    setCurrentStepIdx(response.state.currentStepIndex)
-    if (response.steps) {
-      setSteps(response.steps)
-    } else if (response.phase !== "pasos" && response.phase !== "resumen") {
-      setSteps([])
-    }
-    if (response.progress) setProgress(response.progress)
   }
-
-  // Direct device/level selection without going through the engine
-  const handleDeviceSelect = (deviceId: string) => {
-    const deviceInfo = deviceTypes.find(d => d.id === deviceId)
-    if (!deviceInfo) return
-    setMessages(prev => [...prev, { text: deviceInfo.label, isUser: true }])
-    setOptions([])
-    setIsThinking(true)
-
-    // Build state directly
-    const newState: ConversationState = {
-      phase: "nivel",
-      device: deviceId as DeviceType,
-      deviceInfo: deviceInfo as any,
-      network: "wifi-casa",
-      level: null,
-      config: null,
-      currentStepIndex: 0,
-      history: [],
-      processedInputs: new Set(),
-    }
-    
-    // Simulate engine response for level phase
-    const deviceMsg = `¡Perfecto! 🎯 Has seleccionado **${deviceInfo.label}**.${deviceInfo.descripcion ? " " + deviceInfo.descripcion : ""}\n\nAhora elige el **nivel de protección** según la edad del menor:`
-
-    setTimeout(() => {
-      const response: AssistantResponse = {
-        message: deviceMsg,
-        options: [
-          { value: "basico", label: "🛡️ Básico", desc: "+15 años" },
-          { value: "recomendado", label: "🛡️🛡️ Recomendado", desc: "7-14 años" },
-          { value: "avanzado", label: "🛡️🛡️🛡️ Avanzado", desc: "0-12 años" },
-        ],
-        phase: "nivel",
-        state: newState,
-        progress: { current: 1, total: 3 },
-      }
-      applyResponseFromState(newState, response)
-      setIsThinking(false)
-    }, 200)
-  }
-
-  const handleLevelSelect = (level: string) => {
-    const levelLabels: Record<string, string> = { basico: "🛡️ Básico", recomendado: "🛡️🛡️ Recomendado", avanzado: "🛡️🛡️🛡️ Avanzado" }
-    setMessages(prev => [...prev, { text: levelLabels[level] || level, isUser: true }])
-    setOptions([])
-    setIsThinking(true)
-
-    // Get current device from ref
-    const currentState = stateRef.current
-    if (!currentState.device) {
-      setIsThinking(false)
-      return
-    }
-
-    const config = findConfig(currentState.device as DeviceType, "wifi-casa", level as ProtectionLevel)
-    
-    if (!config) {
-      setMessages(prev => [...prev, { text: "No tengo una guía exacta para esa combinación. Intenta con otro nivel.", isUser: false }])
-      setIsThinking(false)
-      return
-    }
-
-    const newState: ConversationState = {
-      ...currentState,
-      level: level as ProtectionLevel,
-      config,
-      currentStepIndex: 0,
-      phase: "pasos",
-    }
-
-    const firstStep = config.pasos[0]
-    const msg = `**Nivel ${levelLabels[level] || level}** — Tiempo estimado: ${config.tiempoEstimado}\n\n---\n\n**Paso 1/${config.pasos.length}:** ${firstStep.titulo}\n\n${firstStep.descripcion}`
-
-    setTimeout(() => {
-      const response: AssistantResponse = {
-        message: msg,
-        options: [
-          { value: "__siguiente__", label: "✅ Hecho, siguiente" },
-          { value: "__duda__", label: "❓ Tengo una duda" },
-        ],
-        steps: config.pasos,
-        progress: { current: 1, total: config.pasos.length },
-        phase: "pasos",
-        state: newState,
-      }
-      applyResponseFromState(newState, response)
-      setIsThinking(false)
-    }, 200)
-  }
-
-  const handleOptionClick = (value: string) => {
-    // Route to the correct handler based on phase
-    const currentPhase = stateRef.current.phase
-    
-    if (value === "__reset__") {
-      setMessages([]); setOptions([]); setSteps([]); setCurrentStepIdx(-1)
-      const s = createInitialState()
-      applyResponseFromState(s, { message: "Reiniciando...", options: [], phase: "inicio", state: s, progress: { current: 0, total: 3 } })
-      return
-    }
-    
-    // Device selection
-    if (currentPhase === "inicio") {
-      handleDeviceSelect(value)
-      return
-    }
-    
-    // Level selection
-    if (currentPhase === "nivel") {
-      handleLevelSelect(value)
-      return
-    }
-    
-    // Step navigation - use engine
-    const currentState = JSON.parse(JSON.stringify(stateRef.current))
-    const response = processInput(currentState, value)
-    applyResponseFromState(currentState, response)
-  }
-
-  const levelColors = ["border-cyan-200 bg-cyan-50 text-cyan-700", "border-brand-200 bg-brand-50 text-brand-700", "border-rose-200 bg-rose-50 text-rose-700"]
-  const levelBadges = ["+15 AÑOS", "7-14 AÑOS", "0-12 AÑOS"]
-  const levelShieldColors = ["text-cyan-600", "text-brand-600", "text-rose-600"]
 
   return (
     <div>
       {/* Configurador */}
       <div className="flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-        <JarvisHeader device={state.device} onReset={() => { setMessages([]); setOptions([]); setSteps([]); setCurrentStepIdx(-1); const s = createInitialState(); applyResponseFromState(s, processInput(s, "")) }} />
-        <JarvisProgress current={progress.current} total={progress.total} phase={state.phase} />
-        {debugInfo && <div className="px-4 py-1.5 bg-amber-50 border-b border-amber-200 text-[10px] font-mono text-amber-700 truncate">{debugInfo}</div>}
+        {/* Header */}
+        <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-r from-brand-700 to-brand-500 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 border border-white/20">
+              <Shield className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white">Asistente Sentinel</h2>
+              <p className="text-[11px] text-white/70">Protección digital paso a paso</p>
+            </div>
+          </div>
+        </div>
 
-        <div ref={scrollRef} className="overflow-y-auto px-5 py-5 space-y-4 max-h-[500px] md:max-h-[550px] scroll-smooth">
-          <AnimatePresence mode="popLayout">
-            {messages.map((msg, i) => (
-              msg.isUser ? (
-                <motion.div key={`msg-${i}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex justify-end">
-                  <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand-600 text-white text-sm font-medium shadow-sm">
-                    <CheckCircle2 className="w-4 h-4 text-white/70" />{msg.text}
+        <div className="p-5">
+          <AnimatePresence mode="wait">
+            {step === "bienvenida" && (
+              <motion.div key="bienvenida" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6">
+                <div className="flex justify-center mb-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50">
+                    <Shield className="h-7 w-7 text-brand-500" />
                   </div>
-                </motion.div>
-              ) : (
-                <motion.div key={`msg-${i}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-4"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-100">
-                      <Shield className="h-3.5 w-3.5 text-brand-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-semibold text-brand-600 mb-1.5">Asistente Sentinel</p>
-                      <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-line [&_strong]:text-slate-900 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:bg-brand-50 [&_code]:text-[11px] [&_code]:font-medium [&_code]:text-brand-700">{msg.text}</div>
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            ))}
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">Protege a tu familia</h3>
+                <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">Te guío paso a paso para configurar la protección digital en cualquier dispositivo.</p>
+                <button onClick={() => setStep("seleccion")}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition-all shadow-sm">
+                  Comenzar <ArrowRight className="w-4 h-4" />
+                </button>
+              </motion.div>
+            )}
 
-            {isThinking && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100">
-                  <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                  <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }} className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                  <motion.div animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }} className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                  <span className="text-[10px] font-medium text-slate-500 ml-1">Pensando...</span>
+            {step === "seleccion" && (
+              <motion.div key="seleccion" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <h3 className="text-base font-bold text-slate-900 mb-1">¿Qué dispositivo quieres proteger?</h3>
+                <p className="text-sm text-slate-500 mb-5">Selecciona el tipo de dispositivo</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {deviceTypes.map((d) => {
+                    const Icon = iconMap[d.icon as keyof typeof iconMap] || Smartphone
+                    return (
+                      <motion.button key={d.id} whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}
+                        onClick={() => handleDeviceSelect(d.id)}
+                        className="flex flex-col items-center gap-2 p-3.5 rounded-xl border border-slate-200 bg-white hover:border-brand-300 hover:shadow-sm transition-all text-center group">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 group-hover:bg-brand-100 transition-all">
+                          <Icon className="w-5 h-5 text-brand-400 group-hover:text-brand-600" />
+                        </div>
+                        <span className="text-xs font-semibold text-slate-700 group-hover:text-brand-700">{d.label}</span>
+                      </motion.button>
+                    )
+                  })}
                 </div>
               </motion.div>
             )}
 
-            {steps.length > 0 && currentStepIdx >= 0 && currentStepIdx < steps.length && !isThinking && (
-              <motion.div key="steps" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                <JarvisStepCard step={steps[currentStepIdx]} numero={currentStepIdx + 1} total={steps.length} />
-                <div className="flex items-center justify-center gap-1.5 mt-3">
-                  {steps.map((_, i) => (
-                    <button key={i} onClick={() => { if (i !== currentStepIdx) { setIsThinking(true); const s = JSON.parse(JSON.stringify(stateRef.current)); setTimeout(() => { applyResponseFromState(s, processInput(s, `__ir_a_${i}__`)); setIsThinking(false) }, 200) } }}
-                      className={`cursor-pointer rounded-full transition-all duration-500 ${i <= currentStepIdx ? "w-6 h-1.5 bg-brand-400" : "w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400"}`}
-                      title={`Ir al paso ${i + 1}`} aria-label={`Ir al paso ${i + 1}`} />
+            {step === "pasos" && config && (
+              <motion.div key="pasos" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">{config.titulo}</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      ⏱️ {config.tiempoEstimado} · {config.pasos.length} pasos
+                    </p>
+                  </div>
+                  <button onClick={() => { setStep("seleccion"); setDevice(null); setConfig(null) }}
+                    className="text-xs font-medium text-brand-600 hover:text-brand-700 shrink-0">
+                    Cambiar dispositivo
+                  </button>
+                </div>
+                <div className="space-y-3 mb-5">
+                  {config.pasos.map((paso, i) => (
+                    <StepCard key={paso.id || i} step={paso} i={i} total={config.pasos.length} />
                   ))}
                 </div>
+                <div className="rounded-xl border border-success-200 bg-success-50 p-4">
+                  <h4 className="text-xs font-bold text-success-700 mb-1">✅ Verificación final</h4>
+                  <p className="text-xs text-success-600">{config.verificacion}</p>
+                </div>
+                {config.erroresFrecuentes.length > 0 && (
+                  <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+                    <h4 className="text-xs font-bold text-slate-700 mb-2">Problemas frecuentes</h4>
+                    <div className="space-y-1.5">
+                      {config.erroresFrecuentes.slice(0, 3).map((err, i) => (
+                        <p key={i} className="text-[11px] text-slate-600">⚠️ {err.problema} → {err.solucion}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <button onClick={() => { setStep("seleccion"); setDevice(null); setConfig(null) }}
+                  className="mt-4 w-full py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all">
+                  Configurar otro dispositivo
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
-
-          {options.length > 0 && !isThinking && (
-            <motion.div key={`options-${state.phase}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 pt-1">
-              {state.phase === "inicio" && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {options.map((opt, i) => (
-                    <motion.button key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-                      whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} onClick={() => handleOptionClick(opt.value)}
-                      className="flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-200 bg-white hover:border-brand-300 hover:shadow-sm transition-all text-center group"
-                    >
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 group-hover:bg-brand-100 transition-all">
-                        <Shield className="w-5 h-5 text-brand-400 group-hover:text-brand-600" />
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-700 group-hover:text-brand-700 transition-colors">{opt.label}</span>
-                      {opt.desc && <span className="text-[9px] text-slate-400 line-clamp-2">{opt.desc}</span>}
-                    </motion.button>
-                  ))}
-                </div>
-              )}
-              {state.phase === "nivel" && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {options.map((opt, i) => (
-                    <motion.button key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                      whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleOptionClick(opt.value)}
-                      className={`relative overflow-hidden p-4 rounded-xl border-2 ${levelColors[i]} text-center group transition-all duration-300 hover:shadow-sm`}
-                    >
-                      <div className="flex flex-col items-center gap-2">
-                        <Shield className={`w-5 h-5 ${levelShieldColors[i]}`} />
-                        <span className="text-sm font-bold text-slate-800">{opt.label}</span>
-                        <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-white/80 border border-inherit text-inherit">{levelBadges[i]}</span>
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
-              )}
-              {state.phase !== "inicio" && state.phase !== "nivel" && (
-                <div className="flex flex-wrap gap-2">
-                  {options.map((opt, i) => (
-                    <motion.button key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
-                      whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => handleOptionClick(opt.value)}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:border-brand-300 hover:text-brand-700 hover:shadow-sm transition-all"
-                    >
-                      {opt.label} <ArrowRight className="w-3.5 h-3.5" />
-                    </motion.button>
-                  ))}
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {messages.length === 0 && options.length === 0 && !isThinking && (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-50 mb-4">
-                <Shield className="h-8 w-8 text-brand-300" />
-              </div>
-              <p className="text-sm text-slate-500 font-medium">Preparando el asistente...</p>
-            </div>
-          )}
         </div>
       </div>
 
-      <AiChat state={state} />
+      {/* Chat IA */}
+      <AiChat />
     </div>
   )
 }
