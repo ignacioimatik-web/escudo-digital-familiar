@@ -195,7 +195,7 @@ Contexto del usuario:
         body: JSON.stringify({ messages: conv, system }),
       })
       const data = await res.json()
-      console.log("[Sentinel AI] API response:", data)
+      console.log("[Sentinel AI] API response:", JSON.stringify(data))
       const response = data.response
       if (!response) {
         console.error("[Sentinel AI] Empty response from API:", data)
