@@ -210,6 +210,8 @@ function buildConfigResponse(state: ConversationState): AssistantResponse | null
   state.config = config
   state.currentStepIndex = 0
   state.phase = "pasos"
+  console.log("[Sentinel Engine] Config found:", config?.id, "for device:", state.device, "level:", state.level, "network:", state.network)
+  if (config?.pasos?.[0]) console.log("[Sentinel Engine] First step:", config.pasos[0].titulo, "id:", config.pasos[0].id)
   const firstStep = config.pasos[0]
   return {
     message: mensajeNivel(state.level, config) + "\n\n---\n\n" + mensajePaso(firstStep, 1, config.pasos.length),
