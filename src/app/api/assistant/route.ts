@@ -43,7 +43,7 @@ function callViaHermes(messages: any[], system: string): string | null {
   try {
     const result = execSync(
       `${hermes} -z ${JSON.stringify(prompt)} -m "opencode-zen/big-pickle" --provider opencode-zen 2>/dev/null`,
-      { timeout: 30000, encoding: "utf-8", maxBuffer: 10 * 1024 * 1024 }
+      { timeout: 60000, encoding: "utf-8", maxBuffer: 10 * 1024 * 1024 }
     )
     return result.trim()
   } catch {
@@ -71,7 +71,7 @@ async function callDirectAPI(messages: any[], system: string): Promise<string | 
       body: JSON.stringify({
         model: MODEL,
         messages: apiMessages,
-        max_tokens: 512,
+        max_tokens: 8192,
         temperature: 0.7,
         stream: false,
       }),
