@@ -256,21 +256,11 @@ export function ConfigAssistant() {
   const aiEnabled = true // Use BigPickle for natural responses
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // Call the AI API to enhance or generate responses
-  const callAI = async (userInput: string, engineResponse: AssistantResponse): Promise<string> => {
+  // Call the AI API
+  const callAI = async (conv: { role: "user" | "assistant"; content: string }[], engineResponse: AssistantResponse): Promise<string> => {
     if (!aiEnabled) return engineResponse.message
 
     try {
-      // Build full conversation context
-      const conv = messages.map(m => ({
-        role: m.isUser ? "user" : "assistant" as const,
-        content: m.text,
-      }))
-      // Add current user input
-      if (userInput) {
-        conv.push({ role: "user" as const, content: userInput })
-      }
-
       const deviceLabel = state.device
         ? deviceTypes.find(d => d.id === state.device)?.label || state.device
         : "ninguno"
@@ -322,9 +312,10 @@ Responde en español de España, con naturalidad y cercanía.`;
     }
   }, [isFirstMessage])
 
-  const applyResponse = async (response: AssistantResponse, userInput?: string) => {
-    // Enhance message with AI
-    const enhancedMessage = response.message ? await callAI(userInput || "", response) : ""
+  const applyResponse = async (response: AssistantResponse, userInput?: string, convContext?: { role: "user" | "assistant"; content: string }[]) => {
+    // Enhance message with AI (only for user-typed questions, not button clicks)
+    const isControlClick = userInput && (userInput.startsWith("__") || ["Hecho", "Siguiente", "Volver", "Duda", "DNS"].some(c => userInput.includes(c)))
+    const enhancedMessage = (!isControlClick && response.message) ? await callAI(convContext || [], response) : response.message || ""
     setState(response.state)
     if (enhancedMessage) {
       setMessages(prev => [...prev, { text: enhancedMessage, isUser: false }])
@@ -365,11 +356,16 @@ Responde en español de España, con naturalidad y cercanía.`;
     e.preventDefault()
     const text = inputText.trim()
     if (!text) return
+    // Build conversation context BEFORE state updates (avoids stale closure)
+    const currentConv: { role: "user" | "assistant"; content: string }[] = [
+      ...messages.map(m => ({ role: m.isUser ? "user" as const : "assistant" as const, content: m.text })),
+      { role: "user" as const, content: text },
+    ]
     setMessages(prev => [...prev, { text, isUser: true }])
     setInputText("")
     setIsThinking(true)
     const response = processInput(state, text)
-    await applyResponse(response, text)
+    await applyResponse(response, text, currentConv)
     setIsThinking(false)
   }
 
