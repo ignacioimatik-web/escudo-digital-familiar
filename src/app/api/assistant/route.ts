@@ -41,16 +41,24 @@ export async function POST(request: NextRequest) {
 
     if (!res.ok) {
       const errBody = await res.text().catch(() => "unknown")
-      console.error("ZEN API error:", res.status, errBody.slice(0, 200))
-      return NextResponse.json({ response: "", fallback: true }, { status: 200 })
+      console.error("ZEN API error:", res.status, errBody.slice(0, 300))
+      return NextResponse.json({ response: "", fallback: true, debug: { zenStatus: res.status, zenError: errBody.slice(0, 200) } }, { status: 200 })
     }
 
-    const data = await res.json()
+    const rawText = await res.text()
+    let data: any
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      console.error("ZEN API invalid JSON:", rawText.slice(0, 300))
+      return NextResponse.json({ response: "", fallback: true, debug: { parseError: rawText.slice(0, 200) } }, { status: 200 })
+    }
+
     const content = data?.choices?.[0]?.message?.content?.trim() || ""
 
-    // Log if ZEN returned empty content
     if (!content) {
-      console.error("ZEN API returned empty content:", JSON.stringify(data).slice(0, 300))
+      console.error("ZEN API empty content:", JSON.stringify(data).slice(0, 400))
+      return NextResponse.json({ response: "", fallback: true, debug: { zenResponse: JSON.stringify(data).slice(0, 300) } }, { status: 200 })
     }
 
     return NextResponse.json({ response: content })
