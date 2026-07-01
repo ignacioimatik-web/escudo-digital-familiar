@@ -180,16 +180,14 @@ function AiChat({ state }: { state: ConversationState }) {
 
       const system = `Eres el Asistente Sentinel, experto en protección digital infantil.
 Respondes en español de España, con tono cercano y muy claro.
-Usas lenguaje sencillo, sin jerga técnica sin explicar.
-Respuestas naturales, concisas pero completas.
-Usas emojis de vez en cuando para dar calidez.
+Respuestas cortas, máximo 4-5 líneas. Usas emojis de vez en cuando.
 
 Contexto del usuario:
-- Dispositivo seleccionado: ${deviceLabel}
-- Nivel de protección: ${levelLabel}
-- Fase del configurador: ${state.phase}`
+- Dispositivo: ${deviceLabel}
+- Nivel: ${levelLabel}`
 
-      const conv = [...aiMessages, newMsg]
+      // Solo enviar el último mensaje, no todo el historial
+      const conv = [{ role: "user" as const, content: text }]
 
       const res = await fetch("/api/assistant", {
         method: "POST",
@@ -197,9 +195,17 @@ Contexto del usuario:
         body: JSON.stringify({ messages: conv, system }),
       })
       const data = await res.json()
-      const response = data.response || "Lo siento, no he podido procesar tu pregunta. ¿Puedes reformularla?"
+      console.log("[Sentinel AI] API response:", data)
+      const response = data.response
+      if (!response) {
+        console.error("[Sentinel AI] Empty response from API:", data)
+        setAiMessages(prev => [...prev, { role: "assistant", content: "Lo siento, no he podido procesar tu pregunta. ¿Puedes reformularla?" }])
+        setLoading(false)
+        return
+      }
       setAiMessages(prev => [...prev, { role: "assistant", content: response }])
-    } catch {
+    } catch (e) {
+      console.error("[Sentinel AI] Fetch error:", e)
       setAiMessages(prev => [...prev, { role: "assistant", content: "Lo siento, hubo un error. Inténtalo de nuevo." }])
     }
     setLoading(false)
