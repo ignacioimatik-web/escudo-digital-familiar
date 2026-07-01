@@ -110,20 +110,6 @@ export default function ConfiguradorPage() {
       {mode === "assistant" && (
         <Section className="-mt-[300px] pt-0">
           <Container size="md" className="mt-[100px]">
-            <div className="mb-4 flex items-center justify-between">
-              <button
-                onClick={() => setMode("select")}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 text-xs font-medium text-slate-300 hover:text-white hover:border-slate-500 transition-all"
-              >
-                ← Volver al menú
-              </button>
-              <button
-                onClick={() => window.location.reload()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-600/10 border border-cyan-500/20 text-xs font-mono text-cyan-400/70 hover:text-cyan-300 hover:border-cyan-500/40 transition-all"
-              >
-                ↻ REINICIAR
-              </button>
-            </div>
             <div className="rounded-2xl border border-cyan-500/20 bg-slate-950 shadow-2xl shadow-cyan-500/5 overflow-hidden">
               <ConfigAssistant />
             </div>
@@ -134,14 +120,6 @@ export default function ConfiguradorPage() {
       {mode === "wizard" && (
         <Section className="-mt-[300px] pt-0">
           <Container size="md" className="mt-[100px]">
-            <div className="mb-4">
-              <button
-                onClick={() => setMode("select")}
-                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1.5 transition-colors"
-              >
-                ← Volver al menú
-              </button>
-            </div>
             <ConfiguratorWizard />
           </Container>
         </Section>
@@ -150,14 +128,6 @@ export default function ConfiguradorPage() {
       {mode === "dns" && (
         <Section className="-mt-[300px] pt-0">
           <Container size="md" className="mt-[100px]">
-            <div className="mb-4">
-              <button
-                onClick={() => setMode("select")}
-                className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1.5 transition-colors"
-              >
-                ← Volver al menú
-              </button>
-            </div>
             <DnsComparator />
           </Container>
         </Section>
