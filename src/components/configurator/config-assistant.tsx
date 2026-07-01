@@ -241,6 +241,8 @@ export function ConfigAssistant() {
   const [progress, setProgress] = useState({ current: 0, total: 3 })
   const [isFirstMessage, setIsFirstMessage] = useState(true)
   const [isThinking, setIsThinking] = useState(false)
+  const stateRef = useRef(state)
+  stateRef.current = state
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -252,15 +254,16 @@ export function ConfigAssistant() {
       setIsFirstMessage(false)
       setIsThinking(true)
       setTimeout(() => {
-        const response = processInput(createInitialState(), "")
-        applyResponse(response)
+        const freshState = createInitialState()
+        const response = processInput(freshState, "")
+        applyResponseFromState(freshState, response)
         setIsThinking(false)
       }, 300)
     }
   }, [isFirstMessage])
 
-  const applyResponse = (response: AssistantResponse) => {
-    setState(response.state)
+  const applyResponseFromState = (currentState: ConversationState, response: AssistantResponse) => {
+    setState(currentState)
     if (response.message) setMessages(prev => [...prev, { text: response.message, isUser: false }])
     setOptions(response.options ?? [])
     setCurrentStepIdx(response.state.currentStepIndex)
@@ -274,13 +277,20 @@ export function ConfigAssistant() {
     setMessages(prev => [...prev, { text: label, isUser: true }])
     setOptions([])
     setIsThinking(true)
+
+    // Use latest state via ref to avoid stale closure
+    const currentState: ConversationState = JSON.parse(JSON.stringify(stateRef.current))
+    
     if (value === "__reset__") {
       setMessages([]); setOptions([]); setSteps([]); setCurrentStepIdx(-1)
-      applyResponse(resetConversation())
+      const freshState = createInitialState()
+      const response = processInput(freshState, "")
+      applyResponseFromState(freshState, response)
       setIsThinking(false); return
     }
-    const response = processInput(state, value)
-    applyResponse(response)
+    
+    const response = processInput(currentState, value)
+    applyResponseFromState(currentState, response)
     setIsThinking(false)
   }
 
@@ -292,7 +302,7 @@ export function ConfigAssistant() {
     <div>
       {/* Configurador */}
       <div className="flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-        <JarvisHeader device={state.device} onReset={() => { setMessages([]); setOptions([]); setSteps([]); setCurrentStepIdx(-1); applyResponse(resetConversation()) }} />
+        <JarvisHeader device={state.device} onReset={() => { setMessages([]); setOptions([]); setSteps([]); setCurrentStepIdx(-1); const s = createInitialState(); applyResponseFromState(s, processInput(s, "")) }} />
         <JarvisProgress current={progress.current} total={progress.total} phase={state.phase} />
 
         <div ref={scrollRef} className="overflow-y-auto px-5 py-5 space-y-4 max-h-[500px] md:max-h-[550px] scroll-smooth">
@@ -337,7 +347,7 @@ export function ConfigAssistant() {
                 <JarvisStepCard step={steps[currentStepIdx]} numero={currentStepIdx + 1} total={steps.length} />
                 <div className="flex items-center justify-center gap-1.5 mt-3">
                   {steps.map((_, i) => (
-                    <button key={i} onClick={() => { if (i !== currentStepIdx) { setIsThinking(true); setTimeout(() => { applyResponse(processInput(state, `__ir_a_${i}__`)); setIsThinking(false) }, 200) } }}
+                    <button key={i} onClick={() => { if (i !== currentStepIdx) { setIsThinking(true); const s = JSON.parse(JSON.stringify(stateRef.current)); setTimeout(() => { applyResponseFromState(s, processInput(s, `__ir_a_${i}__`)); setIsThinking(false) }, 200) } }}
                       className={`cursor-pointer rounded-full transition-all duration-500 ${i <= currentStepIdx ? "w-6 h-1.5 bg-brand-400" : "w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400"}`}
                       title={`Ir al paso ${i + 1}`} aria-label={`Ir al paso ${i + 1}`} />
                   ))}
