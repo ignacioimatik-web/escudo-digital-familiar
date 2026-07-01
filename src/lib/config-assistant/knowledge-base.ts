@@ -149,7 +149,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 9,
         titulo: "🌟 Extra: proteger también el WiFi de casa (opcional)",
         descripcion:
-          "Si quieres proteger TODOS los dispositivos de casa (no solo el móvil), configura el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia a **manual**\n📝 Escribe: 1️⃣ **91.239.100.101** 2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**",
+          "Si quieres proteger TODOS los dispositivos de casa (no solo el móvil), configura el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia a **manual**\n📝 En DNS principal escribe:\n   1️⃣ **91.239.100.101**\n📝 En DNS secundario escribe:\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**",
         notas: [
           "Esto es OPCIONAL. El móvil ya está protegido desde el paso 1",
           "El router protege también a la tablet, la tele, el ordenador...",

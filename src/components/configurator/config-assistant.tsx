@@ -157,51 +157,77 @@ function JarvisStepCard({ step, numero, total }: { step: ConfigStep; numero: num
   // Split description into individual instruction lines
   const instrucciones = step.descripcion.split("\n").filter(Boolean)
 
+  // Extract DNS provider info from description lines
+  const dnsIps: string[] = []
+  const ipPattern = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g
+  const dnsLines: string[] = []
+  instrucciones.forEach((line) => {
+    if (/^[1-3]️⃣/.test(line.trim())) {
+      const ips = line.match(ipPattern)
+      if (ips) ips.forEach(ip => { if (!dnsIps.includes(ip)) dnsIps.push(ip) })
+      dnsLines.push(line)
+    }
+  })
+  const hasDnsInfo = dnsIps.length > 0
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       className="relative overflow-hidden rounded-xl border border-emerald-700/20 bg-gradient-to-br from-emerald-950/60 to-teal-950/60 backdrop-blur-sm p-5"
     >
-      <div className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.8) 1px, transparent 1px)`,
-          backgroundSize: '20px 20px'
-        }}
-      />
       <div className="relative z-10">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-4">
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
             {String(numero).padStart(2, '0')}
           </div>
           <span className="text-[10px] font-medium text-emerald-400/60 tracking-wide">PASO {numero}/{total}</span>
         </div>
         <h4 className="text-sm font-bold text-white mb-3 tracking-wide">{step.titulo}</h4>
-        <div className="space-y-1.5 mb-3">
+
+        {/* Checklist items */}
+        <div className="space-y-2 mb-4">
           {instrucciones.map((linea, i) => {
-            // Detect if line starts with an emoji (visual instruction)
-            const tieneEmoji = /^[📍🔤🔑🔍✏️📝💾🔄📱🌐🔒📡🎯⚙️1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣💡👉✅❌⚠️👤🔐🎮💻📺🖥️📖📋🗂️🧩🛡️🚫🔞➕➖⬇️⬆️]/.test(linea.trim())
-            const esSubTitulo = linea.trim().startsWith("**") && linea.trim().endsWith("**")
-            
+            const trimmed = linea.trim()
+            // Skip blank lines
+            if (!trimmed) return null
+            // Detect DNS IP lines (1️⃣, 2️⃣) — skip, rendered in DNS card below
+            if (/^[1-3]️⃣/.test(trimmed)) return null
+            // Detect sub-header lines
+            const esSubTitulo = trimmed.startsWith("**") && trimmed.endsWith("**")
+
             return (
-              <div
-                key={i}
-                className={`flex items-start gap-2 ${
-                  tieneEmoji ? "bg-emerald-500/5 rounded-lg px-3 py-2 -mx-1" : ""
-                }`}
-              >
+              <div key={i} className="flex items-start gap-2.5">
+                {/* Checkbox bullet */}
+                <div className="flex h-4 w-4 shrink-0 mt-0.5 items-center justify-center rounded-full border border-emerald-500/40">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </div>
                 <span className={`text-[13px] leading-relaxed ${
                   esSubTitulo ? "text-white font-semibold text-sm" : "text-slate-200"
                 }`}>
-                  {linea}
+                  {trimmed}
                 </span>
               </div>
             )
           })}
         </div>
+
+        {/* DNS Provider Card — prominent */}
+        {hasDnsInfo && (
+          <div className="mb-4 p-3 rounded-xl bg-gradient-to-r from-emerald-900/40 to-teal-900/40 border border-emerald-500/30 shadow-sm">
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-emerald-400 mb-2">🌐 Servidores DNS</p>
+            <div className="flex flex-wrap gap-2">
+              {dnsIps.map((ip) => (
+                <code key={ip} className="text-[12px] font-mono text-emerald-200 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">{ip}</code>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tips section — renamed from "Consejo" */}
         {step.notas && step.notas.length > 0 && (
           <div className="mt-2 p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-            <p className="text-[9px] font-medium tracking-wide text-emerald-400/60 mb-1.5">💡 Consejo</p>
+            <p className="text-[9px] font-medium tracking-wide text-emerald-400/60 mb-1.5">💡 Nota</p>
             {step.notas.map((n, i) => (
               <p key={i} className="text-[12px] text-slate-400 mb-1 last:mb-0">{n}</p>
             ))}
