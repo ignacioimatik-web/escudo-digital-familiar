@@ -64,7 +64,7 @@ const androidPasosBase: DeviceConfig["pasos"] = [
     descripcion:
       "📍 Abre **Ajustes** en el móvil\n📶 Entra en **Red e Internet** o **Conexiones**\n🔍 Busca **DNS privado** (suele estar abajo del todo)\n\n✏️ En Samsung: Ajustes > Conexiones > Más ajustes > DNS privado\n✏️ En Xiaomi: Ajustes > Conexión y compartir > DNS privado\n✏️ En Google Pixel: Ajustes > Red e Internet > DNS privado",
     notas: [
-      "Si no ves "DNS privado", tu móvil es muy antiguo (Android 8 o anterior). No te preocupes, puedes configurar el DNS en el router en su lugar.",
+      "Si no ves \"DNS privado\", tu móvil es muy antiguo (Android 8 o anterior). No te preocupes, puedes configurar el DNS en el router en su lugar.",
     ],
   },
   {
@@ -72,7 +72,7 @@ const androidPasosBase: DeviceConfig["pasos"] = [
     numero: 2,
     titulo: "Activar DNS privado",
     descripcion:
-      "🔘 Pulsa en la opción **"Nombre del host del proveedor de DNS privado"**\n✏️ En el recuadro que aparece, escribe exactamente:\n\n📝 **child.joindns4.eu** (protección infantil)\n\n✅ Pulsa **Guardar** o **Aceptar**\n\n💡 Otros perfiles DNS4.EU según edad:\n   • **protective.joindns4.eu** → +15 años, solo malware\n   • **child-noads.joindns4.eu** → 0-12 años, infantil + sin anuncios\n\n💡 Alternativas si DNS4.EU no funciona:\n   • **family-filter-dns.cleanbrowsing.org** (CleanBrowsing)\n   • **cloudflare-dns.com** (Cloudflare Familias)",
+      "🔘 Pulsa en la opción **\"Nombre del host del proveedor de DNS privado\"**\n✏️ En el recuadro que aparece, escribe exactamente:\n\n📝 **child.joindns4.eu** (protección infantil)\n\n✅ Pulsa **Guardar** o **Aceptar**\n\n💡 Otros perfiles DNS4.EU según edad:\n   • **protective.joindns4.eu** → +15 años, solo malware\n   • **child-noads.joindns4.eu** → 0-12 años, infantil + sin anuncios\n\n💡 Alternativas si DNS4.EU no funciona:\n   • **family-filter-dns.cleanbrowsing.org** (CleanBrowsing)\n   • **cloudflare-dns.com** (Cloudflare Familias)",
     notas: [
       "Escribe el nombre exactamente como aparece, sin espacios ni http://",
     ],
