@@ -169,7 +169,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 9,
         titulo: "🌟 Extra: proteger también el WiFi de casa (opcional)",
         descripcion:
-          "Si quieres proteger TODOS los dispositivos de casa (no solo el móvil), configura el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **"DNS"** en los ajustes\n✏️ Cambia a **manual**\n📝 En DNS principal escribe:\n   1️⃣ **91.239.100.101**\n📝 En DNS secundario escribe:\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**",
+          "Si quieres proteger TODOS los dispositivos de casa (no solo el móvil), configura el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia a **manual**\n📝 En DNS principal escribe:\n   1️⃣ **91.239.100.101**\n📝 En DNS secundario escribe:\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**",
         notas: [
           "Esto es OPCIONAL. El móvil ya está protegido desde el paso 1",
           "El router protege también a la tablet, la tele, el ordenador...",
@@ -215,7 +215,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 7,
         titulo: "🌟 Extra: DNS en el router para doble capa (opcional)",
         descripcion:
-          "Si además quieres proteger todos los dispositivos de casa, añade el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **"DNS"**\n✏️ Cambia a **manual**\n📝 1️⃣ **91.239.100.101** 2️⃣ **91.239.100.102**\n💾 **Guardar**",
+          "Si además quieres proteger todos los dispositivos de casa, añade el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"**\n✏️ Cambia a **manual**\n📝 1️⃣ **91.239.100.101** 2️⃣ **91.239.100.102**\n💾 **Guardar**",
         notas: ["Opcional: el móvil ya está protegido con los pasos anteriores"],
       },
     ],
@@ -423,7 +423,7 @@ export const knowledgeBase: DeviceConfig[] = [
           "En iOS/iPadOS el DNS se configura con un **perfil de configuración**. Así proteges todas las redes.\n\n📍 Abre **Safari**\n🔤 Ve a la web:\n   • **dns4.eu/install** → DNS4.EU Child Protection\n   • **cleanbrowsing.org** → CleanBrowsing Family\n\n⬇️ Pulsa **Descargar perfil**\n⚙️ Ajustes > **Perfil descargado** > **Instalar**",
         notas: [
           "El perfil DNS protege en TODAS las redes: WiFi de casa, datos móviles, WiFi del colegio...",
-          "Si no ves Perfil descargado en Ajustes, abre Safari y prueba otra vez",
+          "Si no ves \"Perfil descargado\" en Ajustes, abre Safari y prueba otra vez.",
         ],
       },
       {
@@ -457,7 +457,7 @@ export const knowledgeBase: DeviceConfig[] = [
           "En iOS el DNS se configura con un **perfil de configuración**. Así proteges WiFi y datos móviles.\\n\\n📍 Abre **Safari**\\n🔤 Ve a la web del proveedor:\\n   • **dns4.eu/install** → DNS4.EU Child Protection (recomendado)\\n   • **cleanbrowsing.org** → CleanBrowsing Family\\n\\n⬇️ Pulsa **Descargar perfil**\\n⚙️ Ajustes > **Perfil descargado** > **Instalar**",
         notas: [
           "El perfil DNS protege en TODAS las redes. No necesitas configurar nada más.",
-          "Si no ves \\"Perfil descargado\\" en Ajustes, abre Safari y prueba otra vez.",
+          "Si no ves \"Perfil descargado\" en Ajustes, abre Safari y prueba otra vez.",
         ],
       },
       {
@@ -485,7 +485,6 @@ export const knowledgeBase: DeviceConfig[] = [
       { problema: "El menor conoce el código de Tiempo de Uso", solucion: "Cámbialo inmediatamente en Ajustes > Tiempo de Uso > Cambiar código." },
       { problema: "El menor tiene su propio Apple ID", solucion: "Si el menor ya tiene Apple ID, añádelo a En Familia desde Ajustes > En Familia > Añadir miembro > Invitar a otra persona." },
     ],
-  }),
   }),
 
   // iPhone × all other critical contexts
@@ -821,7 +820,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "Opción A: DNS en el router (recomendado)",
         descripcion:
-          "Es la opción más fácil. Al cambiar el DNS del router, la TV se protege sola:\n\n📍 Abre Chrome o Safari\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **"DNS"** en los ajustes\n✏️ Cambia a **manual**\n📝 Escribe:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**\n✅ La TV ya filtra YouTube, Netflix y navegador",
+          "Es la opción más fácil. Al cambiar el DNS del router, la TV se protege sola:\n\n📍 Abre Chrome o Safari\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia a **manual**\n📝 Escribe:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**\n✅ La TV ya filtra YouTube, Netflix y navegador",
         notas: ["Esta es la solución más sencilla y efectiva", "Protege también cualquier otro dispositivo conectado al WiFi"],
       },
       {
@@ -868,7 +867,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "DNS en el router (método principal)",
         descripcion:
-          "Al cambiar el DNS del router, la consola se protege sola. Haz esto:\n\n📍 Abre Chrome o Safari en tu móvil u ordenador\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **"DNS"** en los ajustes\n✏️ Cambia de **automático** a **manual**\n📝 Escribe estos números:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**\n🔄 La consola se reconectará sola con protección",
+          "Al cambiar el DNS del router, la consola se protege sola. Haz esto:\n\n📍 Abre Chrome o Safari en tu móvil u ordenador\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia de **automático** a **manual**\n📝 Escribe estos números:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**\n🔄 La consola se reconectará sola con protección",
       },
       {
         id: "console-ps",
