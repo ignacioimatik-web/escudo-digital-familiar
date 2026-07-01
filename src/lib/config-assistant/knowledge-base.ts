@@ -420,9 +420,9 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "Instalar perfil DNS de protección",
         descripcion:
-          "En iOS/iPadOS el DNS se configura con un **perfil de configuración**. Así proteges todas las redes.\n\n📍 Abre **Safari**\n🔤 Ve a la web:\n   • **dns4.eu/install** → DNS4.EU Child Protection\n   • **cleanbrowsing.org** → CleanBrowsing Family\n\n⬇️ Pulsa **Descargar perfil**\n⚙️ Ajustes > **Perfil descargado** > **Instalar**",
+          "En iOS/iPadOS el DNS se configura por red WiFi. Sigue estos pasos:\n\n📱 Abre **Ajustes** > **Wi-Fi**\nℹ️ Pulsa el icono (i) junto a tu red\n⬇️ Baja a **Configurar DNS**\n✏️ Cambia de **Automático** a **Manual**\n❌ Elimina los DNS existentes\n➕ Añade estos DNS:\n   1️⃣ **86.54.11.12** (DNS4.EU Child Protection)\n   2️⃣ **86.54.11.212** (DNS4.EU secundario)\n💾 Pulsa **Guardar**",
         notas: [
-          "El perfil DNS protege en TODAS las redes: WiFi de casa, datos móviles, WiFi del colegio...",
+          "Esto protege SOLO en esta red WiFi. Al cambiar de red tendrás que repetir la configuración.",
           "Si no ves \"Perfil descargado\" en Ajustes, abre Safari y prueba otra vez.",
         ],
       },
@@ -454,9 +454,9 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "Instalar perfil DNS de protección",
         descripcion:
-          "En iOS el DNS se configura con un **perfil de configuración**. Así proteges WiFi y datos móviles.\\n\\n📍 Abre **Safari**\\n🔤 Ve a la web del proveedor:\\n   • **dns4.eu/install** → DNS4.EU Child Protection (recomendado)\\n   • **cleanbrowsing.org** → CleanBrowsing Family\\n\\n⬇️ Pulsa **Descargar perfil**\\n⚙️ Ajustes > **Perfil descargado** > **Instalar**",
+          "En iOS el DNS se configura por red WiFi. Así proteges el iPhone/iPad en casa:\n\n📱 **Ajustes** > **Wi-Fi**\nℹ️ Pulsa (i) junto a tu red\n⬇️ **Configurar DNS** > **Manual**\n❌ Elimina los DNS que aparezcan\n➕ Añade:\n   1️⃣ **86.54.11.12** (DNS4.EU Child Protection)\n   2️⃣ **86.54.11.212** (DNS4.EU secundario)\n💾 **Guardar**",
         notas: [
-          "El perfil DNS protege en TODAS las redes. No necesitas configurar nada más.",
+          "Esto protege SOLO en esta red WiFi. Para más redes, repite la configuración o instala un perfil DNS.",
           "Si no ves \"Perfil descargado\" en Ajustes, abre Safari y prueba otra vez.",
         ],
       },
@@ -499,7 +499,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "Instalar perfil de DNS (imprescindible para datos móviles)",
         descripcion:
-          "iOS no tiene DNS privado nativo para datos móviles. Necesitas instalar un **perfil de configuración DNS**. Usa la app **DNS Profile** de la App Store o genera un perfil en **dns4.eu/install**.",
+          "En iOS no hay DNS privado nativo para datos móviles. La opción más sencilla es:\n\n1️⃣ Configurar el **router** con DNS de protección (protege todas las redes WiFi)\n2️⃣ Para datos móviles, usa la app **DNS Profile** desde la App Store\n\nOtra opción: ve a **Ajustes > Wi-Fi > (i) junto a tu red > Configurar DNS > Manual** y añade:\n   **86.54.11.12** y **86.54.11.212** (DNS4.EU)",
         notas: [
           "Sin perfil, los datos móviles NO están protegidos",
           "El perfil funciona tanto en WiFi como en datos móviles",
@@ -517,7 +517,7 @@ export const knowledgeBase: DeviceConfig[] = [
     ],
     verificacion: "Desactiva WiFi, visita un sitio bloqueado con datos móviles — debe mostrar error.",
     erroresFrecuentes: [
-      { problema: "No encuentro cómo instalar perfil DNS", solucion: "Abre Safari y visita dns4.eu/install. Descarga el perfil y ve a Ajustes > General > VPN y gestión de dispositivos > Instalar perfil." },
+      { problema: "No encuentro cómo instalar perfil DNS", solucion: "Configura el DNS manualmente: Ajustes > Wi-Fi > (i) junto a tu red > Configurar DNS > Manual. Añade 86.54.11.12 y 86.54.11.212 (DNS4.EU Child Protection)." },
       { problema: "El operador bloquea el DNS", solucion: "Prueba con Cloudflare (1.1.1.3 / 1.0.0.3) en el perfil. Si sigue sin funcionar, considera cambiar de operador." },
     ],
   }),
@@ -529,7 +529,7 @@ export const knowledgeBase: DeviceConfig[] = [
     dnsRecomendado: [DNS_FAMILIA_SURF, CLEAN_BROWSING],
     pasos: [
       { id: "ios-dual-router", numero: 1, titulo: "DNS en el router", descripcion: "📍 Abre Chrome o Safari\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **DNS**\n✏️ Cambia a **manual**\n📝 Escribe:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**" },
-      { id: "ios-dual-perfil", numero: 2, titulo: "Perfil DNS para datos móviles", descripcion: "📱 Abre Safari en el iPhone\n🌐 Ve a: **dns4.eu/install**\n⬇️ Descarga el perfil\n⚙️ Ve a Ajustes > Perfil descargado\n🔐 Pulsa **Instalar** (te pedirá la contraseña de Apple)\n✅ ¡Listo! Ya protege también con datos" },
+      { id: "ios-dual-perfil", numero: 2, titulo: "Perfil DNS para datos móviles", descripcion: "📱 **Ajustes** > **Wi-Fi**\nℹ️ Pulsa (i) junto a tu red\n⬇️ **Configurar DNS** > **Manual**\n❌ Elimina DNS existentes\n➕ Añade:\n   1️⃣ **86.54.11.12**\n   2️⃣ **86.54.11.212**\n💾 **Guardar**" },
       { id: "ios-dual-familia", numero: 3, titulo: "En Familia + Tiempo de Uso", descripcion: "👤 En tu iPhone: Ajustes > **tu nombre** > **En Familia**\n➕ Pulsa **Añadir miembro**\n👶 Crea un Apple ID para el menor\n📱 En el móvil del menor:\n   ⏰ Ajustes > **Tiempo de Uso** > **Activar**\n   🔢 Pon un código de 4 números (que el menor NO sepa)\n   🌐 Contenido web > **Limitar contenido para adultos**\n   🛑 Activa **bloquear compras**" },
     ],
     verificacion: "Prueba bloqueo en WiFi, luego con datos móviles. Ambos deben funcionar.",
@@ -559,7 +559,7 @@ export const knowledgeBase: DeviceConfig[] = [
     dnsRecomendado: [CLEAN_BROWSING, DNS_FAMILIA_SURF],
     pasos: [
       { id: "ios-own-1", numero: 1, titulo: "Router con DNS familiar", descripcion: "📍 Abre Chrome o Safari\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **DNS**\n✏️ Cambia a **manual**\n📝 Escribe:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Guardar" },
-      { id: "ios-own-2", numero: 2, titulo: "Perfil DNS en el dispositivo", descripcion: "📱 Abre Safari en el iPhone\n🌐 Ve a: **dns4.eu/install**\n⬇️ Descarga el perfil\n⚙️ Ajustes > Perfil descargado > **Instalar**\n🔐 Te pedirá la contraseña de Apple" },
+      { id: "ios-own-2", numero: 2, titulo: "Perfil DNS en el dispositivo", descripcion: "📱 **Ajustes** > **Wi-Fi**\nℹ️ Pulsa (i) junto a tu red\n⬇️ **Configurar DNS** > **Manual**\n❌ Elimina DNS\n➕ Añade:\n   1️⃣ **86.54.11.12**\n   2️⃣ **86.54.11.212**\n💾 **Guardar**" },
       { id: "ios-own-3", numero: 3, titulo: "En Familia", descripcion: "👤 Ajustes > **tu nombre** > **En Familia**\n➕ **Añadir miembro**\n👶 Crea un Apple ID para el menor\n✅ Activa Compartir en Familia" },
       { id: "ios-own-4", numero: 4, titulo: "Tiempo de Uso con código", descripcion: "Establece todas las restricciones en el dispositivo del menor con un código secreto." },
     ],
