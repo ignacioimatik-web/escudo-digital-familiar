@@ -261,21 +261,36 @@ export function ConfigAssistant() {
     if (!aiEnabled) return engineResponse.message
 
     try {
-      const conv = [
-        { role: "user", content: userInput || "(inicio de conversación)" },
-      ]
-      
-      const systemPrompt = `Eres el Asistente Sentinel, un experto en protección digital infantil. 
-Tu tono es cercano, amable y muy claro. Explicas cosas técnicas de forma sencilla.
+      // Build full conversation context
+      const conv = messages.map(m => ({
+        role: m.isUser ? "user" : "assistant" as const,
+        content: m.text,
+      }))
+      // Add current user input
+      if (userInput) {
+        conv.push({ role: "user" as const, content: userInput })
+      }
 
-Contexto actual:
-- Dispositivo: ${state.device || "ninguno"}
-- Nivel: ${state.level || "ninguno"}
-- Fase: ${state.phase}
-- Opciones disponibles: ${(engineResponse.options || []).map(o => o.label).join(", ")}
+      const deviceLabel = state.device
+        ? deviceTypes.find(d => d.id === state.device)?.label || state.device
+        : "ninguno"
 
-Responde de forma natural y amable. Si el usuario pregunta algo que no sabes, sé honesto.
-No uses jerga técnica sin explicarla. Mantén las respuestas concisas pero cálidas.`
+      const systemPrompt = `Eres el Asistente Sentinel, un experto en protección digital infantil.
+- Tu tono es cercano, amable, muy claro. Usas lenguaje sencillo.
+- Explicas conceptos técnicos como si hablaras con alguien que no sabe nada de tecnología.
+- Usas emojis de vez en cuando para dar calidez.
+- Tus respuestas son concisas: máximo 4-5 líneas a menos que el usuario pida más detalles.
+- Si el usuario te pregunta algo que no está en tu conocimiento, sé honesto pero ofrécete a ayudar.
+
+Contexto actual de la conversación:
+- Dispositivo seleccionado: ${deviceLabel}
+- Nivel de protección: ${state.level || "ninguno"}
+- Fase actual: ${state.phase}
+- Progreso: ${state.phase === "inicio" ? "recién empezando" : state.phase === "nivel" ? "eligiendo nivel" : state.phase === "pasos" ? "siguiendo pasos de configuración" : state.phase === "resumen" ? "verificando resultado" : "finalizado"}
+
+Opciones que puede elegir el usuario ahora: ${(engineResponse.options || []).map(o => o.label).join(", ") || "ninguna"}
+
+Responde en español de España, con naturalidad y cercanía.`;
 
       const res = await fetch("/api/assistant", {
         method: "POST",
@@ -284,6 +299,7 @@ No uses jerga técnica sin explicarla. Mantén las respuestas concisas pero cál
       })
       const data = await res.json()
       if (data.response) return data.response
+      // If API returned fallback, use engine response
     } catch (e) {
       console.warn("AI call failed, using engine response")
     }
@@ -298,11 +314,11 @@ No uses jerga técnica sin explicarla. Mantén las respuestas concisas pero cál
     if (isFirstMessage) {
       setIsFirstMessage(false)
       setIsThinking(true)
-      setTimeout(() => {
+      ;(async () => {
         const response = processInput(createInitialState(), "")
-        applyResponse(response)
+        await applyResponse(response, "")
         setIsThinking(false)
-      }, 600)
+      })()
     }
   }, [isFirstMessage])
 

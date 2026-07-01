@@ -1,33 +1,57 @@
-// API route for the Sentinel AI Assistant
+// API route for Sentinel AI Assistant
 // Uses Hermes CLI to call BigPickle via opencode-zen provider
-// Knowledge base content is injected as system context
+// Hermes handles auth internally - no API key needed in env
 
 import { NextRequest, NextResponse } from "next/server"
 import { execSync } from "child_process"
+import { existsSync } from "fs"
+
+// Find hermes binary in known locations
+function findHermes(): string | null {
+  const candidates = [
+    "/Users/jistev/.hermes/hermes-agent/venv/bin/hermes",
+    "/opt/homebrew/bin/hermes",
+    "/usr/local/bin/hermes",
+    process.env.HOME + "/.local/bin/hermes",
+  ]
+  for (const p of candidates) {
+    if (existsSync(p)) return p
+  }
+  // Try PATH
+  try {
+    const which = execSync("which hermes 2>/dev/null", { encoding: "utf-8", timeout: 5 }).trim()
+    if (which) return which
+  } catch {}
+  return null
+}
+
+const HERMES = findHermes()
 
 export async function POST(request: NextRequest) {
   try {
     const { messages, system } = await request.json()
 
-    // Build the prompt from the conversation
-    const conversation = [
-      ...(system ? [{ role: "system", content: system }] : []),
-      ...messages,
-    ]
+    if (!HERMES) {
+      return NextResponse.json({ response: "", fallback: true }, { status: 200 })
+    }
 
-    // Format for Hermes CLI: each message on its own line
-    const prompt = conversation
-      .map((m: any) => {
-        if (m.role === "system") return `[Sistema: ${m.content}]`
-        if (m.role === "user") return `[Usuario: ${m.content}]`
-        if (m.role === "assistant") return `[Asistente: ${m.content}]`
-        return m.content
-      })
-      .join("\n") + "\n[Asistente:"
+    // Build the prompt for Hermes CLI
+    // System instruction first, then conversation history
+    let prompt = ""
+    if (system) {
+      prompt += `[Sistema: ${system}]\n\n`
+    }
+    for (const msg of messages || []) {
+      if (msg.role === "user") {
+        prompt += `[Usuario: ${msg.content}]\n`
+      } else if (msg.role === "assistant") {
+        prompt += `[Asistente: ${msg.content}]\n`
+      }
+    }
+    prompt += "\n[Asistente:"
 
-    // Call Hermes CLI with BigPickle model
     const result = execSync(
-      `hermes -z ${JSON.stringify(prompt)} -m "opencode-zen/big-pickle" --provider opencode-zen 2>/dev/null`,
+      `${HERMES} -z ${JSON.stringify(prompt)} -m "opencode-zen/big-pickle" --provider opencode-zen 2>/dev/null`,
       {
         timeout: 30000,
         encoding: "utf-8",
@@ -36,13 +60,9 @@ export async function POST(request: NextRequest) {
     )
 
     const response = result.trim()
-
     return NextResponse.json({ response })
   } catch (error: any) {
-    console.error("Assistant API error:", error.message)
-    return NextResponse.json(
-      { error: "Failed to generate response", details: error.message },
-      { status: 500 }
-    )
+    console.error("Assistant API error:", error?.message?.slice(0, 200))
+    return NextResponse.json({ response: "", fallback: true }, { status: 200 })
   }
 }
