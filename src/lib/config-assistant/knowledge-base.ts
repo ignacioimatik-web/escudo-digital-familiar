@@ -15,18 +15,38 @@ function cfg(
 // ── SHARED DNS INFO ──────────────────────────────────────────
 
 const DNS_TABLE = `
-| Proveedor | DNS Primario | DNS Secundario | ¿Bloquea adultos? |
-|-----------|-------------|----------------|-------------------|
-| **DNS4.EU** (recomendado) | 91.239.100.101 | 91.239.100.102 | ✅ Sí |
-| **CleanBrowsing Family** | 185.228.168.168 | 185.228.169.168 | ✅ Sí |
-| **Cloudflare Familias** | 1.1.1.3 | 1.0.0.3 | ✅ Sí |
-| **AdGuard Family** | 94.140.14.15 | 94.140.15.16 | ✅ Sí |
-| **CIRA Canadian Shield** | 149.112.121.30 | 149.112.122.30 | ✅ Sí |
-| **Quad9** (solo malware) | 9.9.9.9 | 149.112.112.112 | ❌ Solo malware |
+| Proveedor | Perfil | DNS Primario | DNS Secundario | ¿Bloquea adultos? |
+|-----------|--------|-------------|----------------|-------------------|
+| **DNS4.EU** (recomendado) | Child Protection | 86.54.11.12 | 86.54.11.212 | ✅ Sí |
+| **DNS4.EU** | Protective | 86.54.11.1 | 86.54.11.201 | ❌ Solo malware |
+| **DNS4.EU** | Child + Ad Block | 86.54.11.11 | 86.54.11.211 | ✅ Sí + anuncios |
+| **CleanBrowsing Family** | Family | 185.228.168.168 | 185.228.169.168 | ✅ Sí |
+| **Cloudflare Familias** | Family | 1.1.1.3 | 1.0.0.3 | ✅ Sí |
+| **AdGuard Family** | Family | 94.140.14.15 | 94.140.15.16 | ✅ Sí |
+| **CIRA Canadian Shield** | Family | 149.112.121.30 | 149.112.122.30 | ✅ Sí |
+| **Quad9** | Malware only | 9.9.9.9 | 149.112.112.112 | ❌ Solo malware |
 `
 
-const DNS_FAMILIA_SURF = "91.239.100.101"
-const DNS_FAMILIA_SURF2 = "91.239.100.102"
+// DNS4.EU perfiles (según https://joindns4.eu/for-public)
+const DNS4_PROTECTIVE = "86.54.11.1"
+const DNS4_PROTECTIVE2 = "86.54.11.201"
+const DNS4_CHILD = "86.54.11.12"
+const DNS4_CHILD2 = "86.54.11.212"
+const DNS4_NOADS = "86.54.11.13"
+const DNS4_NOADS2 = "86.54.11.213"
+const DNS4_CHILD_NOADS = "86.54.11.11"
+const DNS4_CHILD_NOADS2 = "86.54.11.211"
+const DNS4_UNFILTERED = "86.54.11.100"
+const DNS4_UNFILTERED2 = "86.54.11.200"
+
+// Hostnames para DNS privado Android (DoT)
+const DNS4_CHILD_HOST = "child.joindns4.eu"
+const DNS4_PROTECTIVE_HOST = "protective.joindns4.eu"
+const DNS4_CHILD_NOADS_HOST = "child-noads.joindns4.eu"
+
+// Aliases para compatibilidad (Child Protection es el perfil familiar recomendado)
+const DNS_FAMILIA_SURF = DNS4_CHILD
+const DNS_FAMILIA_SURF2 = DNS4_CHILD2
 const CLEAN_BROWSING = "185.228.168.168"
 const CLEAN_BROWSING2 = "185.228.169.168"
 const CLOUDFLARE_FAMILY = "1.1.1.3"
@@ -52,7 +72,7 @@ const androidPasosBase: DeviceConfig["pasos"] = [
     numero: 2,
     titulo: "Activar DNS privado",
     descripcion:
-      "🔘 Pulsa en la opción **\"Nombre del host del proveedor de DNS privado\"**\n✏️ En el recuadro que aparece, escribe exactamente:\n\n📝 **dns4.eu**\n\n✅ Pulsa **Guardar** o **Aceptar**\n\n💡 Si DNS4.EU no funciona, prueba con:\n   • **family-filter-dns.cleanbrowsing.org** (CleanBrowsing)\n   • **cloudflare-dns.com** (Cloudflare Familias)",
+      "🔘 Pulsa en la opción **\"Nombre del host del proveedor de DNS privado\"**\n✏️ En el recuadro que aparece, escribe exactamente:\n\n📝 **child.joindns4.eu** (protección infantil)\n\n✅ Pulsa **Guardar** o **Aceptar**\n\n💡 Otros perfiles DNS4.EU según edad:\n   • **protective.joindns4.eu** → +15 años, solo malware\n   • **child-noads.joindns4.eu** → 0-12 años, infantil + sin anuncios\n\n💡 Alternativas si DNS4.EU no funciona:\n   • **family-filter-dns.cleanbrowsing.org** (CleanBrowsing)\n   • **cloudflare-dns.com** (Cloudflare Familias)",
     notas: [
       "Escribe el nombre exactamente como aparece, sin espacios ni http://",
     ],

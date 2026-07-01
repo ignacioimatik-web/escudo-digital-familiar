@@ -383,7 +383,7 @@ export function processInput(
 
     if (lower.includes("dns") || input === "__ver_dns__") {
       return {
-        message: "📡 **DNS gratuitos con protección familiar**\n\n• **DNS4.EU** → `91.239.100.100` — Europeo, respeta RGPD\n• **CleanBrowsing** → `185.228.168.168` — Filtro muy completo\n• **Cloudflare Familias** → `1.1.1.3` — Rápido y global\n• **AdGuard Family** → `94.140.14.15` — Bloquea anuncios\n\n¿Te ayuda? Puedes seguir con los pasos cuando quieras.",
+        message: "📡 **DNS4.EU — perfiles según la edad**\n\nTodos gratuitos, europeos, sin ánimo de lucro:\n\n🟢 **Protective** → `86.54.11.1` / `86.54.11.201`\n   Para +15 años. Bloquea malware y amenazas.\n\n🔵 **Child Protection** (recomendado) → `86.54.11.12` / `86.54.11.212`\n   Para 7-14 años. Bloquea adultos, violencia, drogas.\n\n🔴 **Child + Ad Blocking** → `86.54.11.11` / `86.54.11.211`\n   Para 0-12 años. Lo mismo + bloquea anuncios.\n\n🟣 **Ad Blocking** → `86.54.11.13` / `86.54.11.213`\n   Solo bloqueo de anuncios, sin filtro infantil.\n\n📱 **Android (DNS privado):** usa el hostname según perfil:\n   • `child.joindns4.eu` → protección infantil\n   • `protective.joindns4.eu` → solo malware\n   • `child-noads.joindns4.eu` → infantil + anti anuncios\n\n📖 Más info: joindns4.eu/for-public",
         options: [{ value: "__siguiente__", label: "Seguir con los pasos" }],
         phase: "dns-compare",
         state,
