@@ -24,44 +24,53 @@ export async function POST(request: NextRequest) {
       ...(messages || []),
     ]
 
-    const res = await fetch(ZEN_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: apiMessages,
-        max_tokens: 4096,
-        temperature: 0.7,
-        stream: false,
-      }),
-    })
+    let zenResponse = ""
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 500))
 
-    if (!res.ok) {
-      const errBody = await res.text().catch(() => "unknown")
-      console.error("ZEN API error:", res.status, errBody.slice(0, 300))
-      return NextResponse.json({ response: "", fallback: true, debug: { zenStatus: res.status, zenError: errBody.slice(0, 200) } }, { status: 200 })
+      const res = await fetch(ZEN_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: apiMessages,
+          max_tokens: 4096,
+          temperature: 0.7,
+          stream: false,
+        }),
+      })
+
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => "unknown")
+        console.error("ZEN API error:", res.status, errBody.slice(0, 300))
+        continue
+      }
+
+      const rawText = await res.text()
+      let data: any
+      try {
+        data = JSON.parse(rawText)
+      } catch {
+        console.error("ZEN API invalid JSON:", rawText.slice(0, 300))
+        continue
+      }
+
+      const content = data?.choices?.[0]?.message?.content?.trim() || ""
+      if (content) {
+        zenResponse = content
+        break
+      }
+      console.error("ZEN API empty content, attempt", attempt + 1)
     }
 
-    const rawText = await res.text()
-    let data: any
-    try {
-      data = JSON.parse(rawText)
-    } catch {
-      console.error("ZEN API invalid JSON:", rawText.slice(0, 300))
-      return NextResponse.json({ response: "", fallback: true, debug: { parseError: rawText.slice(0, 200) } }, { status: 200 })
+    if (!zenResponse) {
+      return NextResponse.json({ response: "", fallback: true }, { status: 200 })
     }
 
-    const content = data?.choices?.[0]?.message?.content?.trim() || ""
-
-    if (!content) {
-      console.error("ZEN API empty content:", JSON.stringify(data).slice(0, 400))
-      return NextResponse.json({ response: "", fallback: true, debug: { zenResponse: JSON.stringify(data).slice(0, 300) } }, { status: 200 })
-    }
-
-    return NextResponse.json({ response: content })
+    return NextResponse.json({ response: zenResponse })
   } catch {
     return NextResponse.json({ response: "", fallback: true }, { status: 200 })
   }
