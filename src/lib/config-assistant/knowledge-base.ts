@@ -128,33 +128,32 @@ export const knowledgeBase: DeviceConfig[] = [
 
   cfg("android", "wifi-casa", "recomendado", {
     titulo: "Protección recomendada en Android (WiFi en casa)",
-    resumen: "DNS privado + DNS en el router + Google Family Link completo.",
-    tiempoEstimado: "20-30 minutos",
+    resumen: "DNS privado en el móvil + Google Family Link completo.",
+    tiempoEstimado: "20-25 minutos",
     dnsRecomendado: [DNS_FAMILIA_SURF, CLEAN_BROWSING],
     pasos: [
       ...androidPasosBase,
-      {
-        id: "android-router",
-        numero: 4,
-        titulo: "Configurar DNS en el router",
-        descripcion:
-          "📍 **Abre el navegador** (Chrome, Safari o Edge)\n🔤 En la barra de arriba escribe: **192.168.1.1**\n🔑 Te pedirá usuario y contraseña. Prueba con:\n   👤 Usuario: **admin**\n   🔐 Contraseña: **admin**\n🔍 Busca donde ponga **\"DNS\"** o **\"Servidores DNS\"**\n✏️ Cambia de **\"automático\"** a **\"manual\"**\n📝 Escribe estos números:\n   1️⃣ **91.239.100.101** (DNS principal)\n   2️⃣ **91.239.100.102** (DNS secundario)\n💾 Busca el botón **\"Guardar\"** y púlsalo\n🔄 El router se reiniciará solo. Espera 1 minuto\n📱 Reconecta el móvil al WiFi",
-        notas: [
-          "Esto protege a todos los dispositivos conectados al WiFi de casa",
-          "Si configuras solo el DNS en el móvil, otros dispositivos no están protegidos",
-          "El router + DNS privado = doble capa de protección",
-        ],
-      },
       ...androidPasosFamilyLink.map((p, i) => ({
         ...p,
         numero: p.numero + 1,
       })),
       {
         id: "android-compras",
-        numero: 9,
+        numero: 8,
         titulo: "Activar aprobación de compras",
         descripcion:
           "En Family Link, ve a **Gestionar configuración > Controles de cuentas > Aprobación de compras y descargas**. Actívala. Así ninguna compra ni descarga de apps en Play Store se realizará sin que tú la autorices desde tu móvil.",
+      },
+      {
+        id: "android-router-bonus",
+        numero: 9,
+        titulo: "🌟 Extra: proteger también el WiFi de casa (opcional)",
+        descripcion:
+          "Si quieres proteger TODOS los dispositivos de casa (no solo el móvil), configura el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia a **manual**\n📝 Escribe: 1️⃣ **91.239.100.101** 2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**",
+        notas: [
+          "Esto es OPCIONAL. El móvil ya está protegido desde el paso 1",
+          "El router protege también a la tablet, la tele, el ordenador...",
+        ],
       },
     ],
     verificacion:
@@ -168,31 +167,17 @@ export const knowledgeBase: DeviceConfig[] = [
     tiempoEstimado: "30-40 minutos",
     dnsRecomendado: [DNS_FAMILIA_SURF, CLEAN_BROWSING, CLOUDFLARE_FAMILY],
     pasos: [
-      {
-        id: "android-adv-router",
-        numero: 1,
-        titulo: "Configurar DNS en el router",
-        descripcion:
-          "📍 **Abre el navegador** (Chrome, Safari o Edge)\n🔤 En la barra de direcciones escribe: **192.168.1.1**\n🔑 Inicia sesión (prueba: usuario **admin** / contraseña **admin**)\n🔍 Busca donde ponga **\"DNS\"** → suele estar en:\n   📋 Red > Ajustes avanzados > Servidores DNS\n✏️ Cambia de **\"automático\"** a **\"usar estos DNS\"**\n📝 Copia estos números exactamente:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **\"Guardar\"** o **\"Aplicar cambios\"**\n🔄 Espera a que el router se reinicie (30 segundos)\n🎯 **¡Hecho!** Todos los dispositivos de casa ya están protegidos",
-      },
-      {
-        id: "android-adv-dns",
-        numero: 2,
-        titulo: "Configurar DNS privado como respaldo",
-        descripcion:
-          "Además del router, configura DNS privado en el Android con un proveedor diferente. Si uno falla, el otro sigue protegiendo.",
-        notas: ["Usa un proveedor diferente al del router como respaldo", "CleanBrowsing en el router + Cloudflare Familias en el móvil"],
-      },
+      ...androidPasosBase,
       {
         id: "android-adv-fl",
-        numero: 3,
+        numero: 4,
         titulo: "Family Link con restricciones máximas",
         descripcion:
           "Configura todas las opciones de Family Link: filtros estrictos, límites de tiempo, aprobación de descargas y compras, bloqueo de instalación de apps.",
       },
       {
         id: "android-adv-browsers",
-        numero: 4,
+        numero: 5,
         titulo: "Bloquear navegadores alternativos",
         descripcion:
           "En Family Link, bloquea la instalación de navegadores que no respeten el DNS del sistema (Firefox, Opera, Brave). Permite solo Chrome o el navegador por defecto.",
@@ -200,10 +185,18 @@ export const knowledgeBase: DeviceConfig[] = [
       },
       {
         id: "android-adv-locks",
-        numero: 5,
+        numero: 6,
         titulo: "Proteger la configuración",
         descripcion:
           "Bloquea los cambios de configuración de red en Family Link. El menor no podrá modificar el DNS ni desactivar las restricciones sin tu permiso.",
+      },
+      {
+        id: "android-adv-router-bonus",
+        numero: 7,
+        titulo: "🌟 Extra: DNS en el router para doble capa (opcional)",
+        descripcion:
+          "Si además quieres proteger todos los dispositivos de casa, añade el DNS en el router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"**\n✏️ Cambia a **manual**\n📝 1️⃣ **91.239.100.101** 2️⃣ **91.239.100.102**\n💾 **Guardar**",
+        notas: ["Opcional: el móvil ya está protegido con los pasos anteriores"],
       },
     ],
     verificacion:
@@ -438,36 +431,43 @@ export const knowledgeBase: DeviceConfig[] = [
     dnsRecomendado: [CLEAN_BROWSING, DNS_FAMILIA_SURF],
     pasos: [
       {
-        id: "ios-rec-router",
+        id: "ios-rec-dns",
         numero: 1,
-        titulo: "Configurar DNS en el router",
-        descripcion: "📍 Abre Chrome o Safari\n🔤 Escribe: **192.168.1.1**\n🔑 Usuario: **admin** / Contraseña: **admin**\n🔍 Busca **\"DNS\"** en los ajustes\n✏️ Cambia a **manual**\n📝 Escribe estos números:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**\n🔄 Espera 30 segundos. ¡Ya está!",
+        titulo: "Configurar DNS en la red WiFi del iPhone",
+        descripcion: "📱 Abre **Ajustes** en el iPhone\n📶 Pulsa **Wi-Fi**\nℹ️ Toca el icono (i) junto a tu red\n⬇️ Baja hasta **Configurar DNS**\n✏️ Cambia de **Automático** a **Manual**\n❌ Elimina los DNS que aparezcan\n➕ Añade:\n   1️⃣ **91.239.100.101**\n   2️⃣ **91.239.100.102**\n💾 Pulsa **Guardar**",
       },
       {
-        id: "ios-rec-perfil",
+        id: "ios-rec-tiempo",
         numero: 2,
-        titulo: "Instalar perfil de DNS (opcional, para datos móviles)",
+        titulo: "Configurar Tiempo de Uso",
         descripcion:
-          "Para proteger también con datos móviles, instala un perfil de configuración DNS. Puedes generarlo en webs como **dns4.eu/install** o usar la app **DNS Profile** de la App Store.",
-        notas: ["Sin perfil, el DNS solo funciona en WiFi", "El perfil es una configuración del sistema que el menor no puede eliminar fácilmente"],
-        advertencia: "Instalar perfiles DNS requiere que el adulto tenga la contraseña de Apple ID.",
+          "📱 En el iPhone del menor:\n⚙️ **Ajustes > Tiempo de Uso**\n🔢 Pon un código de 4 números (que el menor NO sepa)\n🌐 **Restricciones de contenido > Contenido web > Limitar contenido para adultos**\n🛑 Activa **bloquear compras**\n⏱️ Pon **límites de apps** (ej: 1-2h para juegos y redes)",
+        notas: [
+          "Límites de apps: 1-2h diarias para redes sociales y juegos",
+          "Sin el código, el menor no puede desactivar nada",
+        ],
       },
       {
         id: "ios-rec-familia",
         numero: 3,
         titulo: "Configurar En Familia",
-        descripcion: "Ve a **Ajustes > [tu nombre] > En Familia**. Añade al menor con su Apple ID y activa Compartir en Familia.",
+        descripcion: "👤 En **tu** iPhone (el del adulto):\n⚙️ Ajustes > **tu nombre** > **En Familia**\n➕ **Añadir miembro**\n👶 Crea un Apple ID para el menor",
       },
       {
-        id: "ios-rec-tiempo",
+        id: "ios-rec-router-bonus",
         numero: 4,
-        titulo: "Configurar Tiempo de Uso completo",
+        titulo: "🌟 Extra: proteger todo el WiFi (opcional)",
         descripcion:
-          "En el dispositivo del menor: **Ajustes > Tiempo de Uso**. Actívalo con un código que solo el adulto conozca. Configura: límites de apps, restricciones de contenido, y bloqueo de compras.",
-        notas: [
-          "Límites de apps: 1-2h diarias para redes sociales y juegos",
-          "Restricciones: bloquear contenido explícito, compras, cambios de cuenta",
-        ],
+          "Si quieres proteger también los demás dispositivos de casa, cambia el DNS del router:\n\n📍 Abre el navegador\n🔤 Escribe: **192.168.1.1**\n🔑 usuario **admin** / contraseña **admin**\n🔍 Busca **\"DNS\"**\n✏️ Cambia a **manual**\n📝 1️⃣ **91.239.100.101** 2️⃣ **91.239.100.102**\n💾 **Guardar**",
+      },
+      {
+        id: "ios-rec-perfil-bonus",
+        numero: 5,
+        titulo: "🌟 Extra: proteger también con datos móviles (opcional)",
+        descripcion:
+          "📱 Abre Safari en el iPhone\n🌐 Ve a: **dns4.eu/install**\n⬇️ Descarga el perfil\n⚙️ Ajustes > Perfil descargado > **Instalar**\n🔐 Te pedirá la contraseña de Apple",
+        notas: ["Sin este paso, el DNS solo funciona en WiFi. Con datos móviles, no hay filtro."],
+        advertencia: "Necesitas saber la contraseña del Apple ID del adulto.",
       },
     ],
     verificacion:
