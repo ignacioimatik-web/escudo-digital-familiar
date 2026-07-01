@@ -33,21 +33,27 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model: MODEL,
         messages: apiMessages,
-        max_tokens: 1024,
+        max_tokens: 2048,
         temperature: 0.7,
         stream: false,
       }),
     })
 
     if (!res.ok) {
+      const errBody = await res.text().catch(() => "unknown")
+      console.error("ZEN API error:", res.status, errBody.slice(0, 200))
       return NextResponse.json({ response: "", fallback: true }, { status: 200 })
     }
 
     const data = await res.json()
-    const content = data?.choices?.[0]?.message?.content || ""
-    const response = content.trim()
+    const content = data?.choices?.[0]?.message?.content?.trim() || ""
 
-    return NextResponse.json({ response })
+    // Log if ZEN returned empty content
+    if (!content) {
+      console.error("ZEN API returned empty content:", JSON.stringify(data).slice(0, 300))
+    }
+
+    return NextResponse.json({ response: content })
   } catch {
     return NextResponse.json({ response: "", fallback: true }, { status: 200 })
   }
