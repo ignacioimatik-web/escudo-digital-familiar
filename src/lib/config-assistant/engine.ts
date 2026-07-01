@@ -168,6 +168,20 @@ function mensajePaso(step: ConfigStep, current: number, total: number): string {
   return msg
 }
 
+function pasoOptions(currentIndex: number, totalPasos: number) {
+  const opts: { value: string; label: string }[] = []
+  if (currentIndex > 0) {
+    opts.push({ value: "__atras__", label: "👈 Volver" })
+  }
+  if (currentIndex < totalPasos - 1) {
+    opts.push({ value: "__siguiente__", label: "👉 Siguiente paso" })
+  } else {
+    opts.push({ value: "__siguiente__", label: "✅ He terminado" })
+  }
+  opts.push({ value: "__duda__", label: "❓ Tengo una duda" })
+  return opts
+}
+
 // ── HELPERS ──
 
 function nivelOptions() {
@@ -199,11 +213,7 @@ function buildConfigResponse(state: ConversationState): AssistantResponse | null
   const firstStep = config.pasos[0]
   return {
     message: mensajeNivel(state.level, config) + "\n\n---\n\n" + mensajePaso(firstStep, 1, config.pasos.length),
-    options: [
-      { value: "__siguiente__", label: "Hecho, siguiente paso" },
-      { value: "__duda__", label: "Tengo una duda" },
-      { value: "__ver_dns__", label: "Comparar DNS" },
-    ],
+    options: pasoOptions(0, config.pasos.length).filter(o => o.value !== "__atras__"),
     steps: config.pasos,
     progress: { current: 1, total: config.pasos.length },
     phase: "pasos",
@@ -297,6 +307,44 @@ export function processInput(
   if (state.phase === "pasos") {
     const lower = input.toLowerCase()
 
+    // Ir a paso anterior
+    if (input === "__atras__" || lower.includes("atrás") || lower.includes("volver")) {
+      if (state.currentStepIndex > 0) {
+        state.currentStepIndex = state.currentStepIndex - 1
+        const step = state.config!.pasos[state.currentStepIndex]
+        return {
+          message: mensajePaso(step, state.currentStepIndex + 1, state.config!.pasos.length),
+          options: pasoOptions(state.currentStepIndex, state.config!.pasos.length),
+          progress: { current: state.currentStepIndex + 1, total: state.config!.pasos.length },
+          phase: "pasos",
+          state,
+        }
+      }
+      // Ya en el primer paso — no se puede retroceder más
+      return {
+        message: "Estás en el primer paso. No puedes ir más atrás 😊",
+        options: pasoOptions(state.currentStepIndex, state.config?.pasos.length || 0),
+        phase: "pasos",
+        state,
+      }
+    }
+
+    // Ir a un paso específico (desde las barras de progreso)
+    if (input.startsWith("__ir_a_")) {
+      const target = parseInt(input.replace("__ir_a_", "").replace("__", ""), 10)
+      if (!isNaN(target) && target >= 0 && state.config && target < state.config.pasos.length) {
+        state.currentStepIndex = target
+        const step = state.config.pasos[target]
+        return {
+          message: mensajePaso(step, target + 1, state.config.pasos.length),
+          options: pasoOptions(target, state.config.pasos.length),
+          progress: { current: target + 1, total: state.config.pasos.length },
+          phase: "pasos",
+          state,
+        }
+      }
+    }
+
     if (lower.includes("siguiente") || lower.includes("hecho") || lower.includes("listo") || input === "__siguiente__") {
       const nextIndex = state.currentStepIndex + 1
       if (state.config && nextIndex < state.config.pasos.length) {
@@ -304,10 +352,7 @@ export function processInput(
         const step = state.config.pasos[nextIndex]
         return {
           message: mensajePaso(step, nextIndex + 1, state.config.pasos.length),
-          options: [
-            { value: "__siguiente__", label: "Hecho, siguiente" },
-            { value: "__duda__", label: "Tengo una duda" },
-          ],
+          options: pasoOptions(nextIndex, state.config.pasos.length),
           progress: { current: nextIndex + 1, total: state.config.pasos.length },
           phase: "pasos",
           state,
@@ -347,11 +392,8 @@ export function processInput(
 
     // Default in steps
     return {
-      message: "😊 ¿Has completado este paso? Puedes decir **'Hecho'** para continuar, **'Duda'** si tienes preguntas, o **'DNS'** para ver proveedores.",
-      options: [
-        { value: "__siguiente__", label: "✅ Siguiente paso" },
-        { value: "__duda__", label: "❓ Tengo una duda" },
-      ],
+      message: "😊 ¿Has completado este paso? Puedes decir **'Hecho'** para continuar, **'Volver'** para retroceder, o **'Duda'** si tienes preguntas.",
+      options: pasoOptions(state.currentStepIndex, state.config?.pasos.length || 0),
       phase: "pasos",
       state,
     }

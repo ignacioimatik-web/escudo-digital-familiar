@@ -374,9 +374,27 @@ export function ConfigAssistant() {
               <JarvisStepCard step={steps[currentStepIdx]} numero={currentStepIdx + 1} total={steps.length} />
               <div className="flex items-center justify-center gap-1.5 mt-3">
                 {steps.map((_, i) => (
-                  <div key={i} className={`h-1 rounded-full transition-all duration-500 ${
-                    i <= currentStepIdx ? "w-6 bg-gradient-to-r from-cyan-500 to-brand-500 shadow-sm shadow-cyan-500/30" : "w-1.5 bg-slate-700"
-                  }`} />
+                  <button
+                    key={i}
+                    onClick={() => {
+                      if (i !== currentStepIdx) {
+                        setMessages(prev => [...prev, { text: `Ir al paso ${i + 1}`, isUser: true }])
+                        setIsThinking(true)
+                        setTimeout(() => {
+                          const response = processInput(state, `__ir_a_${i}__`)
+                          applyResponse(response)
+                          setIsThinking(false)
+                        }, 300)
+                      }
+                    }}
+                    className={`cursor-pointer rounded-full transition-all duration-500 ${
+                      i <= currentStepIdx
+                        ? "w-6 h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 shadow-sm shadow-emerald-500/30"
+                        : "w-1.5 h-1.5 bg-slate-700 hover:bg-slate-500"
+                    } ${i < currentStepIdx ? "hover:opacity-80" : ""}`}
+                    title={`Ir al paso ${i + 1}`}
+                    aria-label={`Ir al paso ${i + 1}`}
+                  />
                 ))}
               </div>
             </motion.div>
