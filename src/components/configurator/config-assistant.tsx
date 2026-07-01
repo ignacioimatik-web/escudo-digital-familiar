@@ -241,6 +241,7 @@ export function ConfigAssistant() {
   const [progress, setProgress] = useState({ current: 0, total: 3 })
   const [isFirstMessage, setIsFirstMessage] = useState(true)
   const [isThinking, setIsThinking] = useState(false)
+  const [debugInfo, setDebugInfo] = useState("")
   const stateRef = useRef(state)
   stateRef.current = state
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -267,8 +268,14 @@ export function ConfigAssistant() {
     if (response.message) setMessages(prev => [...prev, { text: response.message, isUser: false }])
     setOptions(response.options ?? [])
     setCurrentStepIdx(response.state.currentStepIndex)
-    if (response.steps) setSteps(response.steps)
-    else if (response.phase !== "pasos" && response.phase !== "resumen") setSteps([])
+    if (response.steps) {
+      setSteps(response.steps)
+      const firstStep = response.steps[0]
+      setDebugInfo(`Config: ${currentState.device} / ${currentState.network} / ${currentState.level} → ${firstStep?.titulo || "sin pasos"}`)
+    } else if (response.phase !== "pasos" && response.phase !== "resumen") {
+      setSteps([])
+      setDebugInfo(`Fase: ${response.phase} / Device: ${currentState.device} / Level: ${currentState.level}`)
+    }
     if (response.progress) setProgress(response.progress)
   }
 
@@ -304,6 +311,7 @@ export function ConfigAssistant() {
       <div className="flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
         <JarvisHeader device={state.device} onReset={() => { setMessages([]); setOptions([]); setSteps([]); setCurrentStepIdx(-1); const s = createInitialState(); applyResponseFromState(s, processInput(s, "")) }} />
         <JarvisProgress current={progress.current} total={progress.total} phase={state.phase} />
+        {debugInfo && <div className="px-4 py-1.5 bg-amber-50 border-b border-amber-200 text-[10px] font-mono text-amber-700 truncate">{debugInfo}</div>}
 
         <div ref={scrollRef} className="overflow-y-auto px-5 py-5 space-y-4 max-h-[500px] md:max-h-[550px] scroll-smooth">
           <AnimatePresence mode="popLayout">
