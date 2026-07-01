@@ -67,11 +67,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (!zenResponse) {
-      return NextResponse.json({ response: "", fallback: true }, { status: 200 })
+      return NextResponse.json({ response: "", fallback: true, debug: "all ZEN retries returned empty" }, { status: 200 })
     }
 
     return NextResponse.json({ response: zenResponse })
-  } catch {
-    return NextResponse.json({ response: "", fallback: true }, { status: 200 })
+  } catch (e: any) {
+    console.error("Assistant API fatal error:", e?.message)
+    return NextResponse.json({ response: "", fallback: true, debug: `exception: ${e?.message}` }, { status: 200 })
   }
 }
