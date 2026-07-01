@@ -391,8 +391,8 @@ export function ConfigAssistant() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-2 pt-1"
           >
-            {/* Device grid - holographic style */}
-            {(state.phase === "inicio" || state.phase === "dispositivo") && (
+            {/* Device grid */}
+            {(state.phase === "inicio") && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {options.map((opt, i) => {
                   const Icon = opt.icon ? iconMap[opt.icon] : undefined
@@ -420,16 +420,7 @@ export function ConfigAssistant() {
               </div>
             )}
 
-            {/* Network context */}
-            {state.phase === "contexto" && (
-              <div className="space-y-1.5">
-                {options.map((opt, i) => (
-                  <JarvisGlowButton key={i} label={opt.label} desc={opt.desc} icon={opt.icon} onClick={() => handleOptionClick(opt.value)} />
-                ))}
-              </div>
-            )}
-
-            {/* Level selection - special shields */}
+            {/* Level selection */}
             {state.phase === "nivel" && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {options.map((opt, i) => {
@@ -463,7 +454,7 @@ export function ConfigAssistant() {
             )}
 
             {/* Action buttons */}
-            {state.phase !== "inicio" && state.phase !== "contexto" && state.phase !== "nivel" && state.phase !== "dispositivo" && (
+            {state.phase !== "inicio" && state.phase !== "nivel" && (
               <div className="flex flex-wrap gap-2">
                 {options.map((opt, i) => (
                   <motion.button
