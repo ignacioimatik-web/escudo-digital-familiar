@@ -253,7 +253,7 @@ export function ConfigAssistant() {
   const [inputText, setInputText] = useState("")
   const [isFirstMessage, setIsFirstMessage] = useState(true)
   const [isThinking, setIsThinking] = useState(false)
-  const aiEnabled = true // Use BigPickle for natural responses
+  const [aiEnabled, _setAiEnabled] = useState(true)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   // Call the AI API
@@ -306,22 +306,18 @@ Responde en español de España, con naturalidad y cercanía.`;
       setIsThinking(true)
       ;(async () => {
         const response = processInput(createInitialState(), "")
-        await applyResponse(response, "")
+        applyResponse(response)
         setIsThinking(false)
       })()
     }
   }, [isFirstMessage])
 
-  const applyResponse = async (response: AssistantResponse, userInput?: string, convContext?: { role: "user" | "assistant"; content: string }[]) => {
-    // Enhance message with AI (only for user-typed questions, not button clicks)
-    const isControlClick = userInput && (userInput.startsWith("__") || ["Hecho", "Siguiente", "Volver", "Duda", "DNS"].some(c => userInput.includes(c)))
-    const enhancedMessage = (!isControlClick && response.message) ? await callAI(convContext || [], response) : response.message || ""
+  const applyResponse = (response: AssistantResponse) => {
     setState(response.state)
-    if (enhancedMessage) {
-      setMessages(prev => [...prev, { text: enhancedMessage, isUser: false }])
+    if (response.message) {
+      setMessages(prev => [...prev, { text: response.message, isUser: false }])
     }
     setOptions(response.options ?? [])
-    // Always sync step index from engine state
     setCurrentStepIdx(response.state.currentStepIndex)
     if (response.steps) {
       setSteps(response.steps)
@@ -331,7 +327,7 @@ Responde en español de España, con naturalidad y cercanía.`;
     if (response.progress) setProgress(response.progress)
   }
 
-  const handleOptionClick = async (value: string) => {
+  const handleOptionClick = (value: string) => {
     const label = options.find(o => o.value === value)?.label || value
     setMessages(prev => [...prev, { text: label, isUser: true }])
     setOptions([])
@@ -343,12 +339,12 @@ Responde en español de España, con naturalidad y cercanía.`;
       setSteps([])
       setCurrentStepIdx(-1)
       const response = resetConversation()
-      await applyResponse(response, "")
+      applyResponse(response)
       setIsThinking(false)
       return
     }
     const response = processInput(state, value)
-    await applyResponse(response, label)
+    applyResponse(response)
     setIsThinking(false)
   }
 
@@ -356,26 +352,67 @@ Responde en español de España, con naturalidad y cercanía.`;
     e.preventDefault()
     const text = inputText.trim()
     if (!text) return
-    // Build conversation context BEFORE state updates (avoids stale closure)
-    const currentConv: { role: "user" | "assistant"; content: string }[] = [
-      ...messages.map(m => ({ role: m.isUser ? "user" as const : "assistant" as const, content: m.text })),
-      { role: "user" as const, content: text },
-    ]
     setMessages(prev => [...prev, { text, isUser: true }])
     setInputText("")
     setIsThinking(true)
+
+    // Free text → AI directo (sin pasar por engine)
+    try {
+      const currentConv = [
+        ...messages.map(m => ({ role: m.isUser ? "user" as const : "assistant" as const, content: m.text })),
+        { role: "user" as const, content: text },
+      ]
+
+      const deviceLabel = state.device
+        ? deviceTypes.find(d => d.id === state.device)?.label || state.device
+        : "ninguno todavía"
+      const levelLabel = state.level || "ninguno todavía"
+
+      const systemPrompt = `Eres el Asistente Sentinel, experto en protección digital infantil.
+- Respondes en español de España, con tono cercano y muy claro.
+- Usas lenguaje sencillo, como si hablaras con alguien que no sabe de tecnología.
+- Respuestas concisas (máx 4-5 líneas) pero sin cortar si el usuario pide más.
+- Usas emojis de vez en cuando para dar calidez.
+- NO inventes información técnica. Si no sabes algo, dilo honestamente.
+
+Contexto actual del usuario:
+- Dispositivo seleccionado: ${deviceLabel}
+- Nivel de protección: ${levelLabel}
+- Fase: ${state.phase}
+- Opciones disponibles en pantalla (puede pulsar botones): ${options.map(o => o.label).join(", ") || "ninguna"}`
+
+      const res = await fetch("/api/assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: currentConv, system: systemPrompt }),
+      })
+      const data = await res.json()
+      if (data.response) {
+        setMessages(prev => [...prev, { text: data.response, isUser: false }])
+        setIsThinking(false)
+        return
+      }
+    } catch {}
+
+    // Fallback: si la IA falla, responde con el engine
     const response = processInput(state, text)
-    await applyResponse(response, text, currentConv)
+    setOptions(response.options ?? [])
+    if (response.steps) setSteps(response.steps)
+    if (response.progress) setProgress(response.progress)
+    if (response.message) {
+      setMessages(prev => [...prev, { text: response.message, isUser: false }])
+    }
+    setCurrentStepIdx(response.state.currentStepIndex)
     setIsThinking(false)
   }
 
-  const handleReset = async () => {
+  const handleReset = () => {
     setMessages([])
     setOptions([])
     setSteps([])
     setCurrentStepIdx(-1)
     const response = resetConversation()
-    await applyResponse(response, "")
+    applyResponse(response)
   }
 
   return (
