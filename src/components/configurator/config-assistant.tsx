@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { HeartHandshake, CheckCircle2, Send, Shield, Sparkles, RefreshCw, ArrowRight } from "lucide-react"
-import { processInput, createInitialState, resetConversation } from "@/lib/config-assistant/engine"
+import { processInput, createInitialState } from "@/lib/config-assistant/engine"
 import { deviceTypes } from "@/lib/config-assistant/types"
+import { findConfig } from "@/lib/config-assistant/knowledge-base"
 import type { AssistantResponse, ConversationState } from "@/lib/config-assistant/engine"
-import type { ConfigStep } from "@/lib/config-assistant/types"
+import type { ConfigStep, DeviceType, ProtectionLevel } from "@/lib/config-assistant/types"
 
 // ── Sub-components ──
 
@@ -270,35 +271,129 @@ export function ConfigAssistant() {
     setCurrentStepIdx(response.state.currentStepIndex)
     if (response.steps) {
       setSteps(response.steps)
-      const firstStep = response.steps[0]
-      setDebugInfo(`Config: ${currentState.device} / ${currentState.network} / ${currentState.level} → ${firstStep?.titulo || "sin pasos"}`)
     } else if (response.phase !== "pasos" && response.phase !== "resumen") {
       setSteps([])
-      setDebugInfo(`Fase: ${response.phase} / Device: ${currentState.device} / Level: ${currentState.level}`)
     }
     if (response.progress) setProgress(response.progress)
   }
 
-  const handleOptionClick = (value: string) => {
-    const label = options.find(o => o.value === value)?.label || value
-    setMessages(prev => [...prev, { text: label, isUser: true }])
+  // Direct device/level selection without going through the engine
+  const handleDeviceSelect = (deviceId: string) => {
+    const deviceInfo = deviceTypes.find(d => d.id === deviceId)
+    if (!deviceInfo) return
+    setMessages(prev => [...prev, { text: deviceInfo.label, isUser: true }])
     setOptions([])
     setIsThinking(true)
 
-    // Use latest state via ref to avoid stale closure
-    const currentState: ConversationState = JSON.parse(JSON.stringify(stateRef.current))
+    // Build state directly
+    const newState: ConversationState = {
+      phase: "nivel",
+      device: deviceId as DeviceType,
+      deviceInfo: deviceInfo as any,
+      network: "wifi-casa",
+      level: null,
+      config: null,
+      currentStepIndex: 0,
+      history: [],
+      processedInputs: new Set(),
+    }
+    
+    // Simulate engine response for level phase
+    const deviceMsg = `¡Perfecto! 🎯 Has seleccionado **${deviceInfo.label}**.${deviceInfo.descripcion ? " " + deviceInfo.descripcion : ""}\n\nAhora elige el **nivel de protección** según la edad del menor:`
+
+    setTimeout(() => {
+      const response: AssistantResponse = {
+        message: deviceMsg,
+        options: [
+          { value: "basico", label: "🛡️ Básico", desc: "+15 años" },
+          { value: "recomendado", label: "🛡️🛡️ Recomendado", desc: "7-14 años" },
+          { value: "avanzado", label: "🛡️🛡️🛡️ Avanzado", desc: "0-12 años" },
+        ],
+        phase: "nivel",
+        state: newState,
+        progress: { current: 1, total: 3 },
+      }
+      applyResponseFromState(newState, response)
+      setIsThinking(false)
+    }, 200)
+  }
+
+  const handleLevelSelect = (level: string) => {
+    const levelLabels: Record<string, string> = { basico: "🛡️ Básico", recomendado: "🛡️🛡️ Recomendado", avanzado: "🛡️🛡️🛡️ Avanzado" }
+    setMessages(prev => [...prev, { text: levelLabels[level] || level, isUser: true }])
+    setOptions([])
+    setIsThinking(true)
+
+    // Get current device from ref
+    const currentState = stateRef.current
+    if (!currentState.device) {
+      setIsThinking(false)
+      return
+    }
+
+    const config = findConfig(currentState.device as DeviceType, "wifi-casa", level as ProtectionLevel)
+    
+    if (!config) {
+      setMessages(prev => [...prev, { text: "No tengo una guía exacta para esa combinación. Intenta con otro nivel.", isUser: false }])
+      setIsThinking(false)
+      return
+    }
+
+    const newState: ConversationState = {
+      ...currentState,
+      level: level as ProtectionLevel,
+      config,
+      currentStepIndex: 0,
+      phase: "pasos",
+    }
+
+    const firstStep = config.pasos[0]
+    const msg = `**Nivel ${levelLabels[level] || level}** — Tiempo estimado: ${config.tiempoEstimado}\n\n---\n\n**Paso 1/${config.pasos.length}:** ${firstStep.titulo}\n\n${firstStep.descripcion}`
+
+    setTimeout(() => {
+      const response: AssistantResponse = {
+        message: msg,
+        options: [
+          { value: "__siguiente__", label: "✅ Hecho, siguiente" },
+          { value: "__duda__", label: "❓ Tengo una duda" },
+        ],
+        steps: config.pasos,
+        progress: { current: 1, total: config.pasos.length },
+        phase: "pasos",
+        state: newState,
+      }
+      applyResponseFromState(newState, response)
+      setIsThinking(false)
+    }, 200)
+  }
+
+  const handleOptionClick = (value: string) => {
+    // Route to the correct handler based on phase
+    const currentPhase = stateRef.current.phase
     
     if (value === "__reset__") {
       setMessages([]); setOptions([]); setSteps([]); setCurrentStepIdx(-1)
-      const freshState = createInitialState()
-      const response = processInput(freshState, "")
-      applyResponseFromState(freshState, response)
-      setIsThinking(false); return
+      const s = createInitialState()
+      applyResponseFromState(s, { message: "Reiniciando...", options: [], phase: "inicio", state: s, progress: { current: 0, total: 3 } })
+      return
     }
     
+    // Device selection
+    if (currentPhase === "inicio") {
+      handleDeviceSelect(value)
+      return
+    }
+    
+    // Level selection
+    if (currentPhase === "nivel") {
+      handleLevelSelect(value)
+      return
+    }
+    
+    // Step navigation - use engine
+    const currentState = JSON.parse(JSON.stringify(stateRef.current))
     const response = processInput(currentState, value)
     applyResponseFromState(currentState, response)
-    setIsThinking(false)
   }
 
   const levelColors = ["border-cyan-200 bg-cyan-50 text-cyan-700", "border-brand-200 bg-brand-50 text-brand-700", "border-rose-200 bg-rose-50 text-rose-700"]
