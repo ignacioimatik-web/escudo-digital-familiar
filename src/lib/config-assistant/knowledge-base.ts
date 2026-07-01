@@ -420,7 +420,7 @@ export const knowledgeBase: DeviceConfig[] = [
         numero: 1,
         titulo: "Instalar perfil DNS de protección",
         descripcion:
-          "En iOS/iPadOS el DNS se configura con un **perfil de configuración**. Así proteges todas las redes.\n\n📍 Abre **Safari**\n🔤 Ve a la web:\n   • **dns4.eu/install** → DNS4.EU Child Protection\n   • **cleanbrowsing.org** → CleanBrowsing Family\n\n⬇️ Pulsa **Descargar perfil**\n⚙️ Ajustes > **Perfil descargado** > **Instalar**"
+          "En iOS/iPadOS el DNS se configura con un **perfil de configuración**. Así proteges todas las redes.\n\n📍 Abre **Safari**\n🔤 Ve a la web:\n   • **dns4.eu/install** → DNS4.EU Child Protection\n   • **cleanbrowsing.org** → CleanBrowsing Family\n\n⬇️ Pulsa **Descargar perfil**\n⚙️ Ajustes > **Perfil descargado** > **Instalar**",
         notas: [
           "El perfil DNS protege en TODAS las redes: WiFi de casa, datos móviles, WiFi del colegio...",
           "Si no ves Perfil descargado en Ajustes, abre Safari y prueba otra vez",
