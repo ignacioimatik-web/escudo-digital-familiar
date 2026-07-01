@@ -4,11 +4,13 @@ import Link from "next/link"
 import { Container } from "@/components/ui/container"
 import { Section } from "@/components/ui/section"
 import { Badge } from "@/components/ui/badge"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
+import { useState } from "react"
 import {
   Users, GraduationCap, Heart, Stethoscope,
   FileText, Eye, Presentation,
-  Shield, CheckSquare, FileSignature, Sparkles
+  Shield, CheckSquare, FileSignature, Sparkles,
+  ChevronDown
 } from "lucide-react"
 
 const areas = [
@@ -83,68 +85,65 @@ const fadeUp = {
   visible: { opacity: 1, y: 0 },
 }
 
-export default function DescargasPage() {
+function AreaAccordion({ area, areaIndex, isOpen, onToggle }: {
+  area: typeof areas[0]
+  areaIndex: number
+  isOpen: boolean
+  onToggle: () => void
+}) {
+  const AreaIcon = area.icon
+
   return (
-    <>
-      {/* Hero */}
-      <Section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50/40 via-background to-background" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-500/5 rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -z-10" />
-        <Container size="md">
+    <Section className={areaIndex === 0 ? "" : "pt-0"}>
+      <Container size="md">
+        {/* Header — botón plegable */}
+        <motion.button
+          onClick={onToggle}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={fadeUp}
+          className={`w-full flex items-center justify-between gap-3 p-4 rounded-2xl ${area.bgColor} border ${area.borderColor} relative overflow-hidden text-left transition-all duration-200 hover:shadow-md group cursor-pointer`}
+        >
+          <div className={`absolute -top-6 -right-6 w-24 h-24 ${area.glow} rounded-full blur-2xl`} />
+          <div className="flex items-center gap-3 relative min-w-0">
+            <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${area.color} shadow-sm shrink-0`}>
+              <AreaIcon className="h-6 w-6 text-white" />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-xl font-bold text-slate-900">{area.label}</h2>
+              <p className="text-sm text-slate-500">{area.desc}</p>
+            </div>
+          </div>
           <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            transition={{ duration: 0.5 }}
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-lg ${area.bgColor} group-hover:bg-white/50 transition-colors`}
           >
-            <Badge variant="default" className="mb-6">Recursos descargables</Badge>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
-              Descargas
-            </h1>
-            <p className="text-lg text-slate-500 leading-relaxed max-w-2xl">
-              Materiales gratuitos y descargables para cada comunidad. Carteles, guías, checklists y presentaciones listas para usar.
-            </p>
+            <ChevronDown className={`h-5 w-5 ${area.textColor}`} />
           </motion.div>
-        </Container>
-      </Section>
+        </motion.button>
 
-      {/* Recursos por área */}
-      {areas.map((area, areaIndex) => {
-        const AreaIcon = area.icon
-        return (
-          <Section key={area.id} className={areaIndex === 0 ? "" : "pt-0"}>
-            <Container size="md">
-              {/* Header de área */}
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-50px" }}
-                variants={fadeUp}
-                className={`flex items-center gap-3 mb-8 p-4 rounded-2xl ${area.bgColor} border ${area.borderColor} relative overflow-hidden`}
-              >
-                <div className={`absolute -top-6 -right-6 w-24 h-24 ${area.glow} rounded-full blur-2xl`} />
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${area.color} shadow-sm relative`}>
-                  <AreaIcon className="h-6 w-6 text-white" />
-                </div>
-                <div className="relative">
-                  <h2 className="text-xl font-bold text-slate-900">{area.label}</h2>
-                  <p className="text-sm text-slate-500">{area.desc}</p>
-                </div>
-              </motion.div>
-
-              {/* Cards */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Contenido plegable */}
+        <AnimatePresence initial={false}>
+          {isOpen && (
+            <motion.div
+              key="content"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-5 pb-2">
                 {area.recursos.map((r, i) => {
                   const RIcon = r.icon
                   return (
                     <motion.div
                       key={r.href + r.label}
-                      initial="hidden"
-                      whileInView="visible"
-                      viewport={{ once: true }}
-                      variants={fadeUp}
-                      transition={{ duration: 0.3, delay: i * 0.05 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: i * 0.04 }}
                     >
                       <Link
                         href={r.href}
@@ -183,10 +182,58 @@ export default function DescargasPage() {
                   )
                 })}
               </div>
-            </Container>
-          </Section>
-        )
-      })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Container>
+    </Section>
+  )
+}
+
+export default function DescargasPage() {
+  const [openAreas, setOpenAreas] = useState<string[]>(["familias"])
+
+  const toggleArea = (id: string) => {
+    setOpenAreas(prev =>
+      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
+    )
+  }
+
+  return (
+    <>
+      {/* Hero */}
+      <Section className="relative overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-50/40 via-background to-background" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-500/5 rounded-full blur-3xl -z-10" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -z-10" />
+        <Container size="md">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            transition={{ duration: 0.5 }}
+          >
+            <Badge variant="default" className="mb-6">Recursos descargables</Badge>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+              Descargas
+            </h1>
+            <p className="text-lg text-slate-500 leading-relaxed max-w-2xl">
+              Materiales gratuitos y descargables para cada comunidad. Pulsa en cada área para ver sus recursos.
+            </p>
+          </motion.div>
+        </Container>
+      </Section>
+
+      {/* Acordeones por comunidad */}
+      {areas.map((area, i) => (
+        <AreaAccordion
+          key={area.id}
+          area={area}
+          areaIndex={i}
+          isOpen={openAreas.includes(area.id)}
+          onToggle={() => toggleArea(area.id)}
+        />
+      ))}
 
       {/* CTA final */}
       <Section className="bg-slate-50/50">
