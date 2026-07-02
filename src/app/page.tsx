@@ -7,27 +7,24 @@ import {
   Wifi,
   Smartphone,
   ArrowRight,
-  AlertTriangle,
   Users,
   GraduationCap,
   Heart,
   Stethoscope,
-  CheckCircle2,
-  Baby,
-  Smile,
-  User,
-  UserCheck,
   EyeOff,
   Dices,
   ShieldAlert,
   MessageCircle,
   BrainCircuit,
+  Baby,
+  Smile,
+  User,
+  UserCheck,
 } from "lucide-react"
 import { Container } from "@/components/ui/container"
 import { Section } from "@/components/ui/section"
 import { PremiumCard } from "@/components/ui/premium-card"
 import { Badge } from "@/components/ui/badge"
-import { methodLayers, ageTransitions } from "@/content/method"
 import { audiences } from "@/content/audiences"
 import Link from "next/link"
 
@@ -110,8 +107,6 @@ const problems = [
   },
 ]
 
-const ageIcons = [Baby, Smile, User, UserCheck]
-
 const audienceIcons: Record<string, React.ElementType> = {
   familias: Users,
   colegios: GraduationCap,
@@ -122,6 +117,7 @@ const audienceIcons: Record<string, React.ElementType> = {
 export default function HomePage() {
   return (
     <>
+      {/* ─── HERO ─── */}
       <Section className="relative overflow-hidden min-h-[80vh] flex items-center">
         <video
           autoPlay
@@ -173,6 +169,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
+      {/* ─── PROBLEMAS ─── */}
       <Section className="bg-grid-cyan -mt-[100px]">
         <Container>
           <AnimatedSection>
@@ -201,62 +198,58 @@ export default function HomePage() {
         </Container>
       </Section>
 
+      {/* ─── MÉTODO EN 2 CAPAS (RESUMEN) ─── */}
       <Section className="bg-grid-white -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
-              <div className="text-center mb-16">
+              <div className="text-center mb-12">
+                <Badge variant="default" className="mb-4">Método</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
-                  Dos capas de protección complementarias
+                  Dos capas de protección
                 </h2>
                 <p className="mt-4 text-lg text-slate-500 max-w-2xl mx-auto">
-                  Un sistema sencillo que combina filtrado técnico con acompañamiento humano.
+                  DNS de protección + control parental. Simple, gratuito y eficaz.
                 </p>
               </div>
             </AnimatedItem>
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {methodLayers.map((layer, i) => {
-                const Icon = i === 0 ? Wifi : Smartphone
-                return (
-                  <AnimatedItem key={layer.id}>
-                    <PremiumCard className="h-full">
-                      <div className={`flex h-14 w-14 items-center justify-center rounded-xl mb-6 ${i === 0 ? "bg-brand-100" : "bg-cyan-100"}`}>
-                        <Icon className={`h-7 w-7 ${i === 0 ? "text-brand-600" : "text-cyan-500"}`} />
-                      </div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                        Capa {i + 1}
-                      </p>
-                      <h3 className="text-xl font-semibold text-slate-900 mb-2">{layer.titulo}</h3>
-                      <p className="text-sm text-slate-500 mb-6">{layer.subtitulo}</p>
-                      <p className="text-slate-600 leading-relaxed mb-6">{layer.descripcion}</p>
-                      <div className="space-y-2">
-                        {layer.queHace.slice(0, 3).map((item) => (
-                          <div key={item} className="flex items-start gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-success-500 mt-0.5 shrink-0" />
-                            <span className="text-sm text-slate-600">{item}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <Link
-                        href="/metodo"
-                        className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-700"
-                      >
-                        Ver método completo <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
-                    </PremiumCard>
-                  </AnimatedItem>
-                )
-              })}
+            <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              <AnimatedItem>
+                <PremiumCard className="text-center h-full">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-brand-100 mx-auto mb-4">
+                    <Wifi className="h-7 w-7 text-brand-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">DNS de protección</h3>
+                  <p className="text-sm text-slate-500 mb-4">Filtrado a nivel de red que bloquea contenido inadecuado antes de que llegue al dispositivo.</p>
+                  <Link href="/metodo" className="text-sm font-medium text-brand-600 hover:text-brand-700 inline-flex items-center gap-1">
+                    Ver capa 1 <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </PremiumCard>
+              </AnimatedItem>
+              <AnimatedItem>
+                <PremiumCard className="text-center h-full">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-cyan-100 mx-auto mb-4">
+                    <Smartphone className="h-7 w-7 text-cyan-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Control parental</h3>
+                  <p className="text-sm text-slate-500 mb-4">Supervisión y acompañamiento con límites de uso, restricciones de apps y filtros por edad.</p>
+                  <Link href="/metodo" className="text-sm font-medium text-brand-600 hover:text-brand-700 inline-flex items-center gap-1">
+                    Ver capa 2 <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </PremiumCard>
+              </AnimatedItem>
             </div>
           </AnimatedSection>
         </Container>
       </Section>
 
+      {/* ─── EVOLUCIÓN POR EDADES (RESUMEN) ─── */}
       <Section className="bg-grid-cyan -mt-[100px]">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
-              <div className="text-center mb-16">
+              <div className="text-center mb-12">
+                <Badge variant="cyan" className="mb-4">Evolución</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
                   De los filtros al criterio
                 </h2>
@@ -265,44 +258,40 @@ export default function HomePage() {
                 </p>
               </div>
             </AnimatedItem>
-            <div className="relative max-w-4xl mx-auto">
-              <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-brand-200 hidden sm:block" />
-              <div className="grid sm:grid-cols-2 gap-8">
-                {ageTransitions.map((transition, i) => {
-                  const AgeIcon = ageIcons[i]
-                  return (
-                    <AnimatedItem key={transition.rango}>
-                      <div className={`relative flex gap-4 ${i % 2 === 1 ? "sm:flex-row-reverse sm:text-right" : ""}`}>
-                        <div className="hidden sm:flex flex-col items-center">
-                          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-100 border-4 border-white shadow-sm z-10">
-                            <AgeIcon className="h-7 w-7 text-brand-600" />
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-brand-600 mb-1">
-                            {transition.rango} años
-                          </p>
-                          <h3 className="text-lg font-semibold text-slate-900 mb-2">{transition.titulo}</h3>
-                          <p className="text-sm text-slate-500 leading-relaxed mb-3">{transition.descripcion}</p>
-                          <p className="text-sm text-slate-600">
-                            <span className="font-medium text-slate-700">Acompañamiento:</span> {transition.acompanamiento}
-                          </p>
-                        </div>
-                      </div>
-                    </AnimatedItem>
-                  )
-                })}
-              </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+              {[
+                { icon: Baby, rango: "0-6", titulo: "Primera infancia", desc: "Control total del entorno digital." },
+                { icon: Smile, rango: "7-11", titulo: "Infancia", desc: "Permisos ampliados con supervisión." },
+                { icon: User, rango: "12-14", titulo: "Adolescencia temprana", desc: "Transición hacia la autonomía." },
+                { icon: UserCheck, rango: "15-17", titulo: "Adolescencia tardía", desc: "Criterio personal como filtro principal." },
+              ].map((edad) => (
+                <AnimatedItem key={edad.rango}>
+                  <PremiumCard className="text-center h-full">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 mx-auto mb-3">
+                      <edad.icon className="h-6 w-6 text-brand-600" />
+                    </div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-brand-600 mb-1">{edad.rango} años</p>
+                    <h3 className="text-sm font-semibold text-slate-900 mb-1">{edad.titulo}</h3>
+                    <p className="text-xs text-slate-500">{edad.desc}</p>
+                  </PremiumCard>
+                </AnimatedItem>
+              ))}
             </div>
             <AnimatedItem>
-              <div className="mt-16 rounded-2xl overflow-hidden border border-border/60 max-w-4xl mx-auto">
-                <SlowVideo src="/video/intro_telemet.mp4" />
+              <div className="text-center mt-8">
+                <Link
+                  href="/metodo"
+                  className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50"
+                >
+                  Ver método completo por edades <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
               </div>
             </AnimatedItem>
           </AnimatedSection>
         </Container>
       </Section>
 
+      {/* ─── AUDIENCIAS ─── */}
       <Section className="bg-grid-white -mt-[100px]">
         <Container>
           <AnimatedSection>
@@ -339,6 +328,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
+      {/* ─── CTA FINAL ─── */}
       <Section className="bg-grid-cyan -mt-[100px]">
         <Container className="text-center">
           <AnimatedSection>
