@@ -263,7 +263,11 @@ export default function ModeloPage() {
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8 }}
           >
-            <CrossingChart />
+            <img
+              src="/images/modelo-evolucion.png"
+              alt="Modelo de Evolución de la Protección Digital Infantil: del control a la autonomía"
+              className="w-full h-auto"
+            />
           </motion.div>
         </Container>
       </Section>

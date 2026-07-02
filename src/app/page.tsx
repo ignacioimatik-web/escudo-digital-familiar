@@ -330,123 +330,17 @@ export default function HomePage() {
 
             <AnimatedItem>
               <motion.div
-                className="relative rounded-3xl overflow-hidden mb-10 shadow-lg"
-                style={{ backgroundColor: '#f5eedc' }}
+                className="relative rounded-3xl overflow-hidden mb-10 shadow-lg bg-white"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
               >
-                {/* Cloud-like decorative border */}
-                <div className="absolute inset-0 opacity-20" style={{
-                  backgroundImage: `radial-gradient(circle at 20% 30%, #7fb0d0 8px, transparent 8px),
-                                    radial-gradient(circle at 80% 20%, #7fb0d0 6px, transparent 6px),
-                                    radial-gradient(circle at 50% 10%, #7fb0d0 10px, transparent 10px),
-                                    radial-gradient(circle at 15% 70%, #7fb0d0 5px, transparent 5px),
-                                    radial-gradient(circle at 90% 80%, #7fb0d0 7px, transparent 7px)`,
-                  backgroundSize: '120px 120px'
-                }} />
-                <div className="relative z-10 p-4 sm:p-6 md:p-8">
-                <svg viewBox="0 0 800 420" className="w-full h-auto" fill="none">
-                  <defs>
-                    {/* Plastilina-style filters */}
-                    <filter id="puffBlue">
-                      <feGaussianBlur stdDeviation="1.5" result="blur" />
-                      <feSpecularLighting in="blur" surfaceScale="3" specularConstant="0.6" specularExponent="15" result="spec">
-                        <fePointLight x="200" y="100" z="200" />
-                      </feSpecularLighting>
-                      <feComposite in="SourceGraphic" in2="spec" operator="arithmetic" k1="0" k2="1" k3="0.3" k4="0" />
-                      <feGaussianBlur stdDeviation="0.5" />
-                    </filter>
-                    <filter id="shadowDrop">
-                      <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#00000022" />
-                    </filter>
-                    <linearGradient id="areaBlue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#1a2942" stopOpacity="0.12" />
-                      <stop offset="100%" stopColor="#1a2942" stopOpacity="0.02" />
-                    </linearGradient>
-                    <linearGradient id="areaOrange" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#e8935a" stopOpacity="0.12" />
-                      <stop offset="100%" stopColor="#e8935a" stopOpacity="0.02" />
-                    </linearGradient>
-                  </defs>
-
-                  {/* Ejes - marrón oscuro tipo plastilina */}
-                  <line x1="80" y1="40" x2="80" y2="340" stroke="#5c4033" strokeWidth="4" strokeLinecap="round" />
-                  <line x1="80" y1="340" x2="740" y2="340" stroke="#5c4033" strokeWidth="4" strokeLinecap="round" />
-
-                  {/* Grid suave */}
-                  {[20,40,60,80].map(v => (
-                    <line key={v} x1="80" y1={40+(1-v/100)*300} x2="740" y2={40+(1-v/100)*300} stroke="#d4c9b0" strokeWidth="1.5" strokeDasharray="5,5" />
-                  ))}
-
-                  {/* Eje Y labels */}
-                  <text x="70" y="28" textAnchor="end" className="fill-[#5c4033] text-[10px] font-bold">Peso (%)</text>
-                  {[0,20,40,60,80,100].map(v => (
-                    <text key={v} x="72" y={44+(1-v/100)*300} textAnchor="end" className="fill-[#5c4033] text-[9px] font-bold">{v}%</text>
-                  ))}
-
-                  {/* Eje X labels */}
-                  <text x="110" y="360" textAnchor="middle" className="fill-[#5c4033] text-[11px] font-bold">4 Años</text>
-                  <text x="420" y="360" textAnchor="middle" className="fill-[#5c4033] text-[11px] font-bold">13 Años</text>
-                  <text x="710" y="360" textAnchor="middle" className="fill-[#5c4033] text-[11px] font-bold">18 Años</text>
-
-                  {/* Áreas de relleno */}
-                  <path d="M 110 100 Q 265 160 420 200 Q 575 240 710 260 L 710 340 L 110 340 Z" fill="url(#areaBlue)" />
-                  <path d="M 110 300 Q 265 240 420 200 Q 575 150 710 100 L 710 340 L 110 340 Z" fill="url(#areaOrange)" />
-
-                  {/* Curva AZUL plastilina (Protección Técnica) */}
-                  <path d="M 110 100 Q 265 160 420 200 Q 575 240 710 260"
-                    stroke="#1a2942" strokeWidth="8" strokeLinecap="round" fill="none"
-                    filter="url(#shadowDrop)" />
-                  <path d="M 110 100 Q 265 160 420 200 Q 575 240 710 260"
-                    stroke="#2c5c8f" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.6" />
-
-                  {/* Curva NARANJA plastilina (Acompañamiento) */}
-                  <path d="M 110 300 Q 265 240 420 200 Q 575 150 710 100"
-                    stroke="#8b4513" strokeWidth="8" strokeLinecap="round" fill="none"
-                    filter="url(#shadowDrop)" />
-                  <path d="M 110 300 Q 265 240 420 200 Q 575 150 710 100"
-                    stroke="#e8935a" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.7" />
-
-                  {/* Nudo/unión en el punto de inflexión */}
-                  <g filter="url(#shadowDrop)">
-                    <circle cx="420" cy="200" r="16" fill="#f5eedc" stroke="#5c4033" strokeWidth="3" />
-                    <path d="M 412 192 Q 420 200 428 192" stroke="#1a2942" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                    <path d="M 412 208 Q 420 200 428 208" stroke="#e8935a" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                    <circle cx="420" cy="200" r="5" fill="#d4875a" />
-                  </g>
-
-                  {/* Línea vertical guía en punto de inflexión */}
-                  <line x1="420" y1="40" x2="420" y2="340" stroke="#d4875a" strokeWidth="2" strokeDasharray="6,4" opacity="0.5" />
-                  <text x="420" y="378" textAnchor="middle" className="fill-[#d4875a] text-[10px] font-bold">⚡ Punto de inflexión</text>
-
-                  {/* Caja de datos */}
-                  <rect x="335" y="48" width="170" height="42" rx="8" fill="white" stroke="#d4875a" strokeWidth="1.5" filter="url(#shadowDrop)" />
-                  <text x="345" y="64" className="fill-[#1a2942] text-[9px] font-bold">Protección: ~45%</text>
-                  <text x="345" y="80" className="fill-[#e8935a] text-[9px] font-bold">Acompañamiento: ~55%</text>
-
-                  {/* Leyenda */}
-                  <g transform="translate(600, 42)">
-                    <rect x="0" y="0" width="14" height="14" rx="3" fill="#2c5c8f" />
-                    <text x="20" y="11" className="fill-[#5c4033] text-[9px] font-bold">Protección Técnica</text>
-                    <rect x="0" y="22" width="14" height="14" rx="3" fill="#e8935a" />
-                    <text x="20" y="33" className="fill-[#5c4033] text-[9px] font-bold">Acompañamiento</text>
-                  </g>
-
-                  {/* Iconos extremos */}
-                  <g transform="translate(105, 85)">
-                    <rect x="-10" y="-10" width="20" height="20" rx="5" fill="#1a2942" />
-                    <path d="M-4-4L4-4L4-1L2-1L2 2L-2 2L-2-1L-4-1Z" fill="white" />
-                    <circle cx="0" cy="-6" r="3" fill="white" />
-                  </g>
-                  <g transform="translate(705, 88)">
-                    <rect x="-10" y="-10" width="20" height="20" rx="5" fill="#e8935a" />
-                    <circle cx="0" cy="-3" r="3" fill="white" />
-                    <path d="M-4 1 Q0 6 4 1" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                  </g>
-                </svg>
-                </div>
+                <img
+                  src="/images/modelo-evolucion.png"
+                  alt="Modelo de Evolución de la Protección Digital Infantil: del control a la autonomía"
+                  className="w-full h-auto"
+                />
               </motion.div>
             </AnimatedItem>
 
