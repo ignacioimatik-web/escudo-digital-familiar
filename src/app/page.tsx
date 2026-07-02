@@ -1,7 +1,7 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
-import { useEffect, useRef } from "react"
+import { motion, useInView, useMotionValue, useSpring } from "framer-motion"
+import { useEffect, useRef, useCallback } from "react"
 import {
   Shield,
   Wifi,
@@ -114,11 +114,43 @@ const audienceIcons: Record<string, React.ElementType> = {
   "centros-sanitarios": Stethoscope,
 }
 
+function MouseGlow() {
+  const ref = useRef<HTMLDivElement>(null)
+  const mouseX = useMotionValue(0.5)
+  const mouseY = useMotionValue(0.5)
+  const springX = useSpring(mouseX, { stiffness: 100, damping: 30 })
+  const springY = useSpring(mouseY, { stiffness: 100, damping: 30 })
+
+  const handleMouse = useCallback((e: React.MouseEvent) => {
+    if (!ref.current) return
+    const rect = ref.current.getBoundingClientRect()
+    mouseX.set((e.clientX - rect.left) / rect.width)
+    mouseY.set((e.clientY - rect.top) / rect.height)
+  }, [mouseX, mouseY])
+
+  return (
+    <div ref={ref} onMouseMove={handleMouse} className="absolute inset-0 overflow-hidden pointer-events-none">
+      <motion.div
+        className="absolute w-[600px] h-[600px] rounded-full opacity-[0.12]"
+        style={{
+          background: "radial-gradient(circle, oklch(0.65 0.17 55 / 0.4), transparent 70%)",
+          left: "50%",
+          top: "50%",
+          x: springX.get() !== 0.5 ? useSpring(mouseX, { stiffness: 50, damping: 20 }) : 0,
+          y: springY.get() !== 0.5 ? useSpring(mouseY, { stiffness: 50, damping: 20 }) : 0,
+          translateX: "-50%",
+          translateY: "-50%",
+        }}
+      />
+    </div>
+  )
+}
+
 export default function HomePage() {
   return (
     <>
       {/* ─── HERO ─── */}
-      <Section className="relative overflow-hidden min-h-[80vh] flex items-center">
+      <Section className="relative overflow-hidden min-h-[85vh] flex items-center">
         <video
           autoPlay
           muted
@@ -128,23 +160,39 @@ export default function HomePage() {
         >
           <source src="/video/intro.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-background/90" />
-        <Container className="relative text-center py-16 md:py-28">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background/95" />
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+        <MouseGlow />
+        <Container className="relative text-center py-20 md:py-32">
           <AnimatedSection>
             <AnimatedItem>
-              <Badge variant="default" className="mb-6 bg-white/15 text-white border border-white/20">
-                Protección digital para menores
-              </Badge>
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              >
+                <Badge
+                  variant="default"
+                  className="mb-6 bg-white/10 text-white border border-white/20 backdrop-blur-sm inline-flex items-center gap-2 px-4 py-1.5"
+                >
+                  <span className="flex h-2 w-2 rounded-full bg-success-400 animate-pulse" />
+                  Protección digital para menores
+                </Badge>
+              </motion.div>
             </AnimatedItem>
             <AnimatedItem>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.08]">
                 Un escudo digital
                 <br />
-                <span className="text-brand-300">para tu familia</span>
+                <span className="bg-gradient-to-r from-brand-300 via-cyan-300 to-brand-300 bg-[length:200%_auto] animate-gradient text-transparent bg-clip-text">
+                  para tu familia
+                </span>
               </h1>
             </AnimatedItem>
             <AnimatedItem>
-              <p className="mt-6 text-lg md:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed">
+              <p className="mt-6 text-lg md:text-xl text-slate-200/90 max-w-2xl mx-auto leading-relaxed">
                 Método en dos capas — DNS de protección y control parental — para crear un entorno digital seguro, sencillo y eficaz. Sin coste. Sin complicaciones.
               </p>
             </AnimatedItem>
@@ -152,29 +200,51 @@ export default function HomePage() {
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/configurador"
-                  className="inline-flex h-12 items-center gap-2 rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 transition-all hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/30"
+                  className="group inline-flex h-12 items-center gap-2 rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 transition-all duration-300 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/40 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Configurador guiado
-                  <ArrowRight className="h-4 w-4" />
+                  <span>Configurador guiado</span>
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
                 <Link
                   href="/presentacion"
-                  className="inline-flex h-12 items-center gap-2 rounded-xl border border-border bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300"
+                  className="group inline-flex h-12 items-center gap-2 rounded-xl border border-white/20 bg-white/5 backdrop-blur-sm px-6 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-white/10 hover:border-white/30 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Material de presentación
+                  <span>Material de presentación</span>
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </div>
+            </AnimatedItem>
+            <AnimatedItem>
+              <motion.div
+                className="mt-16 flex items-center justify-center gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1, duration: 0.8 }}
+              >
+                <motion.div
+                  className="flex flex-col items-center gap-2 text-slate-400/60 text-xs"
+                  animate={{ y: [0, 4, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+                  </svg>
+                  <span>Desplázate para descubrir</span>
+                </motion.div>
+              </motion.div>
             </AnimatedItem>
           </AnimatedSection>
         </Container>
       </Section>
 
       {/* ─── PROBLEMAS ─── */}
-      <Section className="bg-grid-cyan -mt-[100px]">
+      <Section className="relative overflow-hidden">
+        <div className="orb orb-3" style={{ opacity: 0.05 }} />
         <Container>
           <AnimatedSection>
             <AnimatedItem>
               <div className="text-center mb-16">
+                <Badge variant="accent" className="mb-4">Realidad digital</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
                   El entorno digital no es seguro para los menores
                 </h2>
@@ -186,7 +256,7 @@ export default function HomePage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {problems.map((p) => (
                 <AnimatedItem key={p.titulo}>
-                  <PremiumCard hover={false} className="h-full">
+                  <PremiumCard hover={true} variant="glass" className="h-full">
                     <p.icon className="h-5 w-5 text-accent-500 mb-4" />
                     <h3 className="text-base font-semibold text-slate-900 mb-2">{p.titulo}</h3>
                     <p className="text-sm text-slate-500 leading-relaxed">{p.descripcion}</p>
@@ -199,7 +269,7 @@ export default function HomePage() {
       </Section>
 
       {/* ─── MÉTODO EN 2 CAPAS (RESUMEN) ─── */}
-      <Section className="bg-grid-white -mt-[100px]">
+      <Section className="relative overflow-hidden bg-gradient-to-b from-slate-50/50 to-background">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -215,28 +285,32 @@ export default function HomePage() {
             </AnimatedItem>
             <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
               <AnimatedItem>
-                <PremiumCard className="text-center h-full">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-brand-100 mx-auto mb-4">
-                    <Wifi className="h-7 w-7 text-brand-600" />
+                <motion.div whileHover={{ y: -4, scale: 1.01 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+                  <div className="relative group rounded-2xl border border-brand-200/40 bg-gradient-to-br from-brand-50/80 to-white p-6 sm:p-8 shadow-sm hover:shadow-lg hover:shadow-brand-500/10 transition-all duration-300 h-full">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-brand-100 mb-4">
+                      <Wifi className="h-7 w-7 text-brand-600" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">DNS de protección</h3>
+                    <p className="text-sm text-slate-500 mb-4 leading-relaxed">Filtrado a nivel de red que bloquea contenido inadecuado antes de que llegue al dispositivo.</p>
+                    <Link href="/metodo" className="text-sm font-medium text-brand-600 hover:text-brand-700 inline-flex items-center gap-1 group/link">
+                      Ver capa 1 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" />
+                    </Link>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">DNS de protección</h3>
-                  <p className="text-sm text-slate-500 mb-4">Filtrado a nivel de red que bloquea contenido inadecuado antes de que llegue al dispositivo.</p>
-                  <Link href="/metodo" className="text-sm font-medium text-brand-600 hover:text-brand-700 inline-flex items-center gap-1">
-                    Ver capa 1 <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </PremiumCard>
+                </motion.div>
               </AnimatedItem>
               <AnimatedItem>
-                <PremiumCard className="text-center h-full">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-cyan-100 mx-auto mb-4">
-                    <Smartphone className="h-7 w-7 text-cyan-500" />
+                <motion.div whileHover={{ y: -4, scale: 1.01 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
+                  <div className="relative group rounded-2xl border border-cyan-200/40 bg-gradient-to-br from-cyan-50/80 to-white p-6 sm:p-8 shadow-sm hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300 h-full">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-cyan-100 mb-4">
+                      <Smartphone className="h-7 w-7 text-cyan-500" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">Control parental</h3>
+                    <p className="text-sm text-slate-500 mb-4 leading-relaxed">Supervisión y acompañamiento con límites de uso, restricciones de apps y filtros por edad.</p>
+                    <Link href="/metodo" className="text-sm font-medium text-cyan-600 hover:text-cyan-700 inline-flex items-center gap-1 group/link">
+                      Ver capa 2 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" />
+                    </Link>
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Control parental</h3>
-                  <p className="text-sm text-slate-500 mb-4">Supervisión y acompañamiento con límites de uso, restricciones de apps y filtros por edad.</p>
-                  <Link href="/metodo" className="text-sm font-medium text-brand-600 hover:text-brand-700 inline-flex items-center gap-1">
-                    Ver capa 2 <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </PremiumCard>
+                </motion.div>
               </AnimatedItem>
             </div>
           </AnimatedSection>
@@ -244,7 +318,7 @@ export default function HomePage() {
       </Section>
 
       {/* ─── EVOLUCIÓN POR EDADES (RESUMEN) ─── */}
-      <Section className="bg-grid-cyan -mt-[100px]">
+      <Section className="relative overflow-hidden bg-gradient-to-b from-background to-slate-50/30">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
@@ -266,7 +340,7 @@ export default function HomePage() {
                 { icon: UserCheck, rango: "15-17", titulo: "Adolescencia tardía", desc: "Criterio personal como filtro principal." },
               ].map((edad) => (
                 <AnimatedItem key={edad.rango}>
-                  <PremiumCard className="text-center h-full">
+                  <PremiumCard variant="glass" className="text-center h-full">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 mx-auto mb-3">
                       <edad.icon className="h-6 w-6 text-brand-600" />
                     </div>
@@ -281,9 +355,10 @@ export default function HomePage() {
               <div className="text-center mt-8">
                 <Link
                   href="/metodo"
-                  className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50"
+                  className="group inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-white px-6 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:shadow-md"
                 >
-                  Ver método completo por edades <ArrowRight className="h-3.5 w-3.5" />
+                  <span>Ver método completo por edades</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </div>
             </AnimatedItem>
@@ -292,11 +367,12 @@ export default function HomePage() {
       </Section>
 
       {/* ─── AUDIENCIAS ─── */}
-      <Section className="bg-grid-white -mt-[100px]">
+      <Section className="relative overflow-hidden bg-gradient-to-b from-slate-50/30 to-background">
         <Container>
           <AnimatedSection>
             <AnimatedItem>
               <div className="text-center mb-16">
+                <Badge variant="success" className="mb-4">Comunidades</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
                   Diseñado para tu comunidad
                 </h2>
@@ -307,7 +383,7 @@ export default function HomePage() {
                 const Icon = audienceIcons[audience.id] || Shield
                 return (
                   <AnimatedItem key={audience.id}>
-                    <PremiumCard className="h-full text-center">
+                    <PremiumCard variant="glass" className="h-full text-center">
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success-100 mx-auto mb-5">
                         <Icon className="h-6 w-6 text-success-500" />
                       </div>
@@ -315,9 +391,9 @@ export default function HomePage() {
                       <p className="text-sm text-slate-500 mb-4 line-clamp-3">{audience.descripcion}</p>
                       <Link
                         href={`/${audience.id}`}
-                        className="text-sm font-medium text-brand-600 hover:text-brand-700 inline-flex items-center gap-1"
+                        className="text-sm font-medium text-brand-600 hover:text-brand-700 inline-flex items-center gap-1 group/link"
                       >
-                        Saber más <ArrowRight className="h-3.5 w-3.5" />
+                        Saber más <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" />
                       </Link>
                     </PremiumCard>
                   </AnimatedItem>
@@ -329,15 +405,24 @@ export default function HomePage() {
       </Section>
 
       {/* ─── CTA FINAL ─── */}
-      <Section className="bg-grid-cyan -mt-[100px]">
+      <Section className="relative overflow-hidden bg-gradient-to-b from-background via-brand-50/20 to-background">
+        <div className="orb orb-2" style={{ opacity: 0.04 }} />
         <Container className="text-center">
           <AnimatedSection>
             <AnimatedItem>
-              <Shield className="h-12 w-12 text-brand-600 mx-auto mb-6" />
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.6 }}
+              >
+                <Shield className="h-12 w-12 text-brand-600 mx-auto mb-6" />
+              </motion.div>
+            </AnimatedItem>
+            <AnimatedItem>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-4">
                 Proteger para educar.
                 <br />
-                <span className="text-brand-600">Educar para liberar.</span>
+                <span className="bg-gradient-to-r from-brand-600 to-cyan-600 bg-clip-text text-transparent">Educar para liberar.</span>
               </h2>
               <p className="text-lg text-slate-500 max-w-xl mx-auto leading-relaxed mb-10">
                 No se trata de construir muros. Se trata de acompañar a los menores mientras desarrollan el criterio necesario para navegar el mundo digital con libertad y responsabilidad.
@@ -347,16 +432,17 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/configurador"
-                  className="inline-flex h-12 items-center gap-2 rounded-xl bg-brand-600 px-8 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 transition-all hover:bg-brand-700 hover:shadow-xl"
+                  className="group inline-flex h-12 items-center gap-2 rounded-xl bg-brand-600 px-8 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 transition-all duration-300 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/40 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Empezar ahora
-                  <ArrowRight className="h-4 w-4" />
+                  <span>Empezar ahora</span>
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
                 <Link
                   href="/metodo"
-                  className="inline-flex h-12 items-center gap-2 rounded-xl border border-border bg-white px-8 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50"
+                  className="group inline-flex h-12 items-center gap-2 rounded-xl border border-border bg-white px-8 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Conocer el método
+                  <span>Conocer el método</span>
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </div>
             </AnimatedItem>

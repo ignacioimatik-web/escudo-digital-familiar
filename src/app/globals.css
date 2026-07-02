@@ -173,20 +173,113 @@
   html {
     @apply font-sans scroll-smooth;
   }
-  
+
   :focus-visible {
     @apply outline-2 outline-brand-500 outline-offset-2;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     @apply tracking-tight;
   }
-  
+
   a {
     @apply underline-offset-4 hover:underline;
   }
 }
 
+/* ─── Glassmorphism ─── */
+.glass {
+  background: oklch(1 0 0 / 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid oklch(1 0 0 / 0.2);
+}
+.dark .glass {
+  background: oklch(0.2 0.018 260 / 0.6);
+  border-color: oklch(1 0 0 / 0.08);
+}
+
+.glass-strong {
+  background: oklch(1 0 0 / 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid oklch(1 0 0 / 0.3);
+}
+
+/* ─── Glow ─── */
+.glow-brand {
+  box-shadow: 0 0 20px oklch(0.55 0.18 250 / 0.3), 0 0 40px oklch(0.55 0.18 250 / 0.1);
+}
+.glow-cyan {
+  box-shadow: 0 0 20px oklch(0.64 0.13 200 / 0.3), 0 0 40px oklch(0.64 0.13 200 / 0.1);
+}
+.glow-accent {
+  box-shadow: 0 0 20px oklch(0.65 0.17 55 / 0.3), 0 0 40px oklch(0.65 0.17 55 / 0.1);
+}
+
+/* ─── Animated gradient orbs ─── */
+@keyframes orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -40px) scale(1.05); }
+  50% { transform: translate(-20px, 20px) scale(0.95); }
+  75% { transform: translate(40px, 30px) scale(1.02); }
+}
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-30px, 30px) scale(1.03); }
+  50% { transform: translate(20px, -40px) scale(0.97); }
+  75% { transform: translate(-40px, -20px) scale(1.04); }
+}
+@keyframes orb-pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.3; }
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: orb-pulse 6s ease-in-out infinite;
+}
+.orb-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, oklch(0.55 0.18 250 / 0.2), transparent 70%);
+  top: -10%;
+  right: -10%;
+  animation: orb-float 12s ease-in-out infinite, orb-pulse 6s ease-in-out infinite;
+}
+.orb-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, oklch(0.64 0.13 200 / 0.15), transparent 70%);
+  bottom: -15%;
+  left: -5%;
+  animation: orb-float-2 15s ease-in-out infinite, orb-pulse 8s ease-in-out infinite;
+  animation-delay: -3s;
+}
+.orb-3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, oklch(0.65 0.17 55 / 0.12), transparent 70%);
+  top: 30%;
+  left: 50%;
+  animation: orb-float 18s ease-in-out infinite, orb-pulse 10s ease-in-out infinite;
+  animation-delay: -6s;
+}
+
+/* ─── Animated gradient text ─── */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient {
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* ─── Grid backgrounds ─── */
 .bg-grid-cyan {
   position: relative;
   background:

@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 
 interface PremiumCardProps {
   hover?: boolean
+  variant?: "default" | "glass"
   className?: string
   children?: React.ReactNode
   id?: string
@@ -13,18 +14,20 @@ interface PremiumCardProps {
 
 export function PremiumCard({
   hover = true,
+  variant = "default",
   className,
   children,
   ...props
 }: PremiumCardProps) {
+  const baseClasses = "group relative rounded-2xl border p-5 sm:p-6 md:p-8 shadow-sm transition-all duration-300"
+  const variantClasses = variant === "glass"
+    ? "border-white/20 bg-white/70 backdrop-blur-md"
+    : "border-border/60 bg-card"
+
   if (!hover) {
     return (
       <div
-        className={cn(
-          "group relative rounded-2xl border border-border/60 bg-card p-5 sm:p-6 md:p-8 shadow-sm",
-          "transition-all duration-300",
-          className
-        )}
+        className={cn(baseClasses, variantClasses, className)}
         {...props}
       >
         {children}
@@ -35,9 +38,10 @@ export function PremiumCard({
   return (
     <motion.div
       className={cn(
-        "group relative rounded-2xl border border-border/60 bg-card p-5 sm:p-6 md:p-8 shadow-sm",
-        "transition-all duration-300",
-        "hover:shadow-lg hover:shadow-brand-500/5 hover:border-brand-200",
+        baseClasses,
+        variantClasses,
+        "hover:shadow-lg hover:shadow-brand-500/10 hover:border-brand-200/80",
+        variant === "glass" && "hover:bg-white/80 hover:border-white/30 hover:shadow-xl hover:shadow-brand-500/5",
         className
       )}
       whileHover={{ y: -4 }}
