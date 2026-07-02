@@ -337,7 +337,7 @@ export default function HomePage() {
                 transition={{ duration: 0.8 }}
               >
                 <img
-                  src="/images/modelo-evolucion.png"
+                  src="/images/modelo-evolucion.jpg"
                   alt="Modelo de Evolución de la Protección Digital Infantil: del control a la autonomía"
                   className="w-full h-auto"
                 />
