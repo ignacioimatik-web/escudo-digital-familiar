@@ -7,6 +7,7 @@ import {
   Wifi,
   Smartphone,
   ArrowRight,
+  CheckCircle2,
   Users,
   GraduationCap,
   Heart,
@@ -26,6 +27,8 @@ import { Section } from "@/components/ui/section"
 import { PremiumCard } from "@/components/ui/premium-card"
 import { Badge } from "@/components/ui/badge"
 import { audiences } from "@/content/audiences"
+import { NetworkDiagram } from "@/components/shared/network-diagram"
+import { useRole, roleContent } from "@/lib/role-context"
 import Link from "next/link"
 
 const fadeUp = {
@@ -147,6 +150,9 @@ function MouseGlow() {
 }
 
 export default function HomePage() {
+  const { role } = useRole()
+  const content = roleContent[role]
+
   return (
     <>
       {/* ─── HERO ─── */}
@@ -178,22 +184,22 @@ export default function HomePage() {
                   className="mb-6 bg-white/10 text-white border border-white/20 backdrop-blur-sm inline-flex items-center gap-2 px-4 py-1.5"
                 >
                   <span className="flex h-2 w-2 rounded-full bg-success-400 animate-pulse" />
-                  Protección digital para menores
+                  {content.hero.badge}
                 </Badge>
               </motion.div>
             </AnimatedItem>
             <AnimatedItem>
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.08]">
-                Un escudo digital
+                {content.hero.title}
                 <br />
                 <span className="bg-gradient-to-r from-brand-300 via-cyan-300 to-brand-300 bg-[length:200%_auto] animate-gradient text-transparent bg-clip-text">
-                  para tu familia
+                  {content.hero.highlight}
                 </span>
               </h1>
             </AnimatedItem>
             <AnimatedItem>
               <p className="mt-6 text-lg md:text-xl text-slate-200/90 max-w-2xl mx-auto leading-relaxed">
-                Método en dos capas — DNS de protección y control parental — para crear un entorno digital seguro, sencillo y eficaz. Sin coste. Sin complicaciones.
+                {content.hero.subtitle}
               </p>
             </AnimatedItem>
             <AnimatedItem>
@@ -202,14 +208,14 @@ export default function HomePage() {
                   href="/configurador"
                   className="group inline-flex h-12 items-center gap-2 rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white shadow-lg shadow-brand-600/25 transition-all duration-300 hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/40 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <span>Configurador guiado</span>
+                  <span>{content.cta.primary}</span>
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
                 <Link
-                  href="/presentacion"
+                  href="/metodo"
                   className="group inline-flex h-12 items-center gap-2 rounded-xl border border-white/20 bg-white/5 backdrop-blur-sm px-6 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:bg-white/10 hover:border-white/30 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  <span>Material de presentación</span>
+                  <span>{content.cta.secondary}</span>
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </div>
@@ -264,6 +270,43 @@ export default function HomePage() {
                 </AnimatedItem>
               ))}
             </div>
+          </AnimatedSection>
+        </Container>
+      </Section>
+
+      {/* ─── VISUAL: CÓMO FUNCIONA ─── */}
+      <Section className="relative overflow-hidden bg-gradient-to-b from-background to-slate-50/30">
+        <Container>
+          <AnimatedSection>
+            <AnimatedItem>
+              <div className="text-center mb-10">
+                <Badge variant="cyan" className="mb-4">Cómo funciona</Badge>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
+                  Un filtro en tu conexión a Internet
+                </h2>
+                <p className="mt-4 text-lg text-slate-500 max-w-2xl mx-auto">
+                  El DNS de protección actúa como un portero digital: antes de que cualquier página web llegue a tus hijos, el sistema decide si es segura o no.
+                </p>
+              </div>
+            </AnimatedItem>
+            <AnimatedItem>
+              <NetworkDiagram variant="full-home" protected_={true} className="mb-6" />
+            </AnimatedItem>
+            <AnimatedItem>
+              <div className="grid sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                {[
+                  { icon: Shield, label: "DNS protector", desc: "Filtra contenido inadecuado antes de que llegue" },
+                  { icon: Wifi, label: "Toda la red", desc: "Un solo cambio protege todos tus dispositivos" },
+                  { icon: CheckCircle2, label: "Funciona solo", desc: "No necesitas instalar nada en cada dispositivo" },
+                ].map(item => (
+                  <div key={item.label} className="text-center p-4 rounded-xl bg-white border border-slate-100 shadow-sm">
+                    <item.icon className="h-6 w-6 text-brand-500 mx-auto mb-2" />
+                    <h3 className="text-sm font-semibold text-slate-900">{item.label}</h3>
+                    <p className="text-[11px] text-slate-500 mt-1">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </AnimatedItem>
           </AnimatedSection>
         </Container>
       </Section>

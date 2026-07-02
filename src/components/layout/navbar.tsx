@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Container } from "@/components/ui/container"
+import { RoleSelector } from "@/components/ui/role-selector"
 
 const navItems = [
   { href: "/metodo", label: "Método" },
@@ -79,7 +80,8 @@ export function Navbar() {
             })}
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
+            <RoleSelector compact />
             <Link
               href="/presentacion"
               className="inline-flex h-9 items-center rounded-lg bg-brand-600 px-4 text-sm font-medium text-white shadow-sm shadow-brand-600/20 transition-all hover:bg-brand-700 hover:shadow-md hover:shadow-brand-600/30"
