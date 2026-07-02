@@ -49,7 +49,7 @@ export default function ConfiguradorPage() {
         {mode === "chat" && (
           <motion.div key="chat" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
             <Section className="-mt-[200px] pt-0">
-              <Container size="sm" className="mt-[160px]">
+              <Container className="mt-[160px] max-w-5xl">
                 <ConversationalAssistant />
               </Container>
             </Section>

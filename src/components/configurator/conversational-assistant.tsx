@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Shield, Sparkles, Send, CheckCircle2, ArrowRight, Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen, RefreshCw, MessageCircle } from "lucide-react"
+import { Shield, Sparkles, Send, CheckCircle2, ArrowRight, Smartphone, Monitor, Router, Globe, Tv, Tablet, Gamepad2, BookOpen, RefreshCw, MessageCircle, ChevronDown } from "lucide-react"
 import { findConfig } from "@/lib/config-assistant/knowledge-base"
 import type { DeviceType, DeviceConfig, ProtectionLevel, ConfigStep } from "@/lib/config-assistant/types"
 
@@ -59,7 +59,7 @@ function extractDevices(text: string): string[] {
   return found
 }
 
-// ── Whether text asks a general question (not a config request) ──
+// ── Whether text asks a general question ──
 function isQuestion(text: string): boolean {
   return /^(qué|cuál|cómo|por qué|qué es|para qué|dónde|cuándo|quién|explica|dime|cuéntame|sugiere|recomiéndame)\b/i.test(text.trim())
 }
@@ -85,7 +85,7 @@ function StepCardInline({ step, i, total }: { step: ConfigStep; i: number; total
       <div className="absolute left-0 top-0 bottom-0 w-1 opacity-30" style={{ backgroundColor: `var(--${theme.accent.replace('bg-', '')})` }} />
       <div className="relative z-10 p-4 pl-5">
         <div className="flex items-center gap-3 mb-2">
-          <div className={`flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100`}>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100">
             <span className="text-[11px] font-bold text-slate-500">{i + 1}</span>
           </div>
           <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">paso {i + 1} de {total}</p>
@@ -135,13 +135,51 @@ export function ConversationalAssistant() {
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState<"chat" | "device" | "done">("chat")
+  // Track if user has manually scrolled up (don't auto-scroll)
+  const [userScrolledUp, setUserScrolledUp] = useState(false)
+  const [showScrollBtn, setShowScrollBtn] = useState(false)
   const [pendingDevice, setPendingDevice] = useState<DeviceType | null>(null)
   const [pendingLevel, setPendingLevel] = useState<ProtectionLevel | null>(null)
   const chatRef = useRef<HTMLDivElement>(null)
+  const msgRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+  const msgCounter = useRef(0)
 
+  // ── Smart scroll: track if user scrolled up ──
+  const handleScroll = useCallback(() => {
+    const el = chatRef.current
+    if (!el) return
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80
+    setUserScrolledUp(!atBottom)
+    setShowScrollBtn(!atBottom)
+  }, [])
+
+  // ── After new message: scroll to show its TOP, not bottom ──
   useEffect(() => {
-    chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" })
-  }, [messages, loading])
+    if (loading || messages.length === 0) return
+    if (userScrolledUp) return // user is reading history
+
+    // Find the last message element and scroll so its top is visible
+    const lastMsgId = messages.length - 1 + msgCounter.current - messages.length + 1
+    const lastEl = msgRefs.current.get(lastMsgId)
+    if (lastEl) {
+      lastEl.scrollIntoView({ block: "start", behavior: "smooth" })
+    }
+  }, [messages, loading, userScrolledUp])
+
+  // ── Scroll to bottom button handler ──
+  const scrollToLatest = () => {
+    const el = chatRef.current
+    if (!el) return
+    const lastMsgId = messages.length - 1 + msgCounter.current - messages.length + 1
+    const lastEl = msgRefs.current.get(lastMsgId)
+    if (lastEl) {
+      lastEl.scrollIntoView({ block: "start", behavior: "smooth" })
+    } else {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
+    }
+    setUserScrolledUp(false)
+    setShowScrollBtn(false)
+  }
 
   // ── Add config cards to chat ──
   const showConfig = useCallback((device: DeviceType, level: ProtectionLevel) => {
@@ -164,6 +202,7 @@ export function ConversationalAssistant() {
     const inputText = (text || input).trim()
     if (!inputText || loading) return
     setInput("")
+    setUserScrolledUp(false) // new message, reset scroll tracking
     setMessages(prev => [...prev, { role: "user", content: inputText }])
     setLoading(true)
 
@@ -206,14 +245,12 @@ export function ConversationalAssistant() {
       const levelName = level === "avanzado" ? "máxima protección 🛡️🛡️🛡️" : level === "recomendado" ? "protección recomendada 🛡️🛡️" : "protección básica 🛡️"
 
       if (devices.length > 0) {
-        // We have both ages and devices → recommend
         const deviceNames = devices.map(d => quickDevices.find(q => q.id === d)?.label || d).join(", ")
         setMessages(prev => [...prev, {
           role: "assistant",
           content: `📋 Entendido: tienes hijos de **${ageList}** años y quieres proteger **${deviceNames}**.\n\nPara la edad del menor, recomiendo **${levelName}**. Voy a preparar tu guía personalizada...`,
         }])
 
-        // Use first device
         const firstDevice = devices[0] as DeviceType
         const config = findConfig(firstDevice, "wifi-casa", level)
         if (config) {
@@ -232,7 +269,6 @@ export function ConversationalAssistant() {
           return
         }
       } else {
-        // Ages but no device → ask what device
         setMessages(prev => [...prev, {
           role: "assistant",
           content: `📋 Entendido: tienes hijos de **${ageList}** años. Para esa edad recomiendo **${levelName}**.\n\n¿Qué dispositivo quieres proteger?`,
@@ -286,17 +322,17 @@ export function ConversationalAssistant() {
   }
 
   return (
-    <div className="flex flex-col h-[600px] sm:h-[650px] rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+    <div className="flex flex-col h-[65vh] sm:h-[70vh] md:h-[75vh] rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm max-w-5xl mx-auto w-full">
       {/* ── Header ── */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-brand-700 to-brand-500 px-5 py-4 shrink-0">
+      <div className="relative overflow-hidden bg-gradient-to-r from-brand-700 to-brand-500 px-4 sm:px-5 py-3 sm:py-4 shrink-0">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: `radial-gradient(circle at 30% 40%, white 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
         <div className="flex items-center gap-3 relative z-10">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 border border-white/20">
-            <Shield className="h-5 w-5 text-white" />
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-white/15 border border-white/20">
+            <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold text-white truncate">Asistente Sentinela</h2>
-            <p className="text-[11px] text-white/70">Dime tu situación y te guío</p>
+            <h2 className="text-sm sm:text-base font-bold text-white truncate">Asistente Sentinela</h2>
+            <p className="text-[10px] sm:text-[11px] text-white/70">Dime tu situación y te guío</p>
           </div>
           {messages.length > 1 && (
             <button
@@ -306,69 +342,73 @@ export function ConversationalAssistant() {
                 setPendingDevice(null)
                 setPendingLevel(null)
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-all"
+              className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-all"
               title="Empezar de nuevo"
             >
-              <RefreshCw className="h-4 w-4 text-white" />
+              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
             </button>
           )}
         </div>
       </div>
 
       {/* ── Messages ── */}
-      <div ref={chatRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div ref={chatRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
         <AnimatePresence initial={false}>
-          {messages.map((msg, i) => (
-            <motion.div
-              key={`msg-${i}`}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              {msg.role === "user" && (
-                <div className="flex justify-end">
-                  <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-brand-600 text-white px-4 py-2.5 text-sm leading-relaxed shadow-sm">
-                    {msg.content}
+          {messages.map((msg, i) => {
+            const msgId = msgCounter.current++
+            return (
+              <motion.div
+                key={`msg-${i}`}
+                ref={(el) => { if (el) msgRefs.current.set(msgId, el) }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+              >
+                {msg.role === "user" && (
+                  <div className="flex justify-end">
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl rounded-br-sm bg-brand-600 text-white px-3.5 sm:px-4 py-2 sm:py-2.5 text-sm leading-relaxed shadow-sm">
+                      {msg.content}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {msg.role === "assistant" && (
-                <div className="flex justify-start">
-                  <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-slate-100 text-slate-700 px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line">
-                    {msg.content}
+                {msg.role === "assistant" && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[90%] sm:max-w-[85%] rounded-2xl rounded-bl-sm bg-slate-100 text-slate-700 px-3.5 sm:px-4 py-2 sm:py-2.5 text-sm leading-relaxed whitespace-pre-line">
+                      {msg.content}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {msg.role === "cards" && msg.config && (
-                <div className="space-y-3 my-3">
-                  <div className="flex items-center gap-2 px-1">
-                    <BadgeDot color="success" />
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tu guía personalizada</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    <span className="px-2.5 py-1 rounded-full bg-brand-100 text-brand-700 text-[11px] font-medium">⏱️ {msg.config.tiempoEstimado}</span>
-                    <span className="px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-700 text-[11px] font-medium">📋 {msg.config.pasos.length} pasos</span>
-                  </div>
-                  <div className="space-y-2.5">
-                    {msg.config.pasos.map((paso, j) => (
-                      <StepCardInline key={paso.id || j} step={paso} i={j} total={msg.config!.pasos.length} />
-                    ))}
-                  </div>
-                  <div className="rounded-xl border border-success-200 bg-success-50 p-3.5">
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle2 className="h-5 w-5 text-success-600 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-bold text-success-700 mb-0.5">✅ Verificación final</p>
-                        <p className="text-[12px] text-success-600 leading-relaxed">{msg.config.verificacion}</p>
+                {msg.role === "cards" && msg.config && (
+                  <div className="space-y-3 my-3">
+                    <div className="flex items-center gap-2 px-1">
+                      <BadgeDot color="success" />
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tu guía personalizada</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      <span className="px-2.5 py-1 rounded-full bg-brand-100 text-brand-700 text-[11px] font-medium">⏱️ {msg.config.tiempoEstimado}</span>
+                      <span className="px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-700 text-[11px] font-medium">📋 {msg.config.pasos.length} pasos</span>
+                    </div>
+                    <div className="space-y-2.5">
+                      {msg.config.pasos.map((paso, j) => (
+                        <StepCardInline key={paso.id || j} step={paso} i={j} total={msg.config!.pasos.length} />
+                      ))}
+                    </div>
+                    <div className="rounded-xl border border-success-200 bg-success-50 p-3.5 sm:p-4">
+                      <div className="flex items-start gap-2.5">
+                        <CheckCircle2 className="h-5 w-5 text-success-600 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs font-bold text-success-700 mb-0.5">✅ Verificación final</p>
+                          <p className="text-[12px] text-success-600 leading-relaxed">{msg.config.verificacion}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </motion.div>
-          ))}
+                )}
+              </motion.div>
+            )
+          })}
         </AnimatePresence>
 
         {loading && (
@@ -381,12 +421,12 @@ export function ConversationalAssistant() {
           </motion.div>
         )}
 
-        {/* ── Device quick-pick (after asking) ── */}
+        {/* ── Device quick-pick ── */}
         {step === "device" && !loading && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start">
-            <div className="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm w-full max-w-[90%]">
+            <div className="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm w-full max-w-[90%] sm:max-w-[85%]">
               <p className="text-[11px] font-semibold text-slate-500 mb-2 px-1">O selecciona rápido:</p>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
                 {quickDevices.map(d => {
                   const Icon = iconMap[d.icon] || Smartphone
                   return (
@@ -435,8 +475,23 @@ export function ConversationalAssistant() {
         )}
       </div>
 
+      {/* ── Scroll-to-bottom floating button ── */}
+      <AnimatePresence>
+        {showScrollBtn && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            onClick={scrollToLatest}
+            className="absolute bottom-20 right-6 z-10 h-8 w-8 rounded-full bg-white border border-slate-200 shadow-md flex items-center justify-center text-slate-500 hover:text-brand-600 hover:shadow-lg transition-all"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* ── Input ── */}
-      <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3">
+      <div className="shrink-0 border-t border-slate-200 bg-white px-3 sm:px-4 md:px-6 py-2.5 sm:py-3">
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -445,14 +500,14 @@ export function ConversationalAssistant() {
             onKeyDown={e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
             placeholder="Escribe aquí tu situación..."
             disabled={loading}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-brand-300 focus:ring-1 focus:ring-brand-200 transition-all disabled:opacity-50"
+            className="flex-1 px-3.5 sm:px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-brand-300 focus:ring-1 focus:ring-brand-200 transition-all disabled:opacity-50"
           />
           <button
             onClick={() => handleSend()}
             disabled={!input.trim() || loading}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white hover:bg-brand-700 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+            className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-brand-600 text-white hover:bg-brand-700 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm shrink-0"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
@@ -464,8 +519,4 @@ export function ConversationalAssistant() {
 function BadgeDot({ color }: { color: string }) {
   const colors: Record<string, string> = { success: "bg-success-500", brand: "bg-brand-500", cyan: "bg-cyan-500" }
   return <span className={`flex h-2 w-2 rounded-full ${colors[color] || colors.success} shrink-0`} />
-}
-
-function cn(...classes: (string | false | undefined | null)[]) {
-  return classes.filter(Boolean).join(" ")
 }
