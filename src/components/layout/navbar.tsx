@@ -10,6 +10,7 @@ import { Container } from "@/components/ui/container"
 import { RoleSelector } from "@/components/ui/role-selector"
 
 const navItems = [
+  { href: "/modelo", label: "Modelo" },
   { href: "/metodo", label: "Método" },
   { href: "/guias", label: "Guías" },
   { href: "/configurador", label: "Configurador" },

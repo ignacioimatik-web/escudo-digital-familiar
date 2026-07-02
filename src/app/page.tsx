@@ -311,6 +311,96 @@ export default function HomePage() {
         </Container>
       </Section>
 
+      {/* ─── MODELO (CRÍTICO: 70% del mensaje) ─── */}
+      <Section className="relative overflow-hidden bg-gradient-to-b from-slate-50/80 via-background to-slate-50/30">
+        <div className="orb orb-3 opacity-[0.03]" />
+        <Container size="lg">
+          <AnimatedSection>
+            <AnimatedItem>
+              <div className="text-center mb-12">
+                <Badge variant="default" className="mb-4">Modelo de protección</Badge>
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+                  De la protección a la autonomía
+                </h2>
+                <p className="mt-4 text-lg text-slate-500 max-w-3xl mx-auto">
+                  El secreto no está en elegir entre filtros o diálogo. Está en saber cuánto peso dar a cada según la edad del menor.
+                </p>
+              </div>
+            </AnimatedItem>
+
+            <AnimatedItem>
+              <motion.div
+                className="bg-white rounded-3xl border border-slate-200 shadow-lg p-4 sm:p-8 mb-10"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+              >
+                <svg viewBox="0 0 800 380" className="w-full h-auto" fill="none">
+                  <defs>
+                    <linearGradient id="lgTech" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#2c5c8f" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#2c5c8f" stopOpacity="0.04" />
+                    </linearGradient>
+                    <linearGradient id="lgEdu" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#e8935a" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#e8935a" stopOpacity="0.04" />
+                    </linearGradient>
+                  </defs>
+                  {/* Grid */}
+                  {[0,25,50,75,100].map(v => (<line key={v} x1={60} y1={40+(1-v/100)*300} x2={740} y2={40+(1-v/100)*300} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="3,3" />))}
+                  <text x={55} y={30} textAnchor="end" className="fill-slate-400 text-[9px] font-semibold">Peso</text>
+                  {[0,25,50,75,100].map(v => (<text key={v} x={55} y={44+(1-v/100)*300} textAnchor="end" className="fill-slate-300 text-[9px]">{v}%</text>))}
+                  {/* Tech curve */}
+                  <path d="M 100 40 Q 250 100 400 160 Q 550 220 700 280" stroke="#1a2942" strokeWidth="3" fill="none" />
+                  {/* Edu curve */}
+                  <path d="M 100 340 Q 250 280 400 220 Q 550 160 700 100" stroke="#e8935a" strokeWidth="3" fill="none" />
+                  {/* Inflection */}
+                  <line x1="400" y1="40" x2="400" y2="380" stroke="#f59e0b" strokeWidth="2" strokeDasharray="5,3" />
+                  <circle cx="400" cy="190" r="4" fill="#f59e0b" />
+                  <text x="400" y="395" textAnchor="middle" className="fill-amber-500 text-[10px] font-bold text-[11px]">13 Años · Punto de inflexión</text>
+                  {/* Labels */}
+                  <text x="100" y="30" className="fill-slate-700 text-[10px] font-bold">4 Años</text>
+                  <text x="700" y="30" className="fill-slate-700 text-[10px] font-bold">18 Años</text>
+                  <rect x="150" y="140" width="12" height="12" rx="3" fill="#1a2942" />
+                  <text x="166" y="150" className="fill-slate-600 text-[9px] font-semibold">Protección Técnica</text>
+                  <rect x="150" y="158" width="12" height="12" rx="3" fill="#e8935a" />
+                  <text x="166" y="168" className="fill-slate-600 text-[9px] font-semibold">Acompañamiento Educativo</text>
+                </svg>
+              </motion.div>
+            </AnimatedItem>
+
+            <AnimatedItem>
+              <div className="grid sm:grid-cols-3 gap-4 max-w-4xl mx-auto text-center">
+                {[
+                  { age: "4-12 años", title: "Predomina la técnica", desc: "Los filtros y restricciones son la base de la seguridad", color: "border-brand-200 bg-brand-50/50" },
+                  { age: "13 años", title: "Punto de inflexión", desc: "La educación empieza a pesar más que la tecnología", color: "border-amber-200 bg-amber-50/50 ring-2 ring-amber-300" },
+                  { age: "14-18 años", title: "Gana el diálogo", desc: "El acompañamiento educativo es el 80% de la protección", color: "border-cyan-200 bg-cyan-50/50" },
+                ].map((item, i) => (
+                  <div key={i} className={`rounded-2xl border p-5 ${item.color} transition-all hover:shadow-md`}>
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">{item.age}</p>
+                    <h3 className="text-base font-bold text-slate-900 mb-1">{item.title}</h3>
+                    <p className="text-sm text-slate-500">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </AnimatedItem>
+
+            <AnimatedItem>
+              <div className="text-center mt-10">
+                <Link
+                  href="/modelo"
+                  className="group inline-flex h-11 items-center gap-2 rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:bg-brand-700 hover:shadow-lg hover:scale-[1.02]"
+                >
+                  <span>Ver el modelo completo</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            </AnimatedItem>
+          </AnimatedSection>
+        </Container>
+      </Section>
+
       {/* ─── MÉTODO EN 2 CAPAS (RESUMEN) ─── */}
       <Section className="relative overflow-hidden bg-gradient-to-b from-slate-50/50 to-background">
         <Container>
