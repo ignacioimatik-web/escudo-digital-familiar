@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 const ZEN_API_URL = "https://opencode.ai/zen/v1/chat/completions"
-const MODEL = "north-mini-code-free"
+const MODEL = "deepseek-v4-flash-free"
 
 export async function POST(request: NextRequest) {
   try {
