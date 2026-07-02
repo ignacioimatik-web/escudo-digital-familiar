@@ -48,7 +48,7 @@ export default function ConfiguradorPage() {
       <AnimatePresence mode="wait">
         {mode === "chat" && (
           <motion.div key="chat" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
-            <Section className="-mt-[200px] pt-0">
+            <Section className="-mt-[300px] pt-0">
               <Container className="mt-[160px] max-w-5xl">
                 <ConversationalAssistant />
               </Container>

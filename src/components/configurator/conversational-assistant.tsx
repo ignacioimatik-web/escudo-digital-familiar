@@ -374,7 +374,7 @@ export function ConversationalAssistant() {
 
                 {msg.role === "assistant" && (
                   <div className="flex justify-start">
-                    <div className="max-w-[90%] sm:max-w-[85%] rounded-2xl rounded-bl-sm bg-slate-100 text-slate-700 px-3.5 sm:px-4 py-2 sm:py-2.5 text-sm leading-relaxed whitespace-pre-line">
+                    <div className="w-full max-w-full rounded-2xl rounded-bl-sm bg-slate-100 text-slate-700 px-3.5 sm:px-4 py-2 sm:py-2.5 text-sm leading-relaxed whitespace-pre-line">
                       {msg.content}
                     </div>
                   </div>
@@ -424,7 +424,7 @@ export function ConversationalAssistant() {
         {/* ── Device quick-pick ── */}
         {step === "device" && !loading && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start">
-            <div className="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm w-full max-w-[90%] sm:max-w-[85%]">
+            <div className="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm w-full">
               <p className="text-[11px] font-semibold text-slate-500 mb-2 px-1">O selecciona rápido:</p>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
                 {quickDevices.map(d => {
